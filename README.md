@@ -1,9 +1,10 @@
 # for my side projects
 ## list
+- bit tricks
+- boost practices
+- dsa
 - leetcodes
-- algorithm
-- java side projects
-- java practice
-- learn c in hard way
-- c & c++ practice
+- multithread
+- opencv
+- sdl2
 
