@@ -1,0 +1,4 @@
+add_library(UnionFind UnionFind.cpp)
+target_link_libraries(UnionFind PUBLIC compiler_flags)
+add_library(Shortest_path Shortest_path.cpp)
+target_link_libraries(Shortest_path PUBLIC compiler_flags)

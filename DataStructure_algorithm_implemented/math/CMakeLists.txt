@@ -1,0 +1,2 @@
+add_library(MathFuncs MathFuncs.cpp)
+target_link_libraries(MathFuncs PUBLIC compiler_flags)
