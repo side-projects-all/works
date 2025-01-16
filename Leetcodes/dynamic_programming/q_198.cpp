@@ -47,6 +47,7 @@ private:
         return next;
         */
         
+        /*
         int n = nums.size();
         if (n == 1) {
             return nums[0];
@@ -62,6 +63,21 @@ private:
 
         for (int i = 3; i < n + 1; ++i) {
             dp[i] = std::max(nums[i - 1] + dp[i - 2], dp[i - 1]);
+        }
+
+        return dp[n];
+        */
+        
+        int n = nums.size();
+        if (n == 1) {
+            return nums[0];
+        }
+
+        std::vector<int> dp(n + 1);
+        dp[1] = nums[0];
+        dp[2] = std::max(nums[0], nums[1]);
+        for (int h = 2; h <= n; ++h) {
+            dp[h] = std::max(dp[h - 1], dp[h - 2] + nums[h - 1]);
         }
 
         return dp[n];

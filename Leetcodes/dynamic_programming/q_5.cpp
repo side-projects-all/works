@@ -29,47 +29,52 @@ Constraints:
 
 class Solution {
 private:
-    std::string byDP(std::string& s) {
-        int N = s.size();
-        if (N == 1) {
-            return s;
+    std::string by_Manachers_alg(std::string& s) {
+        std::string s_prime = "#";
+        for (char c : s) {
+            s_prime += c;
+            s_prime += "#";
         }
 
-        if (N == 2) {
-            return (s[0] == s[1]) ? s : std::string(1, s[0]);
-        }
+        int n = s_prime.size();
+        vector<int> palindrome_radii(n, 0);
+        int center = 0;
+        int radius = 0;
 
-        std::vector<std::vector<bool>> mem(N, std::vector<bool>(N));
-        mem[N - 1][N - 1] = true;
+        for (int i = 0; i < n; i++) {
+            int mirror = 2 * center - i;
 
-        int li = 0;
-        int ri = 0;
-        for (int i = 0; i < N - 1; ++i) {
-            
-            mem[i][i] = true;
-            if (s[i] == s[i + 1]) {
-                mem[i][i + 1] = true;
-                li = i;
-                ri = i + 1;
+            if (i < radius) {
+                palindrome_radii[i] = std::min(radius - i, palindrome_radii[mirror]);
+            }
+
+            while (i + 1 + palindrome_radii[i] < n &&
+                   i - 1 - palindrome_radii[i] >= 0 &&
+                   s_prime[i + 1 + palindrome_radii[i]] ==
+                       s_prime[i - 1 - palindrome_radii[i]]) {
+                palindrome_radii[i]++;
+            }
+
+            if (i + palindrome_radii[i] > radius) {
+                center = i;
+                radius = i + palindrome_radii[i];
             }
         }
 
-        for (int len = 3; len <= N; ++len) {
-            
-            for (int start = 0, end = start + len - 1; end < N; ++start, ++end) {
-                
-                if (s[start] == s[end] && mem[start + 1][end - 1]) {
-                    mem[start][end] = true;
-                    li = start;
-                    ri = end;
-                }
+        int max_length = 0;
+        int center_index = 0;
+        for (int i = 0; i < n; i++) {
+            if (palindrome_radii[i] > max_length) {
+                max_length = palindrome_radii[i];
+                center_index = i;
             }
         }
 
-        return s.substr(li, ri - li + 1);
+        int start_index = (center_index - max_length) / 2;
+
+        return s.substr(start_index, max_length);
     }
-
-    void get_longest_palindrome(int& b, int& e, int i, int j, std::string& s) {
+    void expand(int& b, int& e, int i, int j, std::string& s) {
         int left = i;
         int right = j;
 
@@ -78,30 +83,66 @@ private:
             ++right;
         }
 
-        if ((right - 1 - left - 1) > (e - b)) {
-            e = right - 1;
+        if (right - 1 - left - 1 > e - b) {
+            e = right  - 1;
             b = left + 1;
         }
     }
-    std::string by_two_ptr(std::string& s) {
-        int N = s.size();
-        if (N == 1) {
+    std::string by_two_ptr(string& s) {
+        if (s.size() == 1) {
             return s;
         }
 
         int b = 0;
         int e = 0;
-        for (int i = 0; i < N; ++i) {
 
-            get_longest_palindrome(b, e, i, i, s);      //odd center
-            get_longest_palindrome(b, e, i, i + 1, s);  //even center
+        for (int i = 0; i < s.size(); ++i) {
+            expand(b, e, i, i, s);
+            expand(b, e, i, i + 1, s);
         }
 
         return s.substr(b, e - b + 1);
     }
+    std::string by_iterative_dp(string& s) {
+        if (s.size() == 1) {
+            return s;
+        }
+
+        int n = s.size();
+        std::vector<std::vector<bool>> dp(n, std::vector<bool>(n));
+
+        for (int i = 0; i < n; ++i) {
+            dp[i][i] = true;
+        }
+
+        int start = 0;
+        int end = 0;
+        for (int i = 0; i < n - 1; ++i) {
+            if (s[i] == s[i + 1]) {
+                dp[i][i + 1] = true;
+                start = i;
+                end = i + 1;
+            }
+        }
+
+        for (int len = 3; len <= n; ++len) {
+            for (int b = 0, e = b + len - 1; e < n; ++b, ++e) {
+
+                if (s[b] == s[e] && dp[b + 1][e - 1]) {
+                    dp[b][e] = true;
+                    start = b;
+                    end = e;
+                }
+            }
+        }
+
+        return s.substr(start, end - start + 1);
+    }
 public:
     string longestPalindrome(string s) {
-        //return byDP(s);
-        return by_two_ptr(s);
+        //return by_iterative_dp(s);
+
+        //return by_two_ptr(s);
+        return by_Manachers_alg(s);
     }
 };

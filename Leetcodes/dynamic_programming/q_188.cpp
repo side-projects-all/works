@@ -51,7 +51,7 @@ private:
         }
 
         //corner case: transaction times is larger than the length of prices
-        if (k / 2 > N) {
+        if (k * 2 >= N) {
             int r = 0;
 
             for (int i = 1; i < N; ++i) {

@@ -34,7 +34,39 @@ class Solution {
 private:
     int iterative3(vector<int>& nums) {
 
+        int n = nums.size();
+        if (n == 1) {
+            return 1;
+        }
+
+        std::vector<int> sub;
+        sub.push_back(nums[0]);
+
+        for (int i = 1; i < n; ++i) {
+
+            int j = std::lower_bound(sub.begin(), sub.end(), nums[i]) - sub.begin();
+
+            if (j == sub.size()) {
+                sub.push_back(nums[i]);
+            } else {
+                sub[j] = nums[i];
+            }
+            /*
+            if (nums[i] > sub.back()) {
+                sub.push_back(nums[i]);
+
+            } else {
+
+                int j = std::lower_bound(sub.begin(), sub.end(), nums[i]) - sub.begin();
+                sub[j] = nums[i]; 
+            }
+            */
+        }
+
+        return sub.size();
+
         //this is greedy and binary search
+        /*
         int N = nums.size();
 
         std::vector<int> sub;
@@ -63,6 +95,31 @@ private:
         }
 
         return sub.size();
+        */
+        
+        /*
+        std::vector<int> sub_seq;
+        sub_seq.push_back(nums[0]);
+
+        for (int i = 1; i < nums.size(); ++i) {
+            if (nums[i] > sub_seq.back()) {
+                sub_seq.push_back(nums[i]);
+
+            } else {
+                int j = std::lower_bound(sub_seq.begin(), sub_seq.end(), nums[i]) - sub_seq.begin();
+
+                if (j < 0) {
+                    sub_seq[0] = nums[i];
+
+                } else {
+                    sub_seq[j] = nums[i];
+                }
+                
+            }
+        }
+
+        return sub_seq.size();
+        */
     }
     int iterative2(vector<int>& nums) {
 

@@ -29,66 +29,98 @@ Constraints:
 
 class Solution {
 private:
-    int iterative(std::vector<int>& nums) {
-        //edge case
-        if (nums.size() == 1) {
+    void recursive(vector<int>& nums, std::vector<int>& dp, std::vector<int>& cnt, int i) {
+        if (dp[i] != 0) {
+            return;
+        }
+
+        dp[i] = 1;
+        cnt[i] = 1;
+
+        for (int j = 0; j < i; ++j) {
+            if (nums[i] > nums[j]) {
+
+                //go deeper
+                recursive(nums, dp, cnt, j);
+
+                if (dp[i] < dp[j] + 1) {
+                    dp[i] = dp[j] + 1;
+                    cnt[i] = 0;
+                }
+
+                if (dp[i] == dp[j] + 1) {
+                    cnt[i] += cnt[j];
+                }
+            }
+        }
+    }
+    int by_recursive_dp(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
             return 1;
         }
 
-        std::vector<int> len(nums.size(), 1);
-        std::vector<int> cnt(nums.size(), 1);
-        //std::vector<int> max_indices;
+        std::vector<int> dp(n, 0);
+        std::vector<int> cnt(n, 0);
 
-        int max = -1;
-        for (int i = 0; i < nums.size() ; ++i) {
+        int max_len = 0;
+        for (int i = 0; i < n; ++i) {
+            recursive(nums, dp, cnt, i);
 
+            if (dp[i] > max_len) {
+                max_len = dp[i];
+            }
+        }
+        
+        int ans = 0;
+        for (int i = 0; i < n; ++i) {
+            if (dp[i] == max_len) {
+                ans += cnt[i];
+            }
+        }
+
+        return ans;
+    }
+    int by_iterative_dp(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return 1;
+        }
+
+        std::vector<int> dp(n, 1);
+        std::vector<int> cnt(n, 1);
+
+        for (int i = 1; i < n; ++i) {
             for (int j = 0; j < i; ++j) {
+
                 if (nums[i] > nums[j]) {
 
-                    if (len[i] < len[j] + 1) {
-                        len[i] = len[j] + 1;
-                        cnt[i] = 0; //reset originally longest count
-
+                    if (dp[i] < dp[j] + 1) {
+                        dp[i] = dp[j] + 1;
+                        cnt[i] = 0;
                     }
                     
-                    if (len[i] == len[j] + 1) {
+                    if (dp[i] == dp[j] + 1) {
                         cnt[i] += cnt[j];
-                        
                     }
                 }
             }
-
-            max = std::max(max, len[i]);
-
-            //tring to use vector space manipulation, but the truth is 
-            //any delete operation causes inefficiency
-            /*
-            if (max < len[i]) {
-                max_indices.clear();
-                max_indices.push_back(i);
-                max = len[i];
-            } else if (max == len[i]) {
-                max_indices.push_back(i);
-            }*/
         }
 
-        int result = 0;
-        /*
-        for (int i = 0; i < max_indices.size(); ++i) {
-            result += cnt[max_indices[i]];
-        }*/
-        
-        for (int i = 0; i < nums.size(); ++i) {
-            if (len[i] == max) {
-                result += cnt[i];
+        int max_len = *std::max_element(dp.begin(), dp.end());
+        int ans = 0;
+
+        for (int i = 0; i < n; ++i) {
+            if (dp[i] == max_len) {
+                ans += cnt[i];
             }
         }
 
-        return result;
+        return ans;
     }
 public:
     int findNumberOfLIS(vector<int>& nums) {
-        
-        return iterative(nums);
+        return by_iterative_dp(nums);
+        //return by_recursive_dp(nums);
     }
 };

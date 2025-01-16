@@ -57,41 +57,25 @@ Constraints:
 class Solution {
 private:
     std::vector<int> iterative(vector<int>& obstacles) {
-        int N = obstacles.size();
-        std::vector<int> ans(N, 1);     //the length of the longest obstacle course for index i
-        //std::vector<int> lis;
-        std::vector<int> lis(N, 0);
+        int n = obstacles.size();
+        if (n == 1) {
+            return { 1 };
+        }
+        std::vector<int> ans(n, 1);
+        std::vector<int> sub;
 
-        int len = 0;
-        for (int i = 0; i < N; ++i) {
-            int target = obstacles[i];
-            int left  = 0;
-            int right = len;
+        for (int i = 0; i < n; ++i) {
 
-            //this is finding an upper-bound!!
-            while (left < right) {
-                int mid = left + (right - left) / 2;
+            int j = std::upper_bound(sub.begin(), sub.end(), obstacles[i]) - sub.begin();
 
-                if (lis[mid] > target) {
-                    right = mid;
-                } else {
-                    left = mid + 1;
-                }
-            }
-
-            lis[left] = target;
-            if (left == len) {
-                ++len;
-            }
-            /*
-            if (left == lis.size()) {
-                lis.push_back(target);
+            if (j == sub.size()) {
+                sub.push_back(obstacles[i]);
+                
             } else {
-                lis[left] = target;
+                sub[j] = obstacles[i];
             }
-            */
 
-            ans[i] = left + 1;
+            ans[i] = j + 1;
         }
 
         return ans;

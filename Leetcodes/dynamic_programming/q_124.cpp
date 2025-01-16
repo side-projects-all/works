@@ -42,24 +42,28 @@ Constraints:
  */
 class Solution {
 private:
-    int recursive(TreeNode* root, int& max) {
+    int recursive(TreeNode* root, int&max_sum) {
         if (root == nullptr) {
             return 0;
         }
 
-        int gainFromLeft = std::max(recursive(root->left, max), 0);
-        int gainFromRight = std::max(recursive(root->right, max), 0);
+        int left_max = std::max(0, recursive(root->left, max_sum));
+        int right_max = std::max(0, recursive(root->right, max_sum));
+        max_sum = std::max(max_sum, root->val + left_max + right_max);
 
-        max = std::max(max, gainFromLeft + gainFromRight + root->val);
+        return root->val + std::max(left_max, right_max);   //gain from sub tree
+    }
+    int by_recursive_dp(TreeNode* root) {
+        if (root == nullptr) {
+            return 0;
+        }
 
-        return root->val + std::max(gainFromLeft, gainFromRight);
+        int max_sum = root->val;
+        recursive(root, max_sum);
+        return max_sum;
     }
 public:
     int maxPathSum(TreeNode* root) {
-        int max = -1001;
-
-        recursive(root, max);
-
-        return max;
+        return by_recursive_dp(root);
     }
 };

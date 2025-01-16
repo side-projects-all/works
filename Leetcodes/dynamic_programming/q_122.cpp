@@ -39,16 +39,43 @@ Constraints:
 */
 
 class Solution {
-public:
-    int maxProfit(vector<int>& prices) {
-        
-        int max_profit = 0;
-        for (int i = 1; i < prices.size(); ++i) {
-            if (prices[i] - prices[i - 1] > 0) {
-                max_profit += prices[i] - prices[i - 1];
-            }
+private:
+    int by_iterative_dp_optimize(vector<int>& prices) {
+        int n = prices.size();
+        if (n == 1) {
+            return 0;
         }
 
-        return max_profit;
+        int hold = -prices[0];
+        int sold = 0;
+
+        for (int i = 1; i < n; ++i) {
+            hold = std::max(hold, sold - prices[i]);
+            sold = std::max(sold, hold + prices[i]);
+        }
+
+        return sold;
+    }
+    int by_iterative_dp(vector<int>& prices) {
+        int n = prices.size();
+        if (n == 1) {
+            return 0;
+        }
+
+        std::vector<std::vector<int>> dp(n, std::vector<int>(2));   //0: no stack //1: have a stock
+        dp[0][1] = -prices[0];
+
+        for (int i = 1; i < n; ++i) {
+
+            dp[i][0] = std::max(dp[i - 1][0], dp[i - 1][1] + prices[i]);
+            dp[i][1] = std::max(dp[i - 1][1], dp[i - 1][0] - prices[i]);
+        }
+
+        return dp[n - 1][0];
+    }
+public:
+    int maxProfit(vector<int>& prices) {
+        //return by_iterative_dp(prices);
+        return by_iterative_dp_optimize(prices);
     }
 };

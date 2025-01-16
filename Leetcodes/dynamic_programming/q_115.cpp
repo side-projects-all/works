@@ -36,7 +36,7 @@ Constraints:
 
 
 */
-
+/*
 struct pair_hash {
     template<class T1, class T2>
     size_t operator() (const std::pair<T1, T2>& p) const {
@@ -81,5 +81,73 @@ public:
         std::unordered_map<std::pair<int, int>, int, pair_hash> mem;
 
         return recursive(s, t, 0, 0, mem);
+    }
+};
+*/
+
+class Solution {
+private:
+    int by_iterative_dp(string& s, string& t) {
+        int ls = s.size();
+        int lt = t.size();
+        std::vector<std::vector<unsigned int>> dp(ls + 1, std::vector<unsigned int>(lt + 1, 0));
+
+        for (int i = 0; i <= ls; ++i) {
+            dp[i][lt] = 1;
+        }
+
+        for (int i = ls - 1; i >= 0; --i) {
+            for (int j = lt - 1; j >= 0; --j) {
+
+                dp[i][j] = dp[i + 1][j];
+
+                if (s[i] == t[j]) {
+                    dp[i][j] += dp[i + 1][j + 1];
+                }
+            }
+        }
+
+        return dp[0][0];
+    }
+    int recursive(string& s, string& t, std::vector<std::vector<int>>& mem, int i, int j) {
+        if ((i == s.size() && j < t.size()) || (s.size() - i < t.size() - j)) {
+            return 0;
+        }
+        
+        if (j == t.size()) {
+            return 1;
+        }
+
+        if (mem[i][j] != -1) {
+            return mem[i][j];
+        }
+
+        mem[i][j] = recursive(s, t, mem, i + 1, j);
+
+        if (s[i] == t[j]) {
+            mem[i][j] += recursive(s, t, mem, i + 1, j + 1);
+        }
+
+        return mem[i][j];
+    }
+    int by_recursive_dp(string& s, string& t) {
+        int ls = s.size();
+        int lt = t.size();
+        std::vector<std::vector<int>> mem(ls + 1, std::vector<int>(lt + 1, -1));
+
+        return recursive(s, t, mem, 0, 0);
+    }
+public:
+    int numDistinct(string s, string t) {
+        if (s.size() < t.size()) {
+            return 0;
+        }
+
+        if (s.size() == t.size()) {
+            return s == t;
+        }
+
+        //return by_recursive_dp(s, t);
+        return by_iterative_dp(s, t);
     }
 };

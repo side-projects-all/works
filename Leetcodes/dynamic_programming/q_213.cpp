@@ -34,38 +34,48 @@ Constraints:
 */
 
 class Solution {
-public:
-    int rob(vector<int>& nums) {
-        p_nums = nums;
-        
-        if (nums.size() == 0) {
-            return 0;
+private:
+    int iterative(vector<int>& nums, int b, int e) {
+        /*
+        std::vector<int> dp(nums.size() + 1);
+        dp[b] = nums[b];
+        dp[b + 1] = std::max(nums[b + 1], nums[b]);
+
+        for (int i = b + 2; i <= e; ++i) {
+            dp[i] = std::max(dp[i - 1], dp[i - 2] + nums[i]);
         }
 
-        if (nums.size() == 1) {
+        return dp[e];
+        */
+
+        int rob1 = nums[b];
+        int rob2 = std::max(nums[b + 1], nums[b]);
+
+        for (int i = b + 2; i <= e; ++i) {
+            int rob3 = std::max(rob2, rob1 + nums[i]);
+            rob1 = rob2;
+            rob2 = rob3;
+        }
+
+        return rob2;
+    }
+    int by_iterative_dp(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
             return nums[0];
         }
-        int len = nums.size();
-        int max1 = bottomUp(0, len - 2);
-        int max2 = bottomUp(1, len - 1);
 
-        return std::max(max1, max2);
-    }
-private:
-    std::vector<int> p_nums;
-
-    int bottomUp(int s, int e) {
-        int t1 = 0;
-        int t2 = 0;
-        int tmp = 0;
-        int curr = 0;
-        for (int i = s; i <= e; ++i) {
-            tmp = t1;
-            curr = p_nums[i];
-            t1 = std::max(curr + t2, t1);
-            t2 = tmp;
+        if (n == 2) {
+            return std::max(nums[0], nums[1]);
         }
 
-        return t1;
+        int from_first = iterative(nums, 0, n - 2);
+        int from_sec = iterative(nums, 1, n - 1);
+
+        return std::max(from_first, from_sec);
+    }
+public:
+    int rob(vector<int>& nums) {
+        return by_iterative_dp(nums);
     }
 };

@@ -30,50 +30,60 @@ Constraints:
 class Solution {
 private:
     int iterative(std::string& s) {
-        int N = s.size();
-        std::vector<std::vector<int>> mem(N, std::vector<int>(N));
+        int n = s.size();
+        std::vector<std::vector<int>> dp(n, std::vector<int>(n));
 
-        for (int r = N - 1; r >= 0; --r) {
-            mem[r][r] = 1;
+        for (int b = n - 1; b >= 0; --b) {
+            dp[b][b] = 1;
 
-            for (int c = r + 1; c < N; ++c) {
-                if (s[r] == s[c]) {
-                    mem[r][c] = mem[r + 1][c - 1] + 2;
+            for (int e = b + 1; e < n; ++e) {
+
+                if (s[b] == s[e]) {
+                    dp[b][e] = 2 + dp[b + 1][e - 1];
+
                 } else {
-                    mem[r][c] = std::max(mem[r + 1][c], mem[r][c - 1]);
+                    dp[b][e] = std::max(dp[b + 1][e], dp[b][e - 1]);
                 }
+
             }
         }
 
-        return mem[0][N -1];
+        return dp[0][n - 1];
     }
-    int recursive(std::string& s, int begin, int end, std::vector<std::vector<int>>& mem) {
-        if (begin > end) {
+    int recursive(std::string& s, std::vector<std::vector<int>>& mem, int b, int e) {
+        if (b > e) {
             return 0;
         }
 
-        if (begin == end) {
+        if (b == e) {
             return 1;
         }
 
-        if (mem[begin][end] != -1) {
-            return mem[begin][end];
+        if (mem[b][e] != -1) {
+            return mem[b][e];
         }
 
-        if (s[begin] == s[end]) {
-            mem[begin][end] = recursive(s, begin + 1, end - 1, mem) + 2;
-        } else {
-            mem[begin][end] = std::max(recursive(s, begin, end - 1, mem), recursive(s, begin + 1, end, mem));
+        if (s[b] == s[e]) {
+            return mem[b][e] = recursive(s, mem, b + 1, e - 1) + 2;
         }
 
-        return mem[begin][end];
+        return mem[b][e] = std::max(recursive(s, mem, b + 1, e), recursive(s, mem, b, e - 1));
+    }
+
+    int by_recursive_dp(std::string& s) {
+        int n = s.size();
+        std::vector<std::vector<int>> mem(n, std::vector<int>(n, - 1));
+
+        return recursive(s, mem, 0, n - 1);
     }
 
 public:
     int longestPalindromeSubseq(string s) {
-        //std::vector<std::vector<int>> mem(s.size(), std::vector<int>(s.size(), -1));
+        if (s.size() == 1) {
+            return 1;
+        }
 
-        //return recursive(s, 0, s.size() - 1, mem);
+        //return by_recursive_dp(s);
         return iterative(s);
     }
 };

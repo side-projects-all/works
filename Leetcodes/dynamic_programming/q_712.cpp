@@ -31,59 +31,84 @@ Constraints:
 
 */
 
-struct pair_hash {
-    template<class T1, class T2>
-    std::size_t operator() (const std::pair<T1, T2>& p) const {
-        auto h1 = std::hash<T1>{}(p.first);
-        auto h2 = std::hash<T2>{}(p.second);
-
-        return h1 ^ h2;
-    }
-};
-
 class Solution {
 private:
-    int recursive(std::string& s1, std::string& s2, int s1Index, int s2Index,
-                     std::unordered_map<std::pair<int, int>, int, pair_hash>& mem) {
-        
-        if (s1Index < 0 && s2Index < 0) {
+    int iterative(string& s1, string& s2) {
+        int len1 = s1.size();
+        int len2 = s2.size();
+        std::vector<std::vector<int>> dp(len1 + 1, std::vector<int>(len2 + 1));
+
+        for (int i1 = 1; i1 <= len1; ++i1) {
+            dp[i1][0] = s1[i1 - 1] + dp[i1 - 1][0];
+        }
+
+        for (int i2 = 1; i2 <= len2; ++i2) {
+            dp[0][i2] = s2[i2 - 1] + dp[0][i2 - 1];
+        }
+
+        for (int i1 = 1; i1 <= len1; ++i1) {
+            for (int i2 = 1; i2 <= len2; ++i2) {
+
+                if (s1[i1 - 1] == s2[i2 - 1]) {
+                    dp[i1][i2] = dp[i1 - 1][i2 - 1];
+
+                } else {
+
+                    dp[i1][i2] = std::min(s1[i1 - 1] + dp[i1 - 1][i2], s2[i2 - 1] + dp[i1][i2 - 1]);
+                    /*
+                    dp[i1][i2] = std::min({s1[i1 - 1] + s2[i2 - 1] + dp[i1 - 1][i2 - 1], 
+                                            s1[i1 - 1] + dp[i1 - 1][i2], 
+                                            s2[i2 - 1] + dp[i1][i2 - 1]});
+                    */
+                }
+            }
+        }
+
+        return dp[len1][len2];
+    }
+    int recursive(string& s1, string& s2, std::vector<std::vector<int>>& mem, int i1, int i2) {
+        if (i1 == s1.size() && i2 == s2.size()) {
             return 0;
         }
 
-        std:pair<int, int> key = std::make_pair(s1Index, s2Index);
-
-        if (s1Index < 0) {
-            mem[key] = s2[s2Index] + recursive(s1, s2, s1Index, s2Index - 1, mem);
+        if (i1 == s1.size()) {
             
-            return mem[key];
+            return mem[i1][i2] = s2[i2] + recursive(s1, s2, mem, i1, i2 + 1);;
         }
 
-        if (s2Index < 0) {
-            mem[key] = s1[s1Index] + recursive(s1, s2, s1Index - 1, s2Index, mem);
+        if (i2 == s2.size()) {
             
-            return mem[key];
+            return mem[i1][i2] = s1[i1] + recursive(s1, s2, mem, i1 + 1, i2);;
         }
 
+        if (mem[i1][i2] != -1) {
+            return mem[i1][i2];
+        }
+
+        if (s1[i1] == s2[i2]) {
+            return mem[i1][i2] = recursive(s1, s2, mem, i1 + 1, i2 + 1);
+
+        }
         
-        if (mem.find(key) != mem.end()) {
-            return mem[key];
-        }
+        return mem[i1][i2] = std::min(s1[i1] + recursive(s1, s2, mem, i1 + 1, i2), 
+                                        s2[i2] + recursive(s1, s2, mem, i1, i2 + 1));
+        /*
+        return mem[i1][i2] = std::min({s1[i1] + recursive(s1, s2, mem, i1 + 1, i2), 
+                                        s2[i2] + recursive(s1, s2, mem, i1, i2 + 1), 
+                                        s1[i1] + s2[i2] + recursive(s1, s2, mem, i1 + 1, i2 + 1)});
+        */
+    }
+    int by_recursive_dp(string& s1, string& s2) {
+        int len1 = s1.size();
+        int len2 = s2.size();
 
-        if (s1[s1Index] == s2[s2Index]) {
-            mem[key] = recursive(s1, s2, s1Index - 1, s2Index - 1, mem);
-            
-        } else {
-            mem[key] = std::min(s1[s1Index] + recursive(s1, s2, s1Index - 1, s2Index, mem), 
-                                std::min(s2[s2Index] + recursive(s1, s2, s1Index, s2Index - 1, mem), 
-                                    s1[s1Index] + s2[s2Index] + recursive(s1, s2, s1Index - 1, s2Index - 1, mem)));
+        std::vector<std::vector<int>> mem(len1 + 1, std::vector<int>(len2 + 1, -1));
 
-        }
-
-        return mem[key];
+        return recursive(s1, s2, mem, 0, 0);
     }
 public:
     int minimumDeleteSum(string s1, string s2) {
-        std::unordered_map<std::pair<int, int>, int, pair_hash> mem;
-        return recursive(s1, s2, s1.size() - 1, s2.size() - 1, mem);
+        return by_recursive_dp(s1, s2);
+        //return iterative(s1, s2);
     }
 };

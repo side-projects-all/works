@@ -55,6 +55,23 @@ private:
     }
 
     int iterative_best(vector<int>& prices) {
+        int n = prices.size();
+        if (n == 1) {
+            return 0;
+        }
+        int rest = 0;
+        int sold = 0;
+        int hold = -prices[0];
+
+        // the sequence here is important, if you do not use a temp variable to hold the state before changed
+        for (int i = 1; i < n; ++i) {
+            hold = std::max(hold, rest - prices[i]);
+            rest = std::max(rest, sold);
+            sold = std::max(sold, hold + prices[i]);
+        }
+
+        return sold;
+        /*
         int sold = -1001;
         int held = -1001;
         int reset = 0;
@@ -68,6 +85,7 @@ private:
         }
 
         return std::max(sold, reset);
+        */
     }
 
     int recursive(vector<int>& prices) {

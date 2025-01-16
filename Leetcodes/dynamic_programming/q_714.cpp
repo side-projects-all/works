@@ -34,6 +34,22 @@ Constraints:
 class Solution {
 private:
     int iterative_space_optimize(vector<int>& prices, int fee) {
+        int n = prices.size();
+        if (n == 1) {
+            return 0;
+        }
+
+        int sold = 0;
+        int hold = -prices[0] - fee;
+
+        for (int i = 1; i < n; ++i) {
+
+            hold = std::max(hold, sold - prices[i] - fee);
+            sold = std::max(sold, hold + prices[i]);
+        }
+
+        return sold;
+        /*
         int N = prices.size();
         //still another state transition
 
@@ -46,6 +62,7 @@ private:
             hold = std::max(hold, free - prices[i]);
             free = std::max(free, prehold + prices[i] - fee);
         }
+        */
 
         //start from 0
         /*
@@ -59,7 +76,7 @@ private:
         }
         */
 
-        return free;
+        //return free;
     }
 
     int iterative(vector<int>& prices, int fee) {
