@@ -44,20 +44,29 @@ private:
 
         return v;
     }
-    int iterative(std::vector<std::string>& strs, int m, int n) {
-        std::vector<std::vector<int>> mem(m + 1, std::vector<int>(n + 1, 0));
+    int iterative(std::vector<std::string>& strs, int& m, int& n) {
+        std::vector<std::vector<int>> dp(m + 1, std::vector<int>(n + 1));
 
-        for (std::string& s : strs) {
-            std::vector<int> counts = zerosOnes(s);
+        for (int i = 0; i < strs.size(); ++i) {
+            int zeros = 0;
+            int ones = 0;
 
-            for (int zeros = m; zeros >= counts[0]; --zeros) {
-                for (int ones = n; ones >= counts[1]; --ones) {
-                    mem[zeros][ones] = std::max(1 + mem[zeros - counts[0]][ones - counts[1]], mem[zeros][ones]);
+            for (int j = 0; j < strs[i].size(); ++j) {
+                if (strs[i][j] == '0') {
+                    ++zeros;
+                } else {
+                    ++ones;
+                }
+            }
+
+            for (int z = m; z >= zeros; --z) {
+                for (int o = n; o >= ones; --o) {
+                    dp[z][o] = std::max(dp[z][o], 1 + dp[z - zeros][o - ones]);
                 }
             }
         }
 
-        return mem[m][n];
+        return dp[m][n];
     }
 
     int recursive(std::vector<std::string>& strs, int m, int n, int i, 

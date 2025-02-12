@@ -45,10 +45,38 @@ Constraints:
 
 class Solution {
 private:
+    void back_tracking(int k, int& n, std::vector<std::vector<int>>& ans, int num, int sum, std::vector<int>&& curr) {
+        if (k == 0 && sum == n) {
+            ans.push_back(curr);
+            return;
+        }
+
+        if (k == 0 || sum > n) {
+            return;
+        }
+
+        for (int val = num; val <= 9; ++val) {
+            curr.push_back(val);
+            back_tracking(k - 1, n, ans, val + 1, sum + val, std::move(curr));
+            curr.pop_back();
+        }
+    }
+    vector<vector<int>> by_back_tracking(int& k, int& n) {
+        std::vector<std::vector<int>> ans;
+        back_tracking(k, n, ans, 1, 0, std::vector<int>());
+        return ans;
+    }
+public:
+    vector<vector<int>> combinationSum3(int k, int n) {
+        return by_back_tracking(k, n);
+    }
+};
+/*
+class Solution {
+private:
     std::vector<std::vector<int>> backtracking(int k, int n) {
         std::vector<std::vector<int>> ans;
         std::vector<int> curr;
-
 
         std::function<void(int, int, int)> bt = [&](int i_now, int rest_k, int rest_n) {
             if (rest_n == 0 && rest_k == 0) {
@@ -77,3 +105,4 @@ public:
         return backtracking(k, n);
     }
 };
+*/

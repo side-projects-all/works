@@ -40,39 +40,40 @@ Constraints:
 
 class Solution {
 private:
-    vector<vector<int>> backtracking(vector<int>& candidates, int target) {
-        int N = candidates.size();
-        std::sort(candidates.begin(), candidates.end());
-        std::vector<std::vector<int>> ans;
-        
-        std::vector<int> combine;
-        std::function<void(int, int)> bt = [&](int i, int rest) {
-            if (rest == 0) {
-                ans.push_back(combine);
+    void back_tracking(vector<int>& candidates, int& target, std::vector<std::vector<int>>& ans, int i, int sum, std::vector<int>&& curr) {
+
+        if (sum == target) {
+            ans.push_back(curr);
+            return;
+        }
+
+        if (sum > target || i >= candidates.size()) {
+            return;
+        }
+
+        for (int j = i; j < candidates.size(); ++j) {
+            if (candidates[j] > target) {
                 return;
-
             }
 
-            for (int now = i; now < N; ++now) {
-                if (candidates[now] > rest) {
-                    return;
-                }
-                if (now > i && candidates[now] == candidates[now - 1]) {
-                    continue;
-                }
-
-                combine.push_back(candidates[now]);
-                bt(now + 1, rest - candidates[now]);
-                combine.pop_back();
+            if (j > i && candidates[j] == candidates[j - 1]) {
+                continue;
             }
-        };
 
-        bt(0, target);
+            curr.push_back(candidates[j]);
+            back_tracking(candidates, target, ans, j + 1, sum + candidates[j], std::move(curr));
+            curr.pop_back();
+        }
+    }
+    vector<vector<int>> by_back_tracking(vector<int>& candidates, int& target) {
+        std::vector<std::vector<int>> ans;
+        std::sort(candidates.begin(), candidates.end());
 
+        back_tracking(candidates, target, ans, 0, 0, std::vector<int>());
         return ans;
     }
 public:
     vector<vector<int>> combinationSum2(vector<int>& candidates, int target) {
-        return backtracking(candidates, target);
+        return by_back_tracking(candidates, target);
     }
 };

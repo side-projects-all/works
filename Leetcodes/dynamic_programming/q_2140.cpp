@@ -46,24 +46,26 @@ Constraints:
 class Solution {
 private:
   long long iterative(vector<vector<int>>& questions) {
-    int N = questions.size();
-    std::vector<long long> mem(N, 0);
-    mem[N - 1] = questions[N - 1][0];
-
-    for (int i = N - 2; i > -1; --i) {
-
-        int cantDo = questions[i][1];
-        long long notSkip = questions[i][0];
-
-        if (i + cantDo + 1 < N) {
-            notSkip += mem[i + cantDo + 1];
-        }
-
-        long long skip = mem[i + 1];
-
-        mem[i] = std::max(skip, notSkip);
+    int n = questions.size();
+    if (n == 1) {
+        return questions[0][0];
     }
-    return mem[0];
+
+    std::vector<long long> dp(n);
+    dp[n - 1] = questions[n - 1][0];
+
+    for (int i = n - 2; i >= 0; --i) {
+        long long do_it = questions[i][0];
+        int need_to_skip = questions[i][1] + 1;
+
+        if (i + need_to_skip < n) {
+            do_it += dp[i + need_to_skip];
+        }
+        //dp[i + 1] means you skip to next question
+        dp[i] = std::max(dp[i + 1], do_it);
+    }
+
+    return dp[0];
   }
   long long recursive(vector<vector<int>>& questions, int i, std::vector<long long>& mem) {
     if (i >= questions.size()) {

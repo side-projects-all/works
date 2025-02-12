@@ -39,17 +39,19 @@ Constraints:
 class Solution {
 private:
     int iterative(vector<int>& nums, int target) {
-        std::vector<unsigned int> mem(target + 1, 0);
-        mem[0] = 1;
+        std::vector<unsigned int> dp(target + 1);
+        dp[0] = 1;
 
-        for (int s = 1; s < target + 1; ++s) {
-            for (int n : nums) {
-                if (n <= s) {
-                    mem[s] += mem[s - n];
+        for (int p = 1; p <= target; ++p) {
+            for (int i = 0; i < nums.size(); ++i) {
+                if (nums[i] <= p) {
+                    dp[p] += dp[p - nums[i]];
                 }
+                
             }
         }
-        return mem[target];
+
+        return dp[target];
     }
 
     int recursive(vector<int>& nums, int target, std::vector<int>& mem) {

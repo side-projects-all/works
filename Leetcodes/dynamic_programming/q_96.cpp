@@ -34,17 +34,27 @@ private:
     }
 
     int iterative(int n) {
-        std::vector<int> mem(n + 1);
-        mem[0] = 1;
-        mem[1] = 1;
-
-        for (int i = 2; i <= n; ++i) {
-            for (int j = 1; j <= i; ++j) {
-                mem[i] += mem[j - 1] * mem[i - j];
-            }
+        if (n == 1) {
+            return 1;
         }
 
-        return mem[n];
+        std::vector<int> dp(n + 1);
+        dp[0] = 1;
+        dp[1] = 1;
+
+        for (int nodes = 2; nodes <= n; ++nodes) {
+            for (int left = 0; left < nodes; ++left) {
+                dp[nodes] += dp[left] * dp[nodes - left - 1];
+            }
+
+            /* two ways to complete, 1 index diff
+            for (int left = 1; left <= nodes; ++left) {
+                dp[nodes] += dp[left - 1] * dp[nodes - left];
+            }
+            */
+        }
+
+        return dp[n];
     }
 public:
     int numTrees(int n) {

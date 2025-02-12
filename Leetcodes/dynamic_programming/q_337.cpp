@@ -42,124 +42,58 @@ Constraints:
  */
 class Solution {
 private:
-    int iterative(TreeNode* root) {
+    int recursive(TreeNode* root, bool pre_robbed, std::unordered_map<TreeNode*, int>& robbed, std::unordered_map<TreeNode*, int>& not_robbed) {
         if (root == nullptr) {
             return 0;
         }
 
-        //turn the node-based tree into array-based tree with BFS traverse
-        std::vector<int> tree;
-
-        //use map to show parent-children relationship
-        std::unordered_map<int, std::vector<int>> graph;
-
-        int index = -1;
-        std::queue<TreeNode*> q_node;
-        q_node.push(root);
-        std::queue<int> q_index;
-        q_index.push(index);
-
-        while(!q_node.empty()) {
-            TreeNode* node = q_node.front();
-            q_node.pop();
-            int parent_index = q_index.front();
-            q_index.pop();
-
-            if (node != nullptr) {
-                ++index;
-                tree.push_back(node->val);
-                graph[parent_index].push_back(index);
-
-                q_node.push(node->left);
-                q_index.push(index);
-                q_node.push(node->right);
-                q_index.push(index);
-            }
-        }
-
-        std::vector<int> rob(index + 1);
-        std::vector<int> not_rob(index + 1);
-
-        for (int i = index; i > -1; --i) {
-            std::vector<int> children = graph[i];
-
-            if (children.empty()) {
-                rob[i] = tree[i];
-                not_rob[i] = 0;
-            } else {
-                rob[i] = tree[i];
-
-                for (int child : children) {
-                    rob[i] += not_rob[child];
-                    not_rob[i] += std::max(rob[child], not_rob[child]);
-                }
-            }
-        }
-
-        return std::max(rob[0], not_rob[0]);
-    }
-
-    int recursive_with_mem(TreeNode* root, bool prev_robbed, 
-                                            std::unordered_map<TreeNode*, int>& robbed, 
-                                                std::unordered_map<TreeNode*, int>& notRobbed) {
-
-        if (root == nullptr) {
-            return 0;
-        }
-
-        int result = 0;
-        if (prev_robbed) {
-            if (robbed.find(root) != robbed.end()) {
+        if (pre_robbed) {
+            if (not_robbed.find(root) != not_robbed.end()) {
                 return robbed[root];
             }
 
-            result = recursive_with_mem(root->left, false, robbed, notRobbed) + 
-                        recursive_with_mem(root->right, false, robbed, notRobbed);
+            return not_robbed[root] = recursive(root->left, !pre_robbed, robbed, not_robbed) + recursive(root->right, !pre_robbed, robbed, not_robbed);
 
-            robbed[root] = result;
+        } 
 
-        } else {
-            if (notRobbed.find(root) != notRobbed.end()) {
-                return notRobbed[root];
-            }
-
-            int robNow = root->val + recursive_with_mem(root->left, true, robbed, notRobbed) + 
-                        recursive_with_mem(root->right, true, robbed, notRobbed);
-
-            int notRobNow = recursive_with_mem(root->left, false, robbed, notRobbed) + 
-                                recursive_with_mem(root->right, false, robbed, notRobbed);
-
-            result = std::max(robNow, notRobNow);
-
-            notRobbed[root] = result;
+        if (robbed.find(root) != robbed.end()) {
+            return robbed[root];
         }
 
-        return result;
+        int curr_rob = root->val + recursive(root->left, !pre_robbed, robbed, not_robbed) + recursive(root->right, !pre_robbed, robbed, not_robbed);
+        int curr_not_rob = recursive(root->left, pre_robbed, robbed, not_robbed) + recursive(root->right, pre_robbed, robbed, not_robbed);
+
+        return robbed[root] = std::max(curr_rob, curr_not_rob);
+    }
+    int by_recursive_dp(TreeNode* root) {
+        std::unordered_map<TreeNode*, int> robbed;
+        std::unordered_map<TreeNode*, int> not_robbed;
+        return recursive(root,false, robbed, not_robbed);
     }
 
-    std::vector<int> recursive(TreeNode* root) {
+    std::pair<int, int> recursive2(TreeNode* root) {
         if (root == nullptr) {
             return {0, 0};
         }
 
-        std::vector<int> left = recursive(root->left);
-        std::vector<int> right = recursive(root->right);
+        std::pair<int, int> left_sub = recursive2(root->left);
+        std::pair<int, int> right_sub = recursive2(root->right);
 
-        int rob = root->val + left[1] + right[1];
-        int notRob = std::max(left[0], left[1]) + std::max(right[0], right[1]);
+        //rob now, then we need left right sub without rob
+        int rob = root->val + left_sub.second + right_sub.second;   
+        int not_rob = std::max(left_sub.first, left_sub.second) + std::max(right_sub.first, right_sub.second);
 
-        return {rob, notRob};
+        return {rob, not_rob};
+    }
+    int by_recursive2(TreeNode* root) {
+        std::pair<int, int> p = recursive2(root);   //first: rob, second: not rob
+
+        return std::max(p.first, p.second);
     }
 public:
     int rob(TreeNode* root) {
-        //std::vector<int> ans = recursive(root);
-        //return std::max(ans[0], ans[1]);
+        //return by_recursive_dp(root);
 
-        //std::unordered_map<TreeNode*, int> robbed;
-        //std::unordered_map<TreeNode*, int> notRobbed;
-
-        //return recursive_with_mem(root, false, robbed, notRobbed);
-
-        return iterative(root);
+        return by_recursive2(root);
     }
 };

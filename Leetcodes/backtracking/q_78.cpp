@@ -30,6 +30,29 @@ Constraints:
 
 class Solution {
 private:
+    void back_tracking(vector<int>& nums, std::vector<std::vector<int>>& ans, int i, vector<int>&& curr) {
+        ans.push_back(curr);
+
+        for (int j = i; j < nums.size(); ++j) {
+            curr.push_back(nums[j]);
+            back_tracking(nums, ans, j + 1, std::move(curr));
+            curr.pop_back();
+        }
+    }
+    vector<vector<int>> by_back_tracking(vector<int>& nums) {
+        std::vector<std::vector<int>> ans;
+
+        back_tracking(nums, ans, 0, std::vector<int>());
+        return ans;
+    }
+public:
+    vector<vector<int>> subsets(vector<int>& nums) {
+        return by_back_tracking(nums);
+    }
+};
+/*
+class Solution {
+private:
     std::vector<std::vector<int>> backtracking(vector<int>& nums) {
         std::vector<std::vector<int>> ans;
         ans.push_back(std::vector<int>());
@@ -60,3 +83,4 @@ public:
         return backtracking(nums);
     }
 };
+*/

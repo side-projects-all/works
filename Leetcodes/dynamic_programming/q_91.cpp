@@ -47,27 +47,30 @@ Constraints:
 class Solution {
 private:
     int iterative(std::string& s) {
-        int N = s.size();
+        int n = s.size();
+        if (n == 1) {
+            return s[0] == '0' ? 0 : 1; 
+        }
 
-        //this dp array means the length of s from 0 to s.size()
-        std::vector<int> mem(N + 1, 0);
-        mem[0] = 1;
-        mem[1] = s[0] == '0' ? 0 : 1;
-        
-        for (int i = 2; i <= N; ++i) {
+        std::vector<int> dp(n + 1); //it means length
+        dp[0] = 1;
+        dp[1] = s[0] == '0' ? 0 : 1;
+
+        for (int i = 2; i <= n; ++i) {
+
             //one digit
             if (s[i - 1] != '0') {
-                mem[i] = mem[i - 1];
+                dp[i] += dp[i - 1];
             }
 
             //two digit
             int val = std::stoi(s.substr(i - 2, 2));
             if (val >= 10 && val <= 26) {
-                mem[i] += mem[i - 2];
+                dp[i] += dp[i - 2];
             }
         }
 
-        return mem[N];
+        return dp[n];
     }
     int recurisve(std::string& s, int i, std::vector<int>& mem) {
         //we could not decode any sub-string starts from '0'

@@ -37,6 +37,7 @@ Constraints:
 class Solution {
 private:
     int byGreedy(vector<vector<int>>& pairs) {
+        /*
         struct custom_compare {
             bool operator() (const std::vector<int>& v1, const std::vector<int>& v2) {
                 return v1[1] < v2[1];
@@ -55,6 +56,27 @@ private:
         }
 
         return result;
+        */
+        
+        int n = pairs.size();
+        if (n == 1) {
+            return 1;
+        }
+        
+        std::sort(pairs.begin(), pairs.end(), [](std::vector<int>& v1, std::vector<int>& v2) {
+            return v1[1] < v2[1];
+        });
+
+        int max_len = 1;
+        int max = pairs[0][1];
+        for (int i = 1; i < n; ++i) {
+            if (pairs[i][0] > max) {
+                max = pairs[i][1];
+                ++max_len;
+            }
+        }
+
+        return max_len;
     }
 
     int iterative(vector<vector<int>>& pairs) {

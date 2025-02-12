@@ -28,6 +28,49 @@ Constraints:
 
 class Solution {
 private:
+    void back_tracking(int& len, std::unordered_map<int, int>& m, std::vector<std::vector<int>>& ans, std::vector<int>&& curr) {
+        if (curr.size() == len) {
+            ans.push_back(curr);
+            return;
+        }
+
+        for (auto& p : m) {
+
+            if (p.second == 0) {
+                continue;
+            }
+            
+            curr.push_back(p.first);
+            --m[p.first];
+
+            back_tracking(len, m, ans, std::move(curr));
+
+            curr.pop_back();
+            ++m[p.first];
+        }
+    }
+    vector<vector<int>> by_back_tracking(vector<int>& nums) {
+        std::vector<std::vector<int>> ans;
+        std::unordered_map<int, int> m;
+
+        for (int& v : nums) {
+            ++m[v];
+        }
+
+        int len = nums.size();
+        back_tracking(len, m, ans, std::vector<int>());
+
+        return ans;
+    }
+public:
+    vector<vector<int>> permuteUnique(vector<int>& nums) {
+        return by_back_tracking(nums);
+    }
+};
+
+/*
+class Solution {
+private:
     vector<vector<int>> backtrack(vector<int>& nums) {
         std::vector<std::vector<int>> ans;
         std::unordered_map<int, int> m;
@@ -71,3 +114,4 @@ public:
         return backtrack(nums);
     }
 };
+*/

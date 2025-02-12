@@ -39,25 +39,14 @@ Constraints:
 class Solution {
 private:
     int iterative_space_optimize(int amount, vector<int>& coins) {
-        /*
-        int N = coins.size();
-        std::vector<int> mem(amount + 1);
-        mem[0] = 1;
-
-        for (int i = N - 1; i > -1; --i) {
-            for (int j = coins[i]; j <= amount; ++j) {
-                mem[j] += mem[j - coins[i]];
-            }
+        if (amount == 0) {
+            return 1;
         }
 
-        return mem[amount];
-        */
-        
-        int n = coins.size();
-        std::vector<int> dp(amount + 1);
+        std::vector<unsigned int> dp(amount + 1);
         dp[0] = 1;
 
-        for (int i = 0; i < n; ++i) {
+        for (int i = 0; i < coins.size(); ++i) {
             for (int a = coins[i]; a <= amount; ++a) {
                 dp[a] += dp[a - coins[i]];
             }

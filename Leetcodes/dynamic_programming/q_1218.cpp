@@ -36,6 +36,28 @@ Constraints:
 class Solution {
 private:
     int iterative(std::vector<int>& arr, int difference) {
+        int n = arr.size();
+        if (n == 1) {
+            return 1;
+        }
+
+        std::vector<int> dp(20001);
+        int max_len = 0;
+        for (int i = 0; i < n; ++i) {
+
+            int prev = arr[i] + 10000 - diff;
+            if (prev >= 0 && prev <= 20000 && dp[prev] > 0) {
+                dp[prev + diff] = 1 + dp[prev];
+
+            } else {
+                dp[prev + diff] = 1;
+            }
+
+            max_len = std::max(max_len, dp[prev + diff]);
+        }
+
+        return max_len;
+        /*
         int N = arr.size();
         std::unordered_map<int, int> mem;   //key: arr[i], value: len
 
@@ -54,6 +76,7 @@ private:
         }
 
         return max;
+        */
     }
     int recursive(std::vector<int>& arr, int difference) {
         int N = arr.size();

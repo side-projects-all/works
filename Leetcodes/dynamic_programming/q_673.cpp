@@ -89,6 +89,7 @@ private:
 
         std::vector<int> dp(n, 1);
         std::vector<int> cnt(n, 1);
+        int max_len = 0;
 
         for (int i = 1; i < n; ++i) {
             for (int j = 0; j < i; ++j) {
@@ -105,9 +106,9 @@ private:
                     }
                 }
             }
+            max_len = std::max(max_len, dp[i]);
         }
 
-        int max_len = *std::max_element(dp.begin(), dp.end());
         int ans = 0;
 
         for (int i = 0; i < n; ++i) {

@@ -42,39 +42,35 @@ Constraints:
 
 class Solution {
 private:
-    vector<vector<int>> backtracking(vector<int>& candidates, int target) {
-        std::vector<std::vector<int>> ans;
-        std::sort(candidates.begin(), candidates.end());
-
-        //corner case
-        if (target < candidates[0]) {
-            return ans;
+    void back_tracking(vector<int>& candidates, int& target, std::vector<std::vector<int>>& ans, int i, int sum, std::vector<int>&& curr) {
+        if (sum == target) {
+            ans.push_back(curr);
+            return;
         }
 
-        std::vector<int> combine;
-        std::function<void(int, int)> bk = [&](int i, int sum) {
-            if (sum == target) {
-                ans.push_back(combine);
-                return;
-            } else if (sum > target) {
+        if (sum >= target || i >= candidates.size()) {
+            return;
+        }
+
+        for (int j = i; j < candidates.size(); ++j) {
+            if (candidates[j] > target) {
                 return;
             }
+            
+            curr.push_back(candidates[j]);
+            back_tracking(candidates, target, ans, j, sum + candidates[j], std::move(curr));
+            curr.pop_back();
+        }
+    }
+    vector<vector<int>> by_back_tracking(vector<int>& candidates, int target) {
+        std::sort(candidates.begin(), candidates.end());
+        std::vector<std::vector<int>> ans;
 
-            for (int k = i; k < candidates.size(); ++k) {
-
-                combine.push_back(candidates[k]);
-                bk(k, sum + candidates[k]);
-                combine.pop_back();
-                
-            }
-        };
-
-        bk(0, 0);
-    
+        back_tracking(candidates, target, ans, 0, 0, std::vector<int>());
         return ans;
     }
 public:
     vector<vector<int>> combinationSum(vector<int>& candidates, int target) {
-        return backtracking(candidates, target);
+        return by_back_tracking(candidates, target);
     }
 };

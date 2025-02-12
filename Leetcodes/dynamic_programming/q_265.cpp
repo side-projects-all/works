@@ -37,53 +37,29 @@ Constraints:
 class Solution {
 private:
     int iterative(vector<vector<int>>& costs) {
-        /*
-        for (int r = costs.size() - 2; r >= 0; --r) {
-            for (int c = 0; c < costs[r].size(); ++c) {
-                int val = 20 * 100 + 1;
-
-                for (int i = 0; i < costs[r].size(); ++i) {
-                    if (i != c) {
-                        val = std::min(val, costs[r][c] + costs[r + 1][i]);
-                    }
-                }
-
-                costs[r][c] = val;
-            }
-        }
-
-        int min = 20 * 100 + 1;
-        for (int i = 0; i < costs[0].size(); ++i) {
-            min = std::min(min, costs[0][i]);
-        }
-
-        return min;
-        */
-        
         int n = costs.size();
         int k = costs[0].size();
-
         for (int i = 1; i < n; ++i) {
 
-            int min_c = -1;
-            int min_2c = -1;
-            for (int c = 0; c < k; ++c) {
-                int cost = costs[i - 1][c];
+            int min01 = -1;
+            int min02 = -1;
+            for (int j = 0; j < k; ++j) {
+                int cost = costs[i - 1][j];
 
-                if (min_c == -1 || cost < costs[i - 1][min_c]) {
-                    min_2c = min_c;
-                    min_c = c;
+                if (min01 == -1 || cost < costs[i - 1][min01]) {
+                    min02 = min01;
+                    min01 = j;
 
-                } else if (min_2c == -1 || cost < costs[i - 1][min_2c]) {
-                    min_2c = c;
+                } else if (min02 == -1 || cost < costs[i - 1][min02]) {
+                    min02 = j;
                 }
             }
 
-            for (int c = 0; c < k; ++c) {
-                if (c == min_c) {
-                    costs[i][c] += costs[i - 1][min_2c];
+            for (int j = 0; j < k; ++j) {
+                if (j == min01) {
+                    costs[i][j] += costs[i - 1][min02];
                 } else {
-                    costs[i][c] += costs[i - 1][min_c];
+                    costs[i][j] += costs[i - 1][min01];
                 }
             }
         }

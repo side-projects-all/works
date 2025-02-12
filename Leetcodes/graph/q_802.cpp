@@ -39,50 +39,91 @@ Constraints:
 */
 
 class Solution {
-public:
-    vector<int> eventualSafeNodes(vector<vector<int>>& graph) {
-        int n = graph.size();
-        std::vector<int> indegree(n);
-        std::vector<std::vector<int>> adjacent(n);
+private:
+    bool dfs(int node, vector<vector<int>>& adj, std::vector<bool>& visited, std::vector<bool>& in_stack) {
+        if (in_stack[node]) {
+            return true;
+        }
 
-        //create adjacency list, i.e. nodes that incident to target
-        for (int r = 0; r < n; ++r) {
-            for (int c = 0; c < graph[r].size(); ++c) {
-                int val = graph[r][c];
-                adjacent[val].push_back(r);
-                ++indegree[r];
+        if (visited[node]) {
+            return false;
+        }
+
+        visited[node] = true;
+        in_stack[node] = true;
+
+        for (auto& nei : adj[node]) {
+            if (dfs(nei, adj, visited, in_stack)) {
+                return true;
+            }
+        }
+
+        in_stack[node] = false;
+        return false;
+    }
+    vector<int> by_dfs(vector<vector<int>>& graph) {
+        int n = graph.size();
+        std::vector<bool> visited(n);
+        std::vector<bool> in_stack(n);
+
+        for (int i = 0; i < n; ++i) {
+            dfs(i, graph, visited, in_stack);
+        }
+
+        std::vector<int> safe_nodes;
+        for (int i = 0; i < n; ++i) {
+            if (!in_stack[i]) {
+                safe_nodes.push_back(i);
+            }
+        }
+
+        return safe_nodes;
+    }
+    vector<int> by_topological_sort(vector<vector<int>>& graph) {
+        int n = graph.size();
+        if (n == 1) {
+            return {0};
+        }
+
+        std::vector<std::vector<int>> rev_adj(n, std::vector<int>());
+        std::vector<int> indegree(n);
+        for (int from = 0; from < n; ++from) {
+            for (int to = 0; to < graph[from].size(); ++to) {
+                rev_adj[graph[from][to]].push_back(from);
+                ++indegree[from];
             }
         }
 
         std::queue<int> q;
-        for (int i = 0; i < n; ++i) {
+        for (int i = 0; i < indegree.size(); ++i) {
             if (indegree[i] == 0) {
                 q.push(i);
             }
         }
 
-        std::vector<bool> safe(n);
+        std::vector<bool> safe_nodes(n);
+        std::vector<int> ans;
         while (!q.empty()) {
             int node = q.front();
             q.pop();
-            safe[node] = true;
+            safe_nodes[node] = true;
+            ans.push_back(node);
 
-            for (int neighbor : adjacent[node]) {
-                --indegree[neighbor];
+            for (int& nei : rev_adj[node]) {
+                --indegree[nei];
 
-                if (indegree[neighbor] == 0) {
-                    q.push(neighbor);
+                if (indegree[nei] == 0) {
+                    q.push(nei);
                 }
             }
         }
 
-        std::vector<int> safeNodes;
-        for (int i = 0; i < n; ++i) {
-            if (safe[i]) {
-                safeNodes.push_back(i);
-            }
-        }
-
-        return safeNodes;
+        std::sort(ans.begin(), ans.end());
+        return ans;
+    }
+public:
+    vector<int> eventualSafeNodes(vector<vector<int>>& graph) {
+        //return by_topological_sort(graph);
+        return by_dfs(graph);
     }
 };

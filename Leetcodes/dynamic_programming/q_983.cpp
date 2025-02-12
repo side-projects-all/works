@@ -49,24 +49,21 @@ Constraints:
 class Solution {
 private:
     int iterative(vector<int>& days, vector<int>& costs) {
-        int lastDay = days[days.size() - 1];
-        std::vector<int> mem(lastDay + 1, 0);
+        int n = days.size();
+        std::vector<int> dp(days[n - 1] + 1);   //min cost
+        
+        for (int d = 1, i = 0; d <= days[n - 1]; ++d) {
 
-        int i = 0;
-        for (int day = 1; day <= lastDay; ++day) {
-            if (day < days[i]) {
-                mem[day] = mem[day - 1];  //do not need to travel
-
+            if (d < days[i]) {
+                dp[d] = dp[d - 1];
             } else {
                 ++i;
-                mem[day] = std::min({mem[day - 1] + costs[0], 
-                                        mem[std::max(0, day - 7)] + costs[1], 
-                                        mem[std::max(0, day - 30)] + costs[2]});
+
+                dp[d] = std::min({dp[d - 1] + costs[0], dp[std::max(0, d - 7)] + costs[1], dp[std::max(0, d - 30)] + costs[2]});
             }
         }
-        
 
-        return mem[lastDay];
+        return dp[days[n - 1]];
     }
     int recursive(vector<int>& days, vector<int>& costs, int currDay, std::vector<bool>& needTravel, 
                                                                         std::vector<int>& mem) {
