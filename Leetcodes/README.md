@@ -1,4 +1,4 @@
-# for leetcode question I had done
+# for leetcode questions I had done
 
 
 
