@@ -46,78 +46,71 @@ Constraints:
 */
 
 class Solution {
+private:
+    //like the parent array in union find
+    std::unordered_map<std::string, std::pair<std::string, double>> groups;
+
+    std::pair<std::string, double> find(const std::string& id) {
+        if (groups.find(id) == groups.end()) {
+            groups[id] = {id, 1.0};
+        }
+
+        std::string group_id = groups[id].first;
+        if (group_id != id) {
+            std::pair<std::string, double> parent = find(group_id);
+
+            //update here!!
+            groups[id] = { parent.first, parent.second * groups[id].second };
+        }
+
+        return groups[id];
+    }
+
+    void union_set(const std::string& x, const std::string& y, const double& val) {
+        //dd: dividend
+        //ds: divisor
+        std::pair<std::string, double> dd_gp = find(x);
+        std::pair<std::string, double> ds_gp = find(y);
+
+        std::string dd = dd_gp.first;    //dividend
+        std::string ds = ds_gp.first;    //divisor
+        double dd_val = dd_gp.second;
+        double ds_val = ds_gp.second;
+
+        if (dd != ds) {
+            //union into the same group here!!
+            groups[dd] = { ds, ds_val * val / dd_val };
+        }
+    }
+    
 public:
     vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries) {
+        
+        //build union union_set
         for (int i = 0; i < equations.size(); ++i) {
-            std::vector<std::string> equation = equations[i];
-            std::string dividend = equation[0];
-            std::string divisor = equation[1];
-            double quotient = values[i];
-
-            unionSet(dividend, divisor, quotient);
+            union_set(equations[i][0], equations[i][1], values[i]);
         }
 
-        std::vector<double> results = std::vector<double>(queries.size(), 0);
+        //find ans[i] for queries[i]
+        std::vector<double> ans(queries.size());
+        for (int i = 0; i < queries.size(); ++i) {
 
-        for (int j = 0; j < queries.size(); ++j) {
-            std::vector<std::string> query = queries[j];
-            std::string dividend = query[0];
-            std::string divisor = query[1];
+            if (groups.find(queries[i][0]) == groups.end() || groups.find(queries[i][1]) == groups.end()) {
+                ans[i] = -1;
+                continue;
+            }
 
-            if (gidWeight.find(dividend) == gidWeight.end() || 
-                gidWeight.find(divisor) == gidWeight.end()) {
+            std::pair<std::string, double> dd_gp = find(queries[i][0]);
+            std::pair<std::string, double> ds_gp = find(queries[i][1]);
 
-                results[j] = -1;
+            if (dd_gp.first != ds_gp.first) {
+                ans[i] = -1;
+
             } else {
-                std::pair<std::string, double> dividendEntry = find(dividend);
-                std::pair<std::string, double> divisorEntry = find(divisor);
-
-                std::string dividendGid = dividendEntry.first;
-                std::string divisorGid = divisorEntry.first;
-                double dividendWeight = dividendEntry.second;
-                double divisorWeight = divisorEntry.second;
-
-
-                if (dividendGid != divisorGid) {
-                    results[j] = -1;
-
-                } else {
-                    results[j] = dividendWeight / divisorWeight;
-                }
+                ans[i] = dd_gp.second / ds_gp.second;
             }
         }
-        
-        return results;
-    }
 
-private:
-    std::unordered_map<std::string, std::pair<std::string, double>> gidWeight;
-
-    std::pair<std::string, double> find(std::string nodeId) {
-        if (gidWeight.find(nodeId) == gidWeight.end()) {
-            gidWeight.insert(std::make_pair(nodeId, std::make_pair(nodeId, 1.0)));
-        }
-
-        std::pair<std::string, double> entry = gidWeight.find(nodeId)->second;
-        if (entry.first != nodeId) {
-            std::pair<std::string, double> newEntry = find(entry.first);
-            gidWeight[nodeId] = std::make_pair(newEntry.first, entry.second * newEntry.second);
-        }
-
-        return gidWeight[nodeId];
-    }
-
-    void unionSet(std::string dividend, std::string divisor, double value) {
-        std::pair<std::string, double> dividendEntry = find(dividend);
-        std::pair<std::string, double> divisorEntry = find(divisor);
-
-        std::string dividendGid = dividendEntry.first;
-        std::string divisorGid = divisorEntry.first;
-        double dividendWeight = dividendEntry.second;
-        double divisorWeight = divisorEntry.second;
-
-        if (dividendGid != divisorGid) {
-            gidWeight[dividendGid] = std::make_pair(divisorGid, divisorWeight * value / dividendWeight);
-        }
-    }
+        return ans;
+    }   
 };

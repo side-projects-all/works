@@ -48,15 +48,15 @@ Constraints:
 class Solution {
 public:
     int minOperations(vector<int>& nums, int k) {
-        std::priority_queue<long long, std::vector<long long>, std::greater<long long>> pq(nums.begin(), nums.end());
+        std::priority_queue<long, std::vector<long>, std::greater<long>> pq(nums.begin(), nums.end());
 
         int cnt = 0;
 
         while (pq.top() < k) {
-            long long n01 = pq.top();
+            long n01 = pq.top();
             pq.pop();
 
-            long long n02 = pq.top();
+            long n02 = pq.top();
             pq.pop();
 
             pq.push(n01 * 2 + n02);

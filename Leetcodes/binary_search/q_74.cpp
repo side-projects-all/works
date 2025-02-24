@@ -32,34 +32,23 @@ Constraints:
 
 */
 
-#pragma GCC optimize("Ofast")
-
-static auto _ = [](){
-  std::ios::sync_with_stdio(false);
-  std::cout.tie(nullptr);
-  std::cin.tie(nullptr);
-  return nullptr;
-}();
-
 class Solution {
-public:
-    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+private:
+    bool by_binary_search(vector<vector<int>>& matrix, int& target) {
         int rows = matrix.size();
         int cols = matrix[0].size();
 
-        //corner case: smaller than first one, or larger than last one
         if (target < matrix[0][0] || target > matrix[rows - 1][cols - 1]) {
             return false;
         }
 
-        //corner case: equal to first one or last one
         if (target == matrix[0][0] || target == matrix[rows - 1][cols - 1]) {
             return true;
         }
 
-        //search rows
         int left = 0;
         int right = rows - 1;
+        //search first elements of all rows
         while (left <= right) {
             int mid = left + (right - left) / 2;
 
@@ -74,18 +63,18 @@ public:
             }
         }
 
-        //search by column
-        int target_row = (left - 1 > 0) ? left - 1 : 0;
+        int row = left - 1 > 0 ? left - 1 : 0;
         left = 0;
-        right = cols - 1;
+        right = matrix[row].size() - 1;
+        //search the row found before
         while (left <= right) {
             int mid = left + (right - left) / 2;
 
-            if (matrix[target_row][mid] == target) {
+            if (matrix[row][mid] == target) {
                 return true;
             }
 
-            if (matrix[target_row][mid] > target) {
+            if (matrix[row][mid] > target) {
                 right = mid - 1;
             } else {
                 left = mid + 1;
@@ -93,5 +82,9 @@ public:
         }
 
         return false;
+    }
+public:
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        return by_binary_search(matrix, target);
     }
 };

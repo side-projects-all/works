@@ -41,27 +41,32 @@ Constraints:
 */
 
 class Solution {
-public:
-    vector<int> twoSum(vector<int>& numbers, int target) {
-        
-        //two pointer solution
-        int low = 0;
-        int high = numbers.size() - 1;
-        std::vector<int> result;
+private:
+    vector<int> by_binary_search(vector<int>& nums, int& target) {
+        int n = nums.size();
+        if (n == 2) {
+            return {1, 2};
+        }
 
-        while (low < high) {
-            int sum = numbers[low] + numbers[high];
-            if (sum == target) {
-                result = {low + 1, high + 1};
-                break;
+        int left = 0;
+        int right = n - 1;
+        while (left < right) {
 
-            } else if (sum > target) {
-                high -= 1;
+            if (nums[left] + nums[right] == target) {
+                return {left + 1, right + 1};
+            }
+
+            if (nums[left] + nums[right] > target) {
+                right -= 1;
             } else {
-                low += 1;
+                left += 1;
             }
         }
-        
-        return result;
+
+        return {0, 0};
+    }
+public:
+    vector<int> twoSum(vector<int>& numbers, int target) {
+        return by_binary_search(numbers, target);
     }
 };

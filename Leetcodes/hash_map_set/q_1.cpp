@@ -35,13 +35,6 @@ Constraints:
 */
 
 class Solution {
-public:
-    vector<int> twoSum(vector<int>& nums, int target) {
-        //return by_binary_search(nums, target);
-        
-        return by_hash_map(nums, target);
-    }
-
 private:
     vector<int> by_hash_map(vector<int>& nums, int& target) {
         std::unordered_map<int, int> m;
@@ -58,6 +51,8 @@ private:
         return {};
     }
     vector<int> by_binary_search(vector<int>& nums, int& target) {
+
+        
         std::vector<std::pair<int, int>> pair_nums(nums.size());
 
         for (int i = 0; i < nums.size(); ++i) {
@@ -66,6 +61,25 @@ private:
 
         std::sort(pair_nums.begin(), pair_nums.end());
 
+        //use the way in leetcode 167
+        int left  = 0; 
+        int right = nums.size() - 1;
+        while (left < right) {
+            
+            if (pair_nums[left].first + pair_nums[right].first == target) {
+                return {pair_nums[left].second, pair_nums[right].second};
+            }
+
+            if (pair_nums[left].first + pair_nums[right].first > target) {
+                right -= 1;
+            } else {
+                left += 1;
+            }
+        }
+
+        return {};
+
+        /*
         for (int i = 0; i < pair_nums.size(); ++i) {
 
             int j = bs(i + 1, pair_nums.size() - 1, pair_nums, target - pair_nums[i].first);
@@ -75,7 +89,9 @@ private:
         }
 
         return {};
+        */
     }
+    /*
     int bs(int left, int right, std::vector<std::pair<int, int>>& pair_nums, int target) {
 
         while (left <= right) {
@@ -93,5 +109,12 @@ private:
         }
 
         return -1;
+    }
+    */
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        return by_binary_search(nums, target);
+        
+        //return by_hash_map(nums, target);
     }
 };

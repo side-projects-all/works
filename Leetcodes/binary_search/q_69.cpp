@@ -29,12 +29,21 @@ Constraints:
 */
 
 class Solution {
-public:
-    int mySqrt(int x) {
+private:
+    int by_bit_ops(int x) {
         if (x < 2) {
             return x;
         }
 
+        //by bit operation
+        int left = by_bit_ops(x >> 2) << 1;
+        int right = left + 1;
+
+        //left is smaller, right is larger
+        //if right * right were larger than x, we choose smaller, vice versa.
+        return ((long)right * right > x) ? left : right;
+    }
+    int by_newtons_method(int& x) {
         //newton's method
         double x0 = x;
         double x1 = (x0 + x / x0) / 2.0;
@@ -45,19 +54,8 @@ public:
         }
 
         return (int)x1;
-
-        /*
-        //by bit operation
-        int left = mySqrt(x >> 2) << 1;
-        int right = left + 1;
-
-        //left is smaller, right is larger
-        //if right * right were larger than x, we choose smaller, vice versa.
-        return ((long)right * right > x) ? left : right;
-        */
-
-        //by binary search
-        /*
+    }
+    int by_binary_search(int& x) {
         int num = 0;
         int upper = x / 2;
         int low = 2;
@@ -78,6 +76,16 @@ public:
         }
 
         return upper;
-        */
+    }
+
+public:
+    int mySqrt(int x) {
+        if (x < 2) {
+            return x;
+        }
+
+        //return by_bit_ops(x);
+        //return by_newtons_method(x);
+        return by_binary_search(x);
     }
 };

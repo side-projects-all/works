@@ -31,51 +31,62 @@ Constraints:
 
 class Solution {
 private:
-    int find_root(int x, std::vector<int>& root) {
-        if (x != root[x]) {
-            return root[x] = find_root(root[x], root);
+    class Union_find {
+    private:
+        std::vector<int> parent;
+        std::vector<int> rank;
+    public:
+        Union_find(const int& n) {
+            parent.resize(n);
+            rank.resize(n, 1);
+
+            for (int i = 0; i < n; ++i) {
+                parent[i] = i;
+            }
         }
 
-        return x;
-    }
+        int find(int x) {
+            if (parent[x] == x) {
+                return x;
+            }
 
-    void union_set(int x, int y, std::vector<int>& root, std::vector<int>& rank, int& cnt) {
-        int rX = find_root(x, root);
-        int rY = find_root(y, root);
-
-        if (rX == rY) {
-            return;
+            return parent[x] = find(parent[x]);
         }
 
-        //union them if they have different root, so we reduce cnt for every set(1 node 1 set)
-        --cnt;
+        void union_set(int x, int y, int& cnt) {
+            int px = find(x);
+            int py = find(y);
 
-        if (rank[rX] > rank[rY]) {
-            root[rY] = rX;
+            if (px ==py) {
+                return;
+            }
 
-        } else if (rank[rX] < rank[rY]) {
-            root[rX] = rY;
+            if (rank[px] > rank[py]) {
+                parent[py] = px;
 
-        } else {
-            root[rY] = rX;
-            ++rank[rX];
+            } else if (rank[px] < rank[py]) {
+                parent[px] = py;
+
+            } else {
+                parent[px] = py;
+                rank[py] += 1;
+            }
+
+            --cnt;
         }
-    }
-
-    int byDSA(int n, vector<vector<int>>& edges) {
-        std::vector<int> root(n);
-        std::iota(root.begin(), root.end(), 0);
-        std::vector<int> rank(n, 1);
-
+    };
+    int by_union_find(int& n, vector<vector<int>>& edges) {
+        Union_find uf(n);
         int cnt = n;
-        for (auto& e : edges) {
-            union_set(e[0], e[1], root, rank, cnt);
+
+        for (int i = 0; i < edges.size(); ++i) {
+            uf.union_set(edges[i][0], edges[i][1], cnt);
         }
 
         return cnt;
     }
 public:
     int countComponents(int n, vector<vector<int>>& edges) {
-        return byDSA(n, edges);
+        return by_union_find(n, edges);
     }
 };

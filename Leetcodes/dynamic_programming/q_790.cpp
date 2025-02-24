@@ -26,25 +26,26 @@ Constraints:
 class Solution {
 private:
     int iterative(int n) {
-        int MOD = 1'000'000'007;
-        if (n <= 2) {
-            return n;
+        if (n == 1) {
+            return 1;
         }
 
-        long f[n + 1];
-        long p[n + 1];
-
-        f[0] = 1L;
-        f[1] = 1L;
-        f[2] = 2L;
-        p[2] = 1L;
-        p[1] = 0L;
-        for (int k = 3; k < n + 1; ++k) {
-            f[k] = (f[k - 1] + f[k - 2] + 2 * p[k - 1]) % MOD;
-            p[k] = (p[k - 1] + f[k - 2]) % MOD;
+        if (n == 2) {
+            return 2;
         }
 
-        return static_cast<int>(f[n]);
+        std::vector<unsigned int> full(n + 1);
+        std::vector<unsigned int> partial(n + 1);
+        full[1] = 1;
+        full[2] = 2;
+        partial[2] = 1;
+
+        for (int i = 3; i <= n; ++i) {
+            full[i] += (full[i - 2] + full[i - 1] + 2 * partial[i - 1]) % 1'000'000'007;
+            partial[i] += (full[i - 2] + partial[i - 1]) % 1'000'000'007;
+        }
+        
+        return full[n];
     }
 
     long recursive_p(int n, int MOD, std::vector<long>& f, std::vector<long>& p) {

@@ -46,67 +46,62 @@ Constraints:
  */
 class Solution {
 private:
-    //because it is a complete tree, the minimum leaf node will be in the left sub-tree, 
-    //for counting depth, we only need it.
     int depth(TreeNode* root) {
-        int depth = 0;
-        TreeNode* node = root;
-
-        while (node->left != nullptr) {
-            node = node->left;
-            ++depth;
+        TreeNode* b = root;
+        int d = 0;
+        while (b->left != nullptr) {
+            ++d;
+            b = b->left;
         }
 
-        return depth;
+        return d;
     }
-    //d: depth
-    bool isNodeExist(int index, int d, TreeNode* node) {
+
+    bool find_node_by_binary_search(int node_cnt, int& depth, TreeNode* root) {
         int left = 0;
-        int right = (int)std::pow(2, d) - 1;
-        int mid = 0;
-        TreeNode* now = node;
+        int right = std::pow(2, depth) - 1;
+        TreeNode* b = root;
 
-        for (int i = 0; i < d; ++i) {
-            mid = left + (right - left) / 2;
+        for (int i = 0; i < depth; ++i) {
+            int mid = left + (right - left) / 2;
 
-            if (index <= mid) {
-                now = now->left;
+            if (node_cnt <= mid) {
+                b = b->left;
                 right = mid;
+
             } else {
-                now = now->right;
+                b = b->right;
                 left = mid + 1;
             }
         }
 
-        return now != nullptr;
+        return b != nullptr;
     }
-
 public:
     int countNodes(TreeNode* root) {
         if (root == nullptr) {
             return 0;
         }
 
-        int d = depth(root);
-
-        if (d == 0) {
+        if (root->left == nullptr && root->right == nullptr) {
             return 1;
         }
 
-        int left = 1;
-        int right = (int)std::pow(2, d) - 1;
-        int mid = 0;
+        int d = depth(root);    //depth starting from 0
+        //left, right means counts of last level nodes
+        int left = 1;               
+        int right = std::pow(2, d) - 1; //because it were not full tree, the max is 2^h - 1
 
         while (left <= right) {
-            mid = left + (right - left) / 2;
+            int mid = left + (right - left) / 2;
 
-            if (isNodeExist(mid, d, root)) {
+            if (find_node_by_binary_search(mid, d, root)) {
                 left = mid + 1;
             } else {
                 right = mid - 1;
             }
         }
 
-        return (int)std::pow(2, d) - 1 + left;
+        return std::pow(2, d) - 1 + left;
     }
 };

@@ -32,56 +32,35 @@ Constraints:
 */
 
 class Solution {
+private:
+    int by_sliding_window(int& target, vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return nums[0] > target;
+        }
+        int b = 0;
+        int e = 0;
+        int sum = 0;
+        int min_len = INT_MAX;
+        while (e < n) {
+            if (sum < target) {
+                sum += nums[e];
+            }
+
+            while (b <= e && sum >= target) {
+                min_len = std::min(min_len, e - b + 1);
+
+                sum -= nums[b];
+                ++b;
+            }
+
+            ++e;
+        }
+
+        return b == 0 && sum < target ? 0 : min_len;
+    }
 public:
     int minSubArrayLen(int target, vector<int>& nums) {
-
-        //using two pointer
-        
-        int sum = 0;
-        int total = nums.size() + 1;    //using total size + 1 as upper bound
-        int left = 0;
-
-        for (int i = 0; i < nums.size(); ++i) {
-            sum += nums[i];
-
-            while (sum >= target) {
-                //compare with total used before to get minimum value
-                total = std::min(total, i + 1 - left);
-
-                //left is a pointer we set from the beginning
-                sum -= nums[left];
-                left += 1;
-            }
-        }
-        
-        return (total != nums.size() + 1) ? total : 0;
-        
-
-        //using binary search
-        /*
-        int len = nums.size();
-        if (len == 0) {
-            return 0;
-        }
-
-        int upper_bound = nums.size() + 1;
-        int min = nums.size() + 1;
-        std::vector<int> sums(len + 1, 0);  //sum that acclumulates before every element
-
-        for (int i = 1; i <= len; ++i) {
-            sums[i] = sums[i - 1] + nums[i - 1];
-        }
-
-        for (int i = 1; i <= len; ++i) {
-            int to_find = target + sums[i - 1];
-            auto bound = lower_bound(sums.begin(), sums.end(), to_find);
-
-            if (bound != sums.end()) {
-                min = std::min(min, static_cast<int>(bound - (sums.begin() + i - 1)));
-            }
-        }
-
-        return (min != upper_bound) ? min : 0;
-        */
+        return by_sliding_window(target, nums);
     }
 };

@@ -39,23 +39,49 @@ Constraints:
 
 class Solution {
 private:
-    int shiftBS(vector<int>& nums, int pivot, int target) {
+    int by_one_binary_search(vector<int>& nums, int& target) {
         int n = nums.size();
-        int shift = n - pivot;
-        int left = (pivot + shift) % n;
-        int right = (pivot - 1 + shift) % n;
+        int left = 0;
+        int right = n - 1;
 
         while (left <= right) {
-            int mid = (left + right) / 2;
-            //because the mid meant the position in unrotated array, 
-            //for retrieving value in a rotated array, we should use shifted mid position.
-            //so how to get it? use the shifted smallest position(pivot)!!
-            int shifted_mid = (mid + pivot) % n;
+            int mid = left + (right - left) / 2;
 
-            if (nums[shifted_mid] == target) {
-                return shifted_mid;
-            } else if (nums[shifted_mid] > target) {
+            if (nums[mid] == target) {
+                return mid;
+
+            } else if (nums[mid] >= nums[left]) {
+
+                if (target >= nums[left] && target < nums[mid]) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+
+            } else {
+                if (target <= nums[right] && target > nums[mid]) {
+                    left = mid + 1;
+                    
+                } else {
+                    right = mid - 1;
+                }
+            }
+        }
+
+        return -1;
+    }
+    int binary_search(vector<int>& nums, int& target, int left, int right) {
+
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+
+            if (nums[mid] == target) {
+                return mid;
+            }
+
+            if (nums[mid] > target) {
                 right = mid - 1;
+                
             } else {
                 left = mid + 1;
             }
@@ -63,94 +89,47 @@ private:
 
         return -1;
     }
-
-    int bs(vector<int>& nums, int left, int right, int target) {
-        int L = left;
-        int R = right;
-
-        while (L <= R) {
-            int mid = (L + R) / 2;
-
-            if (nums[mid] == target){
-                return mid;
-            } else if (nums[mid] > target) {
-                R = mid - 1;
-            } else {
-                L = mid + 1;
-            }
-        }
-
-        return -1;
-    }
-
-public:
-    int search(vector<int>& nums, int target) {
-        if (nums.empty()) {
-            return -1;
-        }
-
-        if (nums.size() == 1) {
+    int by_two_binary_search(vector<int>& nums, int& target) {
+        int n = nums.size();
+        if (n == 1) {
             return nums[0] == target ? 0 : -1;
         }
 
-        int len = nums.size();
-        int begin = 0;
-        int end = len - 1;
+        int left = 0;
+        int right = n - 1;
+        //not rotate
+        if (nums[0] < nums[n - 1]) {
+            int i = std::lower_bound(nums.begin(), nums.end(), target) - nums.begin();
 
-        //one time binary search
-        while (begin <= end) {
-            int mid = begin + (end - begin) / 2;
+            if (i < 0 || i == n) {
+                return -1;
+            }
 
-            
-            if (nums[mid] == target) {
-                //case 1: find target
-                return mid;
+            return nums[i] == target ? i : -1;
+        }
 
-            } else if (nums[mid] >= nums[begin]) {
-                //case 2: sub-array on the left of mid is sorted
-                if (target >= nums[begin] && target < nums[mid]) {
-                    end = mid - 1;
-                } else {
-                    begin = mid + 1;
-                }
+        //find rotate position
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
 
+            if (nums[mid] > nums[n - 1]) {
+                left = mid + 1;
             } else {
-                //case 3: sub-array one the right of mid is sorted
-                if (target <= nums[end] && target > nums[mid]) {
-                    begin = mid + 1;
-                } else {
-                    end = mid - 1;
-                }
+                right = mid - 1;
             }
         }
 
-        return -1;
-
-        /*
-        //find smallest
-        while (begin <= end) {
-            int mid = (begin + end) / 2;
-
-            if (nums[mid] > nums[len - 1]) {
-                begin = mid + 1;
-            } else {
-                end = mid - 1;
-            }
+        int pos = binary_search(nums, target, 0, left);
+        if (pos != -1) {
+            return pos;
         }
 
-        //using shift binary search
-        return shiftBS(nums, begin, target);
-        */
+        return binary_search(nums, target, left, n - 1);
+    }
+public:
+    int search(vector<int>& nums, int target) {
+        //return by_two_binary_search(nums, target);
 
-        //split two part to search
-        /*
-        //when upper loop ends, we will have the position of smallest element
-        int result = bs(nums, 0, begin - 1, target);
-        if (result != -1) {
-            return result;
-        }
-
-        return bs(nums, begin, len - 1, target);
-        */
+        return by_one_binary_search(nums, target);
     }
 };

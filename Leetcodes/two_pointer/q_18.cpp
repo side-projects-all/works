@@ -31,63 +31,64 @@ Constraints:
 */
 
 class Solution {
-public:
-    vector<vector<int>> fourSum(vector<int>& nums, int target) {
-        std::sort(nums.begin(), nums.end());
-
-        return k_sum(nums, target, 0, 4);
-    }
-
 private:
-    std::vector<std::vector<int>> k_sum(std::vector<int>& nums, long target, int s, int k) {
+    std::vector<std::vector<int>> two_sum(vector<int>& nums, long target, int b) {
         std::vector<std::vector<int>> ans;
+        int e = nums.size() - 1;
 
-        if (s == nums.size()) {
-            return ans;
+        while (b < e) {
+
+            if (nums[b] + nums[e] == target) {
+                ans.push_back({nums[b], nums[e]});
+                ++b;
+                --e;
+
+                while (b < e && nums[b] == nums[b - 1]) {
+                    ++b;
+                }
+            } else if (nums[b] + nums[e] > target) {
+                --e;
+
+            } else {
+                ++b;
+            }
         }
 
+        return ans;
+    }
+
+    std::vector<std::vector<int>> k_sum(vector<int>& nums, int& n, long target, int b, int k) {
+        std::vector<std::vector<int>> ans;
+        
         int avg = target / k;
-        if (nums[s] > avg || avg > nums.back()) {
+        if (nums[0] > avg || nums[n - 1] < avg) {
             return ans;
         }
 
         if (k == 2) {
-            return two_sum(nums, target, s);
+            return two_sum(nums, target, b);
         }
 
-        for (int i = s; i < nums.size(); ++i) {
-
-            if (i == s || nums[i] != nums[i - 1]) {
-                for (std::vector<int>& sub : k_sum(nums, target - nums[i], i + 1, k - 1)) {
+        for (int i = b; i < n; ++i) {
+            if (i == b || nums[i] != nums[i - 1]) {
+                
+                for (std::vector<int>& v : k_sum(nums, n, target - nums[i], i + 1, k - 1)) {
                     ans.push_back({nums[i]});
-                    ans.back().insert(std::end(ans.back()), sub.begin(), sub.end());
+                    ans.back().insert(ans.back().end(), v.begin(), v.end());
                 }
             }
         }
+
         return ans;
     }
-
-    std::vector<std::vector<int>> two_sum(std::vector<int>& nums, long target, int s) {
-        std::vector<std::vector<int>> ans;
-        int left = s;
-        int right = nums.size() - 1;
-
-        while (left < right) {
-            int sum = nums[left] + nums[right];
-
-            if (sum < target || (left > s && nums[left] == nums[left - 1])) {
-                ++left;
-
-            } else if (sum > target || (right < nums.size() - 1 && nums[right] == nums[right + 1])) {
-                --right;
-
-            } else {
-                ans.push_back({nums[left], nums[right]});
-                ++left;
-                --right;
-            }
+public:
+    vector<vector<int>> fourSum(vector<int>& nums, int target) {
+        std::sort(nums.begin(), nums.end());
+        int n = nums.size();
+        if (n < 4) {
+            return {};
         }
 
-        return ans;
+        return k_sum(nums, n, target, 0, 4);
     }
 };

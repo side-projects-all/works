@@ -30,78 +30,74 @@ Constraints:
 */
 
 class Solution {
-public:
-    bool validTree(int n, vector<vector<int>>& edges) {
-        //initialize root and rank
-        root = std::vector<int>(n);
-        rank = std::vector<int>(n, 1);
+private:
+    class Union_find {
+    private:
+        std::vector<int> parent;
+        std::vector<int> rank;
 
-        for (int i = 0; i < n; ++i) {
-            root[i] = i;
+    public:
+        Union_find(const int& n) {
+            parent.resize(n);
+            rank.resize(n, 1);
+
+            for (int i = 0; i < n; ++i) {
+                parent[i] = i;
+            }
+        }
+
+        int find(int x) {
+            if (parent[x] == x) {
+                return x;
+            }
+
+            return parent[x] = find(parent[x]);
+        }
+
+        bool union_set(int x, int y) {
+            int px = find(x);
+            int py = find(y);
+
+            if (px == py) {
+                return false;
+            }
+
+            if (rank[px] > rank[py]) {
+                parent[py] = px;
+
+            } else if (rank[px] < rank[py]) {
+                parent[px] = py;
+
+            } else {
+                parent[py] = px;
+                rank[py] += 1;
+            }
+
+            return true;
+        }
+    };
+    bool by_union_find(int& n, vector<vector<int>>& edges) {
+        if (n == 1) {
+            return true;
         }
 
         if (edges.size() != n - 1) {
             return false;
         }
 
-        int p01 = 0;
-        int p02 = 0;
-        for (auto edge : edges) {
-            p01 = edge[0];
-            p02 = edge[1];
+        Union_find uf(n);
 
-            if (!unionSet(p01, p02)) {
+        for (int i = 0; i < edges.size(); ++i) {
+
+            if (!uf.union_set(edges[i][0], edges[i][1])) {
                 return false;
             }
         }
 
-
         return true;
     }
-
-private:
-    std::vector<int> root;
-    std::vector<int> rank;
-
-    int find(int index) {
-        //using loop to path compression!!!
-        int root_index = index;
-        //find root first!!
-        while (root[root_index] != root_index) {
-            root_index = root[root_index];
-        }
-        
-        //traverse from x, and set value as root_index every node on the path 
-        int oldRoot = -1;
-        while (index != root_index) {
-            oldRoot = root[index];
-            root[index] = root_index;
-            index = oldRoot;
-        }
-        
-        return root_index;
-    }
-
-    bool unionSet(int x, int y) {
-        //still big O(N)
-        int rootX = find(x);
-        int rootY = find(y);
-        
-        if (rootX == rootY) {
-            return false;
-        }
-
-        if (rank[rootX] > rank[rootY]) {
-            root[rootY] = rootX;
-            
-        } else if (rank[rootX] < rank[rootY]) {
-            root[rootX] = rootY;
-            
-        } else {
-            root[rootY] = rootX;
-            rank[rootX] += 1;
-        }
-
-        return true;
+public:
+    bool validTree(int n, vector<vector<int>>& edges) {
+        return by_union_find(n, edges);
     }
 };

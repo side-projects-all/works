@@ -30,15 +30,26 @@ Constraints:
 class Solution {
 public:
     int searchInsert(vector<int>& nums, int target) {
-        int left = 0;
-        int right = nums.size() - 1;
+        int n = nums.size();
 
+        if (target <= nums[0]) {
+            return 0;
+        }
+
+        if (target > nums[n - 1]) {
+            return n;
+        }
+
+        int left = 0;
+        int right = n - 1;
         while (left <= right) {
             int mid = left + (right - left) / 2;
 
             if (nums[mid] == target) {
                 return mid;
-            } else if (nums[mid] > target) {
+            }
+
+            if (nums[mid] > target) {
                 right = mid - 1;
             } else {
                 left = mid + 1;

@@ -35,32 +35,38 @@ Constraints:
 */
 
 class Solution {
-
 private:
-    int binarySearch(vector<int>& nums, int target, bool findingBegin) {
-        int N = nums.size();
-        int left = 0;
-        int right = N - 1;
-
+    int bs_upper(vector<int>& nums, int left, int right, int& target) {
         while (left <= right) {
             int mid = left + (right - left) / 2;
 
             if (nums[mid] == target) {
 
-                if (findingBegin) {
-                    if (mid == left || nums[mid - 1] < target) {
-                        return mid;
-                    }
-
-                    right = mid - 1;
-                } else {
-                    if (mid == right || nums[mid + 1] > target) {
-                        return mid;
-                    }
-
-                    left = mid + 1;
+                if (mid == right || nums[mid + 1] != target) {
+                    return mid;
                 }
 
+                left = mid + 1;
+
+            } else if (nums[mid] > target) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+
+        return -1;
+    }
+    int bs_lower(vector<int>& nums, int left, int right, int& target) {
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+
+            if (nums[mid] == target) {
+                if (mid == left || nums[mid - 1] != target) {
+                    return mid;
+                }
+
+                right = mid - 1;
             } else if (nums[mid] > target) {
                 right = mid - 1;
 
@@ -71,20 +77,37 @@ private:
 
         return -1;
     }
+    std::vector<int> by_binary_search(vector<int>& nums, int& target) {
+        int n = nums.size();
+        if (n == 0) {
+            return {-1, -1};
+        }
+
+        if (n == 1) {
+            if (nums[0] == target) {
+                return {0, 0};
+            } else {
+                return {-1, -1};
+            }
+        }
+
+        if (target < nums[0] || target > nums[n - 1]) {
+            return {-1, -1};
+        }
+
+        std::vector<int> ans(2, -1);
+        ans[0] = bs_lower(nums, 0, n - 1, target);
+
+        if (ans[0] == -1) {
+            return ans;
+        }
+
+        ans[1] = bs_upper(nums, ans[0], n - 1, target);
+
+        return ans;
+    }
 public:
     vector<int> searchRange(vector<int>& nums, int target) {
-        //edge case: empty array
-        if (nums.empty()) {
-            return { -1, -1 };
-        }
-        //edge case: all values are the same as target
-        if (nums[0] == target && nums[nums.size() - 1] == target) {
-            return { 0, (int)(nums.size() - 1) };
-        }
-
-        int begin = binarySearch(nums, target, true);
-        int end = binarySearch(nums, target, false);
-
-        return { begin, end };
+        return by_binary_search(nums, target);
     }
 };

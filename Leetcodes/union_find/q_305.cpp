@@ -39,75 +39,87 @@ Constraints:
 
 class Solution {
 private:
-    int find_root(int x, std::vector<int>& parent) {
-        if (x != parent[x]) {
-            return parent[x] = find_root(parent[x], parent);
+    class Union_find {
+    public:
+        std::vector<int> parent;
+        std::vector<int> rank;
+
+        Union_find(const int& n) {
+            parent.resize(n, -1);
+            rank.resize(n, 1);
         }
 
-        return x;
-    }
+        int find(int x) {
+            if (parent[x] == x) {
+                return x;
+            }
 
-    void union_set(int x, int y, std::vector<int>& parent, std::vector<int>& rank, int& cnt) {
-        int rX = find_root(x, parent);
-        int rY = find_root(y, parent);
-
-        if (rX == rY) {
-            return;
+            return parent[x] = find(parent[x]);
         }
 
-        if (rank[rX] > rank[rY]) {
-            parent[rY] = rX;
+        void union_set(int x, int y, int& cnt) {
+            int px = find(x);
+            int py = find(y);
 
-        } else if (rank[rX] < rank[rY]) {
-            parent[rX] = rY;
+            if (px == py) {
+                return;
+            }
+            if (rank[px] > rank[py]) {
+                parent[py] = px;
 
-        } else {
-            parent[rY] = rX;
-            rank[rX] += 1;
+            } else if (rank[py] > rank[px]) {
+                parent[px] = py;
 
+            } else {
+                parent[py] = px;
+                rank[px] += 1;
+            }
+
+            --cnt;
+        }
+    };
+    
+    std::vector<int> by_union_find(int& m, int& n, vector<vector<int>>& positions) {
+        Union_find uf(m * n);
+        int cnt = 0;
+        int len = positions.size();
+
+        std::vector<int> ans(len);
+        for (int i = 0; i < len; ++i) {
+            int pos = positions[i][0] * n + positions[i][1];
+
+            //already appeared
+            if (uf.parent[pos] != -1) {
+                ans[i] = cnt;
+                continue;
+            }
+
+            uf.parent[pos] = pos;
+            ++cnt;
+
+            if (positions[i][0] - 1 >= 0 && uf.parent[(positions[i][0] - 1) * n + positions[i][1]] != -1) {
+                uf.union_set(pos, (positions[i][0] - 1) * n + positions[i][1], cnt);
+            }
+
+            if (positions[i][0] + 1 < m && uf.parent[(positions[i][0] + 1) * n + positions[i][1]] != -1) {
+                uf.union_set(pos, (positions[i][0] + 1) * n + positions[i][1], cnt);
+            }
+
+            if (positions[i][1] - 1 >= 0 && uf.parent[positions[i][0] * n + (positions[i][1] - 1)] != -1) {
+                uf.union_set(pos, positions[i][0] * n + (positions[i][1] - 1), cnt);
+            }
+
+            if (positions[i][1] + 1 < n && uf.parent[positions[i][0] * n + (positions[i][1] + 1)] != -1) {
+                uf.union_set(pos, positions[i][0] * n + (positions[i][1] + 1), cnt);
+            }
+
+            ans[i] = cnt;
         }
 
-        --cnt;
+        return ans;
     }
 public:
     vector<int> numIslands2(int m, int n, vector<vector<int>>& positions) {
-        int x[] = {-1, 1, 0, 0};
-        int y[] = {0, 0, -1, 1};
-
-        std::vector<int> parent(m * n, -1);
-        std::vector<int> rank(m * n, 1);
-        int cnt = 0;
-
-        std::vector<int> result;
-
-        for (auto& v : positions) {
-            int landPos = v[0] * n + v[1];
-
-            //add land position
-            if (parent[landPos] >= 0) {
-                result.push_back(cnt);
-                continue;
-            } 
-
-            parent[landPos] = landPos;
-            ++cnt;
-
-            //find neighbors of this land position to union!!!
-            for (int d = 0; d < 4; ++d) {
-                int neighX = v[0] + x[d];
-                int neighY = v[1] + y[d];
-                int neighPos = neighX * n + neighY;
-
-                if (neighX >= 0 && neighX < m && neighY >= 0 && neighY < n && 
-                                                            parent[neighPos] >= 0) {
-                    
-                    union_set(landPos, neighPos, parent, rank, cnt);
-                }
-            }
-
-            result.push_back(cnt);
-        }
-
-        return result;
+        return by_union_find(m, n, positions);
     }
 };

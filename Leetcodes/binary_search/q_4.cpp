@@ -33,90 +33,47 @@ Constraints:
 
 class Solution {
 private:
-    //b1: begin of nums1, b2: begin of nums2, e1: end of nums1, e2: end of nums2
-    /*
-    int solve(vector<int>& nums1, vector<int>& nums2, int k, int b1, int e1, int b2, int e2) {
-        if (e1 < b1) {
-            return nums2[k - b1];
-        }
-
-        if (e2 < b2) {
-            return nums1[k - b2];
-        }
-
-        int n1_mid = (b1 + e1) / 2;
-        int n2_mid = (b2 + e2) / 2;
-        int n1_mid_val = nums1[n1_mid];
-        int n2_mid_val = nums2[n2_mid];
-
-        if (n1_mid + n2_mid < k) {
-            if (n1_mid_val > n2_mid_val) {
-                return solve(nums1, nums2, k, b1, e1, n2_mid + 1, e2);
-            } else {
-                return solve(nums1, nums2, k, n1_mid + 1, e1, b2, e2);
-            }
-        } else {
-            if (n1_mid_val > n2_mid_val) {
-                return solve(nums1, nums2, k, b1, n1_mid - 1, b2, e2);
-            } else {
-                return solve(nums1, nums2, k, b1, e1, b2, n2_mid - 1);
-            }
-        }
-
-        return -1;
-    }
-    */
-
-public:
-    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
-        
-        //recursive binary search
-        /*
-        int Na = nums1.size();
-        int Nb = nums2.size();
-        int N = Na + Nb;
-
-        if (N % 2) {
-            return solve(nums1, nums2, N / 2, 0, Na - 1, 0, Nb - 1);
-        } else {
-            return 1.0 * (solve(nums1, nums2, N / 2 - 1, 0, Na - 1, 0, Nb - 1) + 
-                        solve(nums1, nums2, N / 2, 0, Na - 1, 0, Nb - 1)) / 2;
-        }
-        */
-
-        //better binary search
-        if (nums1.size() > nums2.size()) {
-            return findMedianSortedArrays(nums2, nums1);
-        }
-
-        int N1 = nums1.size();
-        int N2 = nums2.size();
+    double by_binary_search(vector<int>& nums1, int& n1, vector<int>& nums2, int& n2) {
+        //focus on building smaller part of two arrays
         int left = 0;
-        int right = N1;
+        int right = n1;
 
         while (left <= right) {
-            int partA = left + (right - left) / 2;
-            int partB = (N1 + N2 + 1) / 2 - partA;
+            int part_a = left + (right - left) / 2;     //this is smaller part
+            int part_b = (n1 + n2 + 1) / 2 - part_a;
 
-            int maxLeftA = (partA == 0) ? INT_MIN : nums1[partA - 1];
-            int minRightA = (partA == N1) ? INT_MAX : nums1[partA];
-            int maxLeftB = (partB == 0) ? INT_MIN : nums2[partB - 1];
-            int minRightB = (partB == N2) ? INT_MAX : nums2[partB];
+            int max_left_a = (part_a == 0) ? INT_MIN : nums1[part_a - 1];
+            int min_right_a = (part_a == n1) ? INT_MAX : nums1[part_a];
+            int max_left_b = (part_b == 0) ? INT_MIN : nums2[part_b - 1];
+            int min_right_b = (part_b == n2) ? INT_MAX : nums2[part_b];
 
-            if (maxLeftA <= minRightB && maxLeftB <= minRightA) {
-                if ((N1 + N2) % 2 == 0) {
-                    return (std::max(maxLeftA, maxLeftB) + std::min(minRightA, minRightB)) / 2.0;
+            if (max_left_a <= min_right_b && max_left_b <= min_right_a) {
+
+                if ((n1 + n2) % 2 == 0) {
+                    return (std::max(max_left_a, max_left_b) + std::min(min_right_a, min_right_b)) * 0.5;
                 } else {
-                    return std::max(maxLeftA, maxLeftB);
+                    return std::max(max_left_a, max_left_b);
                 }
-            } else if (maxLeftA > minRightB) {
-                right = partA - 1;
-            } else {
-                left = partA + 1;
-            }
 
+            } else if (max_left_a > min_right_b) {
+                right = part_a - 1;
+
+            } else {
+                // not use  if (max_left_b > min_right_a) for better performance
+                left = part_a + 1;
+            }
         }
 
         return 0.0;
+    }
+public:
+    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
+        int n1 = nums1.size();
+        int n2 = nums2.size();
+        if (n1 > n2) {
+            return by_binary_search(nums2, n2, nums1, n1);
+        }
+
+        return by_binary_search(nums1, n1, nums2, n2);
     }
 };
