@@ -29,14 +29,18 @@ Constraints:
 */
 
 class Solution {
-public:
-    int hIndex(vector<int>& citations) {
+private:
+    int by_sorting_and_ptr(vector<int>& citations) {
+        int n = citations.size();
+        if (n == 1) {
+            return citations[0] >= 1;
+        }
         std::sort(citations.begin(), citations.end());
 
         int i = 0;
-        for (i = 0; i < citations.size();/* ++i */) {
+        for (i = 0; i < n;/* ++i */) {
             
-            if (citations[citations.size() - i - 1] > i) {
+            if (citations[n - i - 1] > i) {
                 ++i;
             } else {
                 break;
@@ -49,5 +53,34 @@ public:
         }
 
         return i;
+    }
+    int by_binary_search(vector<int>& citations) {
+        int n = citations.size();
+        if (n == 1) {
+            return citations[0] >= 1;
+        }
+
+        int left = 0;
+        int right = n - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+
+            if (n - mid  == citations[mid]) {
+                return n - mid;
+
+            } else if (n - mid < citations[mid]) {
+                right = mid - 1;
+                
+            } else {
+                left = mid + 1;
+            }
+        }
+
+        return n - left;
+    }
+public:
+    int hIndex(vector<int>& citations) {
+        //return by_binary_search(citations);
+        return by_sorting_and_ptr(citations);
     }
 };

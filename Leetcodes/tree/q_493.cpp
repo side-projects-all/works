@@ -38,6 +38,61 @@ Constraints:
 
 class Solution {
 private:
+    struct Node {
+        Node *left;
+        Node *right;
+        int val;
+        int cnt;
+
+        Node(int val) {
+            this->left = nullptr;
+            this->right = nullptr;
+            this->val = val;
+            this->cnt = 1;
+        }
+    };
+
+    Node* insert(Node* head, int val) {
+        if (head == nullptr) {
+            return new Node(val);
+
+        } else if (val == head->val) {
+            ++head->cnt;
+
+        } else if (val > head->val) {
+            ++head->cnt;
+            head->right = insert(head->right, val);
+
+        } else {
+            head->left = insert(head->left, val);
+        }
+
+        return head;
+    }
+    int search(Node* head, long target) {
+        if (head == nullptr) {
+            return 0;
+
+        } else if (target == head->val) {
+            return head->cnt;
+
+        } else if (target > head->val) {
+            return search(head->right, target);
+
+        } else {
+            return head->cnt + search(head->left, target);
+        }
+    }
+    int by_binary_search(std::vector<int>& nums) {
+        Node* root = nullptr;
+        int cnt = 0;
+        for (int j = 0; j < nums.size(); ++j) {
+            cnt += search(root, nums[j] * 2L + 1);
+            root = insert(root, nums[j]);
+        }
+
+        return cnt;
+    }
     int mergeSort(std::vector<int>& nums, int left, int right) {
         if (left >= right) {
             return 0;
@@ -107,7 +162,7 @@ private:
         std::vector<int> BITS(n + 1, 0);
         int count = 0;
         for (int i = 0; i < n; i++) {
-            count += query(BITS, std::lower_bound(nums_copy.begin(), nums_copy.end(), 2LL * nums[i] + 1) - nums_copy.begin() + 1);
+            count += query(BITS, std::lower_bound(nums_copy.begin(), nums_copy.end(), 2L * nums[i] + 1) - nums_copy.begin() + 1);
             update(BITS, std::lower_bound(nums_copy.begin(), nums_copy.end(), nums[i]) - nums_copy.begin() + 1, 1);
         }
         return count;
@@ -116,8 +171,10 @@ private:
 public:
     int reversePairs(std::vector<int>& nums) {
 
-        //return mergeSort(nums, 0, nums.size() - 1);
-        return by_fenwick_tree(nums);
+        return mergeSort(nums, 0, nums.size() - 1);
+        //return by_fenwick_tree(nums);
+        //return by_binary_search(nums);
     }
 };
+
 

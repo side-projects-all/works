@@ -36,7 +36,7 @@ public:
             return 2;
         }
 
-        long left = 1;
+        long left = 4;
         long right = n / 2;
 
         while (left <= right) {

@@ -35,12 +35,12 @@ Constraints:
 
 class Solution {
 private:
-    int binary_search(vector<int>& nums, int target) {
+    int by_binary_search(vector<int>& nums, int& target, int& n) {
         int cnt = 0;
-        for (int i = 0; i < nums.size() - 2; ++i) {
+        for (int i = 0; i < n - 2; ++i) {
 
             int sum = 0;
-            for (int j = i + 1; j < nums.size() - 1; ++j) {
+            for (int j = i + 1; j < n - 1; ++j) {
                 /*
                 int k = std::lower_bound(nums.begin() + j, nums.end(), target - nums[i] - nums[j]) - nums.begin() - 1;
 
@@ -50,7 +50,7 @@ private:
                 */
 
                 int b = j;
-                int e = nums.size() - 1;
+                int e = n - 1;
                 while (b < e) {
                     int mid = (b + e + 1) / 2;
                     if (nums[mid] < target - nums[i] - nums[j]) {
@@ -68,7 +68,29 @@ private:
 
         return cnt;
     }
-    int two_ptr(vector<int>& nums, int target) {
+    int by_two_ptr(vector<int>& nums, int& target, int& n) {
+        
+
+        int cnt = 0;
+        for (int i = 0; i < n; ++i) {
+            int j = i + 1;
+            int k = n - 1;
+
+            while (j < k) {
+                if (nums[i] + nums[j] + nums[k] < target) {
+                    cnt += k - j;
+                    ++j;
+
+                } else {
+                    --k;
+                }
+            }
+        }
+
+        return cnt;
+    }
+public:
+    int threeSumSmaller(vector<int>& nums, int target) {
         int n = nums.size();
         if (n < 3) {
             return 0;
@@ -79,36 +101,8 @@ private:
         }
 
         std::sort(nums.begin(), nums.end());
-        int cnt = 0;
-        
 
-        for (int i = 0; i < n; ++i) {
-
-            int j = i + 1;
-            int k = n - 1;
-
-            while (j < k) {
-
-                if (nums[i] + nums[j] + nums[k] < target) {
-                    cnt += k - j;
-                    ++j;
-
-                } else {
-                    --k;
-                }
-            }
-        }
-        
-        return cnt;
-    }
-public:
-    int threeSumSmaller(vector<int>& nums, int target) {
-        if (nums.size() < 3) {
-            return 0;
-        }
-
-        std::sort(nums.begin(), nums.end());
-        //return two_ptr(nums, target);
-        return binary_search(nums, target);
+        return by_binary_search(nums, target, n);
+        //return by_two_ptr(nums, target, n);
     }
 };

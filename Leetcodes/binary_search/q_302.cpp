@@ -37,10 +37,11 @@ Constraints:
 
 class Solution {
 private:
-    int binary_search_cols(vector<vector<char>>& image, int b, int e, int top, int bottom, bool w_to_b) {
-        while (b != e) {
+    int by_binary_search_cols(vector<vector<char>>& image, int b, int e, int top, int bottom, bool w_to_b) {
+
+        while (b < e) {
             int k = top;
-            int mid = (b + e) / 2;
+            int mid = b + (e - b) / 2;
 
             while (k < bottom && image[k][mid] == '0') {
                 ++k;
@@ -48,6 +49,7 @@ private:
 
             if ((k < bottom) == w_to_b) {
                 e = mid;
+
             } else {
                 b = mid + 1;
             }
@@ -56,10 +58,11 @@ private:
         return b;
     }
 
-    int binary_search_rows(vector<vector<char>>& image, int b, int e, int left, int right, bool w_to_b) {
-        while (b != e) {
+    int by_binary_search_rows(vector<vector<char>>& image, int b, int e, int left, int right, bool w_to_b) {
+        
+        while (b < e) {
             int k = left;
-            int mid = (b + e) / 2;
+            int mid = b + (e - b) / 2;
 
             while (k < right && image[mid][k] == '0') {
                 ++k;
@@ -67,6 +70,7 @@ private:
 
             if ((k < right) == w_to_b) {
                 e = mid;
+
             } else {
                 b = mid + 1;
             }
@@ -79,12 +83,12 @@ public:
         int rows = image.size();
         int cols = image[0].size();
 
-        int min_x = binary_search_cols(image, 0, y, 0, rows, true);
-        int max_x = binary_search_cols(image, y + 1, cols, 0, rows, false);
-        int min_y = binary_search_rows(image, 0, x, min_x, max_x, true);
-        int max_y = binary_search_rows(image, x + 1, rows, min_x, max_x, false);
+        //based on the example, y means column, x means row
+        int min_y = by_binary_search_cols(image, 0, y, 0, rows, true);
+        int max_y = by_binary_search_cols(image, y + 1, cols, 0, rows, false);
+        int min_x = by_binary_search_rows(image, 0, x, min_y, max_y, true);
+        int max_x = by_binary_search_rows(image, x + 1, rows, min_y, max_y, false);
 
-        int ans = 0;
         return (max_x - min_x) * (max_y - min_y);
     }
 };

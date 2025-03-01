@@ -26,19 +26,21 @@ Constraints:
 class Solution {
 public:
     int findNthDigit(int n) {
+        //begin in one digit interval
         long digit = 9;
-        int first = 1;
         int len = 1;
+        int first = 1;
 
         while (n > digit * len) {
             n -= digit * len;
-            ++len;
+            ++len;  //to next digit interval
             first *= 10;
             digit *= 10;
         }
 
         first += (n - 1) / len;
-        string num = std::to_string(first);
-        return num[(n - 1) % len] - '0';
+        std::string num = std::to_string(first);
+
+        return num[((n - 1) % len)] - '0';
     }
 };

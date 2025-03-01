@@ -88,13 +88,13 @@ public:
 
         int cnt = 0;
         for (const auto& s : prefix_sum) {
-            int j = std::lower_bound(sorted_sum.begin(), sorted_sum.end(), s) - sorted_sum.begin();
+            int i = std::lower_bound(sorted_sum.begin(), sorted_sum.end(), s) - sorted_sum.begin();
             //lower bound
             int lb = std::lower_bound(sorted_sum.begin(), sorted_sum.end(), s + lower) - sorted_sum.begin();
             //upper bound
             int ub = std::upper_bound(sorted_sum.begin(), sorted_sum.end(), s + upper) - sorted_sum.begin() - 1;
 
-            update(j, -1);  //this prefix_sum at j is already used, we need to remove this its counting
+            update(i, -1);  //this prefix_sum at i is already used, we need to remove this its counting
             cnt += query(ub) - query(lb - 1);
         }
         return cnt;

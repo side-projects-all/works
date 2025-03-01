@@ -35,37 +35,62 @@ Constraints:
 */
 
 class Solution {
-public:
-    bool find132pattern(vector<int>& nums) {
-        if (nums.size() < 3) {
-            return false;
-        }
-
+private:
+    bool by_binary_search(vector<int>& nums) {
         int n = nums.size();
-        std::stack<int> stack;  //it stores all k!!
         std::vector<int> min_arr(n);
         min_arr[0] = nums[0];
-
         for (int i = 1; i < n; ++i) {
             min_arr[i] = std::min(min_arr[i - 1], nums[i]);
         }
 
-        for (int i = n - 1; i > 0; --i) {
-            if (nums[i] <= min_arr[i]) {
+        int k = n;
+        for (std::size_t j = n - 1; j > 0; --j) {
+            if (nums[j] <= min_arr[j]) {
                 continue;
             }
 
-            while (!stack.empty() && stack.top() <= min_arr[i]) {
-                stack.pop();
-            }
-
-            if (!stack.empty() && stack.top() < nums[i]) {
+            auto it = std::lower_bound(nums.begin() + k, nums.end(), min_arr[j] + 1);
+            k = it - nums.begin();
+            if (k < n && nums[k] < nums[j]) {
                 return true;
             }
 
-            stack.push(nums[i]);
+            nums[--k] = nums[j];
         }
 
         return false;
+    }
+    bool by_stack(vector<int>& nums) {
+        int n = nums.size();
+        std::vector<int> min_arr(n);
+        min_arr[0] = nums[0];
+        for (int i = 1; i < n; ++i) {
+            min_arr[i] = std::min(min_arr[i - 1], nums[i]);
+        }
+
+        std::stack<int> stack;  //it stores all k!!
+        for (int j = n - 1; j > 0; --j) {
+            if (nums[j] <= min_arr[j]) {
+                continue;
+            }
+
+            while (!stack.empty() && stack.top() <= min_arr[j]) {
+                stack.pop();
+            }
+
+            if (!stack.empty() && stack.top() < nums[j]) {
+                return true;
+            }
+
+            stack.push(nums[j]);
+        } 
+
+        return false;
+    }
+public:
+    bool find132pattern(vector<int>& nums) {
+        //return by_stack(nums);
+        return by_binary_search(nums);
     }
 };

@@ -75,7 +75,7 @@ private:
             }
         }
 
-        return upper;
+        return upper; //why not low? because low will exceed upper!! we only need the value when low == upper
     }
 
 public:

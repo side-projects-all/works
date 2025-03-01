@@ -40,78 +40,38 @@ Constraints:
 
 */
 
-struct myHash {
-
-  template<class T1, class T2>
-  std::size_t operator() (const std::pair<T1, T2>& p1) const {
-
-    return std::hash<T1>{}(p1.first) ^ std::hash<T2>{}(p1.second);
-  }
-};
 class Solution {
 public:
     vector<int> findRightInterval(vector<vector<int>>& intervals) {
-        int N = intervals.size();
-
-        //corner case
-        if (N == 1) {
-          int left = intervals[0][0];
-          int right = intervals[0][1];
-
-          if (left >= right) {
-            return { 0 };
-          } else {
-            return { -1 };
-          }
+        int n = intervals.size();
+        //not necessary if error test case [[4, 4]] still exist 
+        /*
+        if (n == 1) {
+            return {-1};
+        }
+        */
+        std::vector<std::pair<int, int>> copy(n);
+        for (int i = 0; i < n; ++i) {
+            copy[i] = {intervals[i][0], i};
         }
 
-        //create index mapping
-        std::unordered_map<std::pair<int, int>, int, myHash> m;
-        for (int i = 0; i < N; ++i) {
-          std::pair<int, int> p = std::make_pair(intervals[i][0], intervals[i][1]);
-          m[p] = i;
-        }
+        const auto compr = [](const std::pair<int, int>& p1, const std::pair<int, int>& p2) {
+            return p1.first < p2.first;
+        };
+        std::sort(copy.begin(), copy.end(), compr);
 
-        std::sort(intervals.begin(), intervals.end());
+        std::vector<int> ans(n);
+        for (int i = 0; i < n; ++i) {
+            auto it = std::lower_bound(copy.begin(), copy.end(), std::make_pair(intervals[i][1], i), compr);
 
-        std::vector<int> result(N);
+            if (it != copy.end()) {
+                ans[i] = it->second;
 
-        for (int i = 0; i < N; ++i) {
-          int target = intervals[i][1];
-
-          //find from the indices that are larger than poisiton now
-          int left = i;
-          int right = N - 1;
-
-          while (left <= right) {
-            int mid = left + (right - left) / 2;
-
-            if (target == intervals[mid][0]) {
-              left = mid;
-              break;
-            }
-
-            if (target > intervals[mid][0]) {
-              left = mid + 1;
             } else {
-              right = mid - 1;
+                ans[i] = -1;
             }
-          }
-
-          std::pair<int, int> p = { intervals[i][0], intervals[i][1] };
-          int index = m[p];
-
-          if (left < N) {
-            p = { intervals[left][0], intervals[left][1] };
-            int original_index_of_left = m[p];
-
-            result[index] = original_index_of_left;
-
-          } else {
-            result[index] = -1;
-          }
         }
 
-        return result;
+        return ans;
     }
 };

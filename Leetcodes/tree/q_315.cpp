@@ -35,24 +35,8 @@ Constraints:
 
 class Solution {
 private:
-    vector<int> by_fenwick_tree(vector<int>& nums) {
-        int offset = 1e4;
-        int len = 2 * offset + 1;
-        std::vector<int> tree(len);
-        std::vector<int> ans;
-
-        for (int i = nums.size() - 1; i >= 0; --i) {
-            int smaller_cnt = query_val(nums[i] + offset, tree);
-            ans.push_back(smaller_cnt);
-            update_val(nums[i] + offset, 1, tree);
-        }
-
-        std::reverse(ans.begin(), ans.end());
-        return ans;
-    }
-
-    void update_val(int i, int val, std::vector<int>& tree) {
-        ++i;    //1 index started!!! remember
+    void update_fenwick_tree(std::vector<int>& tree, int i, int val) {
+        ++i;
 
         while (i < tree.size()) {
             tree[i] += val;
@@ -60,7 +44,8 @@ private:
         }
     }
 
-    int query_val(int i, std::vector<int>& tree) {
+    int query_fenwick_tree(std::vector<int>& tree, int i) {
+
         int sum = 0;
         while (i > 0) {
             sum += tree[i];
@@ -70,70 +55,67 @@ private:
         return sum;
     }
 
-    vector<int> by_segment_tree(vector<int>& nums) {
+    std::vector<int> by_fenwick_tree(vector<int>& nums) {
         int n = nums.size();
-        if (n == 1) {
-            return { 0 };
-        }
-
         int offset = 1e4;
-        int len = 2 * 1e4 + 1;
-        //this tree is bucket, 
-        //and we use ofset to store positive and negative
-        std::vector<int> tree(len * 2); 
-        std::vector<int> ans;
-
-        //travel from right to left to perform sum of smaller ones than i
+        std::vector<int> tree(2 * offset + 1);
+        std::vector<int> ans(n);
         for (int i = n - 1; i >= 0; --i) {
-            int smallers = segment_tree_query(0, nums[i] + offset, tree, len);
-            ans.push_back(smallers);
-
-            segment_tree_update(nums[i] + offset, 1, tree, len);
+            ans[i] = query_fenwick_tree(tree, nums[i] + offset);
+            update_fenwick_tree(tree, nums[i] + offset, 1);
         }
 
-        std::reverse(ans.begin(), ans.end());
         return ans;
     }
 
-    void segment_tree_update(int i, int val, std::vector<int>& tree, int len) {
-        i += len;
-
+    void update_segment_tree(std::vector<int>& tree, int size, int i, int val) {
+        i += size;    //move to leaf index
         tree[i] += val;
 
         while (i > 1) {
-            i /= 2;
+            i /= 2;     //go to parent and update
             tree[i] = tree[i * 2] + tree[i * 2 + 1];
         }
     }
 
-    int segment_tree_query(int left, int right, std::vector<int>& tree, int len) {
-        int ans = 0;
-        left += len;
-        right += len;
-
+    int query_segment_tree(std::vector<int>& tree, int size, int left, int right) {
+        int sum = 0;
+        left += size;
+        right += size;
         while (left < right) {
             if (left % 2 == 1) {
-                ans += tree[left];
+                sum += tree[left];
                 ++left;
             }
 
-            left /= 2;
-
             if (right % 2 == 1) {
                 --right;
-                ans += tree[right];
+                sum += tree[right];
             }
 
+            left /= 2;
             right /= 2;
+        }
+
+        return sum;
+    }
+
+    std::vector<int> by_segment_tree(vector<int>& nums) {
+        int offset = 1e4;
+        int total = 2 * offset + 1;
+        std::vector<int> tree(2 * total);
+        int n = nums.size();
+        std::vector<int> ans(n);
+        for (int i = n - 1; i >= 0; --i) {
+            ans[i] = query_segment_tree(tree, total, 0, nums[i] + offset);
+            update_segment_tree(tree, total, nums[i] + offset, 1);
         }
 
         return ans;
     }
-    
 public:
     vector<int> countSmaller(vector<int>& nums) {
-
-        //return by_segment_tree(nums);
-        return by_fenwick_tree(nums);
+        //return by_fenwick_tree(nums);
+        return by_segment_tree(nums);
     }
 };

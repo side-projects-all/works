@@ -32,30 +32,58 @@ Constraints:
 */
 
 class Solution {
-public:
-    int hIndex(vector<int>& citations) {
-        if (citations.size() == 1) {
-            return citations[0] == 0 ? 0 : 1;
+private:
+    int by_sorting_and_ptr(vector<int>& citations) {
+        int n = citations.size();
+        if (n == 1) {
+            return citations[0] >= 1;
+        }
+        std::sort(citations.begin(), citations.end());
+
+        int i = 0;
+        for (i = 0; i < n;/* ++i */) {
+            
+            if (citations[n - i - 1] > i) {
+                ++i;
+            } else {
+                break;
+            }
+            
+            /*
+            if (citations[citations.size() - i - 1] <= i) {
+                break;
+            }*/
         }
 
-        int N = citations.size();
-        int left = 0;
-        int right = N - 1;
+        return i;
+    }
+    int by_binary_search(vector<int>& citations) {
+        int n = citations.size();
+        if (n == 1) {
+            return citations[0] >= 1;
+        }
 
+        int left = 0;
+        int right = n - 1;
         while (left <= right) {
             int mid = left + (right - left) / 2;
 
-            if (N - mid == citations[mid]) {
-                return citations[mid];
-            }
+            if (n - mid  == citations[mid]) {
+                return n - mid;
 
-            if (N - mid > citations[mid]) {
-                left = mid + 1;
-            } else {
+            } else if (n - mid < citations[mid]) {
                 right = mid - 1;
+                
+            } else {
+                left = mid + 1;
             }
         }
 
-        return N - left;
+        return n - left;
+    }
+public:
+    int hIndex(vector<int>& citations) {
+        //return by_binary_search(citations);
+        return by_sorting_and_ptr(citations);
     }
 };

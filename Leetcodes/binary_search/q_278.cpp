@@ -34,29 +34,33 @@ Constraints:
 // The API isBadVersion is defined for you.
 // bool isBadVersion(int version);
 
+// The API isBadVersion is defined for you.
+// bool isBadVersion(int version);
+
 class Solution {
-public:
-    int firstBadVersion(int n) {
+private:
+    int by_binary_search(int& n) {
         if (n == 1) {
-            return isBadVersion(n) ? n : -1;
+            return isBadVersion(1);
         }
 
         int left = 1;
         int right = n;
-        int mid = 0;
         while (left < right) {
-
-            mid = left + (right - left) / 2;
+            int mid = left + (right - left) / 2;
 
             if (isBadVersion(mid)) {
-                
                 right = mid;
+
             } else {
                 left = mid + 1;
             }
         }
 
-
-        return isBadVersion(left) ? left : -1;
+        return isBadVersion(left) ? left : 0;
+    }
+public:
+    int firstBadVersion(int n) {
+        return by_binary_search(n);
     }
 };
