@@ -36,46 +36,24 @@ Constraints:
 
 class Solution {
 private:
-    int bs_upper(vector<int>& nums, int left, int right, int& target) {
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
+    int binary_search(vector<int>& nums, int target) {
+        int n = nums.size();
+        int b = 0;
+        int e = n - 1;
 
-            if (nums[mid] == target) {
+        while (b < e) {
+            int mid = b + (e - b) / 2;
 
-                if (mid == right || nums[mid + 1] != target) {
-                    return mid;
-                }
+            if (nums[mid] >= target) {
+                e = mid;
 
-                left = mid + 1;
-
-            } else if (nums[mid] > target) {
-                right = mid - 1;
             } else {
-                left = mid + 1;
+                
+                b = mid + 1;
             }
         }
 
-        return -1;
-    }
-    int bs_lower(vector<int>& nums, int left, int right, int& target) {
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-
-            if (nums[mid] == target) {
-                if (mid == left || nums[mid - 1] != target) {
-                    return mid;
-                }
-
-                right = mid - 1;
-            } else if (nums[mid] > target) {
-                right = mid - 1;
-
-            } else {
-                left = mid + 1;
-            }
-        }
-
-        return -1;
+        return b;
     }
     std::vector<int> by_binary_search(vector<int>& nums, int& target) {
         int n = nums.size();
@@ -84,6 +62,7 @@ private:
         }
 
         if (n == 1) {
+
             if (nums[0] == target) {
                 return {0, 0};
             } else {
@@ -91,19 +70,36 @@ private:
             }
         }
 
-        if (target < nums[0] || target > nums[n - 1]) {
-            return {-1, -1};
-        }
-
         std::vector<int> ans(2, -1);
-        ans[0] = bs_lower(nums, 0, n - 1, target);
+        int first = binary_search(nums, target);
 
-        if (ans[0] == -1) {
+        //not find first
+        if (first == n || nums[first] != target) {
             return ans;
         }
 
-        ans[1] = bs_upper(nums, ans[0], n - 1, target);
+        //find first, and try to find second
+        int second = binary_search(nums, target + 1);
+        if (second == n) {
+            if (nums[n - 1] == target) {
+                ans[0] = first;
+                ans[1] = n - 1;
 
+                return ans;
+
+            } else {
+                return ans;
+            }
+        }
+
+        if (nums[second] == target) {
+            ans[0] = first;
+            ans[1] = second;
+            return ans;
+        }
+
+        ans[0] = first;
+        ans[1] = second - 1;
         return ans;
     }
 public:

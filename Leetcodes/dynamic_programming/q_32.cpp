@@ -33,51 +33,61 @@ Constraints:
 */
 
 class Solution {
-    int iterative(std::string& s) {
-        //record how many valid parentheses at the current index
-        std::vector<int> mem(s.size(), 0);
-
-        int max = 0;
-        for (int i = 1; i < s.size(); ++i) {
-            if (s[i] == ')') {
-                if (s[i - 1] == '(') {
-                    mem[i] = (i >= 2 ? mem[i - 2] : 0) + 2;
-
-                } else if (i - mem[i - 1] > 0 && s[i - mem[i - 1] - 1] == '(') {
-                    mem[i] = mem[i - 1] + ((i - mem[i - 1]) >= 2 ? mem[i - mem[i - 1] - 2] : 0) + 2;
-                }
-
-                max = std::max(max, mem[i]);
-            }
+private:
+    int by_stack(string& s) {
+        int n = s.size();
+        if (n < 2) {
+            return 0;
         }
 
-        return max;
-    }
-    int byStack(std::string& s) {
-        int max = 0;
-
+        int max_len = 0;
         std::stack<int> stack;
         stack.push(-1);
-        for (int i = 0; i < s.size(); ++i) {
+        for (int i = 0; i < n; ++i) {
             if (s[i] == '(') {
                 stack.push(i);
+
             } else {
-
                 stack.pop();
-
                 if (stack.empty()) {
                     stack.push(i);
+
                 } else {
-                    max = std::max(max, i - stack.top());
+                    max_len = std::max(max_len, i - stack.top());
                 }
             }
         }
 
-        return max;
+        return max_len;
+    }
+    int by_iterative_dp(string& s) {
+        int n = s.size();
+        if (n < 2) {
+            return 0;
+        }
+
+        std::vector<int> dp(n); //LVP at index i
+        int max_len = 0;
+        for (int i = 1; i < n; ++i) {
+            if (s[i] == ')') {  // ')' at index i
+
+                if (s[i - 1] == '(') {
+                    dp[i] = (i >= 2 ? dp[i - 2] : 0) + 2;
+
+                } else if (i - dp[i - 1] > 0 && s[i - dp[i - 1] - 1] == '(') {
+                    dp[i] = dp[i - 1] + (i - dp[i - 1] >= 2 ? dp[i - dp[i - 1] - 2] : 0) + 2;
+                }
+
+                max_len = std::max(max_len, dp[i]);
+            }
+        }
+
+        return max_len;
     }
 public:
     int longestValidParentheses(string s) {
-        //return byStack(s);
-        return iterative(s);
+        //return by_iterative_dp(s);
+        
+        return by_stack(s);
     }
 };

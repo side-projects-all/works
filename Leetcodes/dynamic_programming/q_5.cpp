@@ -83,8 +83,9 @@ private:
             ++right;
         }
 
-        if (right - 1 - left - 1 > e - b) {
-            e = right  - 1;
+        //from the idea: (right - 1) - (left - 1) > e - b
+        if (right - left > e - b) {
+            e = right - 1;
             b = left + 1;
         }
     }

@@ -29,30 +29,27 @@ Constraints:
 class Solution {
 public:
     int numKLenSubstrNoRepeats(string s, int k) {
-        int len = s.size();
-        if (len < k) {
-            return 0;
-        }
-
-        int cnt = 0;
+        int n = s.size();
         int b = 0;
         int e = 0;
-        std::array<int, 26> char_cnts{ 0 };
 
-        while (e < len) {
-            char_cnts[s[e] - 'a']++;
+        int cnt = 0;
+        std::vector<int> cnts(26);
+        while (e < n) {
+            ++cnts[s[e] - 'a'];
 
-            while (char_cnts[s[e] - 'a'] > 1) {
-                --char_cnts[s[b] - 'a'];
+            while (cnts[s[e] - 'a'] > 1 || e - b + 1 > k) {
+
+                if (cnts[s[b] - 'a'] > 0) {
+                    --cnts[s[b] - 'a'];
+                }
+
                 ++b;
             }
 
             if (e - b + 1 == k) {
                 ++cnt;
-                --char_cnts[s[b] - 'a'];
-                ++b;
             }
-
             ++e;
         }
 

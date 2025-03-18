@@ -56,79 +56,147 @@ Constraints:
 */
 
 class Solution {
-public:
-    vector<int> distanceToCycle(int n, vector<vector<int>>& edges) {
-        vector<bool> isInCycle(n, true),
-            visited(n, false);  // 'isInCycle' is initially true for all nodes
-        vector<int> degree(n, 0), distances(n);
-        vector<vector<int>> adjacencyList(n, vector<int>(0));
+private:
+    vector<int> by_bfs(int& n, vector<vector<int>>& edges) {
+        std::vector<bool> in_cycle(n, true);
+        std::vector<bool> visited(n, false);  
+        std::vector<int> degree(n);
+        std::vector<int> dis(n);
+        std::vector<std::vector<int>> adj(n);
 
-        // Build the adjacency list and calculate node degrees
-        for (auto edge : edges) {
-            adjacencyList[edge[0]].push_back(edge[1]);
-            adjacencyList[edge[1]].push_back(edge[0]);
-            degree[edge[0]]++;
-            degree[edge[1]]++;
+        for (auto& e : edges) {
+            adj[e[0]].push_back(e[1]);
+            adj[e[1]].push_back(e[0]);
+            ++degree[e[0]];
+            ++degree[e[1]];
         }
 
-        queue<int> nodeQueue;
-
-        // Start by adding all leaf nodes (degree 1) to the queue
+        std::queue<int> q;
         for (int i = 0; i < n; i++) {
             if (degree[i] == 1) {
-                nodeQueue.push(i);
+                q.push(i);
             }
         }
 
-        // Perform BFS to remove nodes with degree 1, progressively reducing the
-        // graph
-        while (!nodeQueue.empty()) {
-            int currentNode = nodeQueue.front();
-            nodeQueue.pop();
-            isInCycle[currentNode] =
-                false;  // Mark the node as not in the cycle
+        while (!q.empty()) {
+            int curr = q.front();
+            q.pop();
+            in_cycle[curr] = false;
 
-            // Update the degree of neighbors and add them to the queue if their
-            // degree becomes 1
-            for (auto neighbor : adjacencyList[currentNode]) {
-                degree[neighbor]--;
-                if (degree[neighbor] == 1) {
-                    nodeQueue.push(neighbor);
+            for (auto& nei : adj[curr]) {
+
+                --degree[nei];
+                if (degree[nei] == 1) {
+                    q.push(nei);
                 }
             }
         }
 
-        // Add all cycle nodes to the queue and mark them as visited
-        for (int currentNode = 0; currentNode < n; currentNode++) {
-            if (isInCycle[currentNode]) {
-                nodeQueue.push(currentNode);
-                visited[currentNode] = true;
+        for (int curr = 0; curr < n; ++curr) {
+
+            if (in_cycle[curr]) {
+                q.push(curr);
+                visited[curr] = true;
             }
         }
 
-        // BFS to calculate distances from cycle nodes
-        int currentDistance = 0;
-        while (!nodeQueue.empty()) {
-            int queueSize = nodeQueue.size();  // Track number of nodes to
-                                               // process at this distance level
+        int curr_dis = 0;
+        while (!q.empty()) {
+            int queueSize = q.size();
+                                              
             for (int i = 0; i < queueSize; i++) {
-                int currentNode = nodeQueue.front();
-                nodeQueue.pop();
+                int curr = q.front();
+                q.pop();
 
-                distances[currentNode] =
-                    currentDistance;  // Set the distance for the current node
+                dis[curr] = curr_dis;
 
-                // Add unvisited neighbors to the queue
-                for (auto neighbor : adjacencyList[currentNode]) {
-                    if (visited[neighbor]) continue;
-                    nodeQueue.push(neighbor);
-                    visited[neighbor] = true;
+                for (auto& nei : adj[curr]) {
+
+                    if (visited[nei]) {
+                        continue;
+                    }
+
+                    q.push(nei);
+                    visited[nei] = true;
                 }
             }
-            currentDistance++;  // Increment distance after processing all nodes
-                                // at the current level
+            ++curr_dis; 
         }
 
-        return distances;
+        return dis;
+    }
+    void cal_dis(int curr, int curr_dis, std::vector<std::vector<int>>& adj, std::vector<int>& dis, 
+                        std::vector<bool>& in_cycle, std::vector<bool>& visited) {
+
+        dis[curr] = curr_dis;
+        visited[curr] = true;
+
+        for (auto& nei : adj[curr]) {
+            if (visited[nei]) {
+                continue;
+            }
+
+            int new_dis = in_cycle[nei] ? 0 : curr_dis + 1;
+            cal_dis(nei, new_dis, adj, dis, in_cycle, visited);
+        }
+    }
+    bool find_cycle_nodes(int curr, std::vector<std::vector<int>>& adj, std::vector<bool>& in_cycle, 
+                            std::vector<bool>& visited, std::vector<int>& parent) {
+
+        visited[curr] = true;
+        for (auto& nei : adj[curr]) {
+
+            if (!visited[nei]) {
+
+                parent[nei] = curr;
+                if (find_cycle_nodes(nei, adj, in_cycle, visited, parent)) {
+                    return true;
+                }
+
+            } else if (parent[curr] != nei) {
+
+                in_cycle[nei] = true;
+                int tmp = curr;
+
+                while (tmp != nei) {
+                    in_cycle[tmp] = true;
+                    tmp = parent[tmp];
+                }
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    vector<int> by_dfs(int& n, vector<vector<int>>& edges) {
+        std::vector<std::vector<int>> adj(n);
+        for (auto& e : edges) {
+            adj[e[0]].push_back(e[1]);
+            adj[e[1]].push_back(e[0]);
+        }
+
+        std::vector<bool> in_cycle(n);
+        std::vector<bool> visited(n);
+        std::vector<int> parent(n);
+        std::vector<int> dis(n);
+        find_cycle_nodes(0, adj, in_cycle, visited, parent);
+
+        std::fill(visited.begin(), visited.end(), false);
+
+        for (int i = 0; i < n; ++i) {
+            if (in_cycle[i]) {
+                cal_dis(i, 0, adj, dis, in_cycle, visited);
+                break;
+            }
+        }
+
+        return dis;
+    }
+public:
+    vector<int> distanceToCycle(int n, vector<vector<int>>& edges) {
+        return by_dfs(n, edges);
+        //return by_bfs(n, edges);
     }
 };

@@ -33,29 +33,40 @@ Constraints:
 
 class Solution {
 private:
-    bool possible(double distance, std::vector<int>& stations, int k) {
-        int used = 0;
-        for (int i = 0; i < stations.size() - 1; ++i) {
-            used += (int)((stations[i + 1] - stations[i]) / distance);
+    int add_cnt(vector<int>& stations, int& n, double& dis, int& k) {
+        int cnt = 0;
+        
+        for (int i = 1; i < n; ++i) {
+            cnt += (int)((stations[i] - stations[i - 1]) / dis);
         }
 
-        return used <= k;
+        return cnt;
     }
-public:
-    double minmaxGasDist(vector<int>& stations, int k) {
-        double left = 0;
-        double right = 1e8;
+    double by_binary_search(vector<int>& stations, int& k) {
+        int n = stations.size();
+        double b = 0;
+        double e = 0;
 
-        while (right - left > 1e-6) {
-            double mid = left + (right - left) * 0.5;
+        for (int i = 1; i < n; ++i) {
+            e = std::max(e, (double)(stations[i] - stations[i - 1]));
+        }
 
-            if (possible(mid, stations, k)) {
-                right = mid;
+        while (e - b > 1e-6) {
+            double mid = b + (e - b) / 2;
+            int possible_add = add_cnt(stations, n, mid, k);
+
+            if (possible_add > k) {
+                b = mid;
+
             } else {
-                left = mid;
+                e = mid;
             }
         }
 
-        return left;
+        return b;
+    }
+public:
+    double minmaxGasDist(vector<int>& stations, int k) {
+        return by_binary_search(stations, k);
     }
 };

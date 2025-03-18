@@ -38,47 +38,49 @@ Constraints:
 */
 
 class Solution {
-public:
-    int maximizeSweetness(vector<int>& sweetness, int k) {
-        int numPeople = k + 1;
-        int left = *std::min_element(sweetness.begin(), sweetness.end());
-        int right = std::accumulate(sweetness.begin(), sweetness.end(), 0) / numPeople;
+private:
+    int by_binary_search(vector<int>& sweetness, int& k) {
+        int n = sweetness.size();
+        if (n == 1) {
+            return sweetness[0];
+        }
 
-        /*
-        refer to editorial
+        int b = sweetness[0];
+        int e = sweetness[0];
+        for (int i = 1; i < n; ++i) {
+            b = std::min(sweetness[i], b);
+            e += sweetness[i];
+        }
+        e /= (k + 1);
 
-        If we use mid = (left + right) / 2, then mid will be equal to left for which a workable plan exists. 
-        According to the rule for how we reduce the search space, we will set left = mid for the next search. 
-        Thus, the new search space is [mid, right] = [left, right], which is exactly the same as our previous 
-        search space. Thus, the search will loop forever!
+        while (b < e) {
+            int mid = b + (e - b) / 2 + 1;
+            //int mid = (e + b + 1) / 2;
+            int sum = 0;
+            int divide = 0;
 
-        However, using mid = (left + right + 1) / 2 means we will now set mid equal to right instead. Since 
-        the new mid is not workable, we will create the new search space according to the rule, 
-        that is [left, mid - 1] = [left, left]. Since the left boundary equals the right boundary, 
-        we can successfully stop the binary search and return either boundary as the correct answer!
-        */
+            for (int i = 0; i < n; ++i) {
+                sum += sweetness[i];
 
-        while (left < right) {
-            int mid = (left + right + 1) / 2;
-            int currSweet = 0;
-            int peopleWithChoc = 0;
-
-            for (int s : sweetness) {
-                currSweet += s;
-
-                if (currSweet >= mid) {
-                    peopleWithChoc += 1;
-                    currSweet = 0;
+                if (sum >= mid) {
+                    sum = 0;
+                    ++divide;
                 }
             }
 
-            if (peopleWithChoc >= numPeople) {
-                left = mid;
+            if (divide >= k + 1) {
+                b = mid;
+
             } else {
-                right = mid - 1;
+                e = mid - 1;
             }
+            
         }
 
-        return right;
+        return b;
+    }
+public:
+    int maximizeSweetness(vector<int>& sweetness, int k) {
+        return by_binary_search(sweetness, k);
     }
 };

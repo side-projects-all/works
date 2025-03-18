@@ -38,36 +38,32 @@ private:
     std::string by_binary_search(string& n) {
         unsigned long long num = std::stoll(n);
 
-        //this means the m, in this serials: k^0 + k^1 + k^2 + ... + k^m = n, 
-        //and k^m < n
-        for (int m = 60; m >= 1; --m) {
+        for (int m = (int)std::log2(num); m >= 1; --m) {
 
-            //skip those 2^m > n
-            if (((unsigned long long)1 << m) >= num) {
+            if ((1ULL << m) > num) {
                 continue;
             }
 
-            //left, right means possible k in the serials
             unsigned long long left = 2;
             unsigned long long right = std::pow(num, 1.0 / m) + 1;
 
             while (left <= right) {
                 unsigned long long mid = left + (right - left) / 2;
 
-                //calculate the value from the possible k, that is mid
                 unsigned long long sum = 1;
-                unsigned long long curr = 1;
+                unsigned long long val = mid;
+
                 for (int i = 1; i <= m; ++i) {
-                    curr *= mid;
-                    sum += curr;
+                    sum += val;
+                    val *= mid;
                 }
 
                 if (sum == num) {
                     return std::to_string(mid);
-                }
 
-                if (sum > num) {
+                } else if (sum > num) {
                     right = mid - 1;
+
                 } else {
                     left = mid + 1;
                 }

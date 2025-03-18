@@ -36,68 +36,51 @@ Constraints:
 class Solution {
 private:
     int by_binary_search(vector<int>& nums) {
+        class Solution {
+private:
+    int by_binary_search(vector<int>& nums) {
         int n = nums.size();
         if (n == 1 || nums[0] < nums[n - 1]) {
             return nums[0];
         }
 
-        int left = 0;
-        int right = n - 1;
-        while (left < right) {
-            //avoid the same values is necessary
-            while (left < right && nums[left] == nums[left + 1]) {
-                ++left;
+        int b = 0;
+        int e = n - 1;
+        while (b < e) {
+            while (b < e && nums[b] == nums[b + 1]) {
+                ++b;
             }
 
-            while (right > left && nums[right - 1] == nums[right]) {
-                --right;
+            while (b < e && nums[e] == nums[e - 1]) {
+                --e;
             }
 
-            //check if mid were min element
-            int mid = left + (right - left) / 2;
+            int mid = b + (e - b) / 2;
 
             if (mid - 1 >= 0 && nums[mid] < nums[mid - 1]) {
                 return nums[mid];
             }
 
-            //adjust left, right index
             if (mid + 1 < n && nums[mid] > nums[mid + 1]) {
                 return nums[mid + 1];
             }
 
-            if (nums[mid] >= nums[0]) {
-                left = mid + 1;
-            } else {
-                right = mid;
-            }
-        }
-
-        return left == n ? nums[left - 1] : nums[left];
-        
-        /*
-        if (nums[0] < nums[nums.size() - 1] || nums.size() == 1) {
-            return nums[0];
-        }
-
-        int N = nums.size();
-        int left = 0;
-        int right = N - 1;
-
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            
-            if (nums[mid] < nums[right]) {
-                right = mid;
-            } else if (nums[mid] > nums[right]) {
-                left = mid + 1;
-            } else {
+            //different from leetcode 153, because of duplicates, ex: [0,0,1,1,2,0]
+            if (nums[mid] >= nums[b]) {
+                b = mid + 1;
                 
-                right -= 1;
+            } else {
+                e = mid;
             }
         }
 
-        return nums[left];
-        */
+        return b == n ? nums[b - 1] : nums[b];
+    }
+public:
+    int findMin(vector<int>& nums) {
+        return by_binary_search(nums);
+    }
+};
     }
 public:
     int findMin(vector<int>& nums) {

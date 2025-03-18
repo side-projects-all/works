@@ -24,28 +24,33 @@ Constraints:
 */
 
 class Solution {
+private:
+    int by_iterative_dp(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return nums[0];
+        }
+
+        int max_sum = nums[0];
+        //int curr_sum = nums[0];
+        int curr_sum = 0;
+        int prev_sum = nums[0];
+        //std::vector<int> dp(n);
+        //dp[0] = nums[0];
+
+        for (int i = 1; i < n; ++i) {
+            //curr_sum = std::max(0, curr_sum) + nums[i];
+            curr_sum = std::max(0, prev_sum) + nums[i];
+            max_sum = std::max(max_sum, curr_sum);
+            prev_sum = curr_sum;
+            //dp[i] = std::max(0, dp[i - 1]) + nums[i];
+            //max_sum = std::max(max_sum, dp[i]);
+        }
+
+        return max_sum;
+    }
 public:
     int maxSubArray(vector<int>& nums) {
-        int max_sum = INT_MIN;
-        int curr_sum = 0;
-
-        for (int i = 0; i < nums.size(); ++i) {
-            curr_sum = std::max(curr_sum, 0) + nums[i];
-            max_sum = std::max(max_sum, curr_sum);
-        }
-        return max_sum;
-        
-        /*
-        std::vector<int> dp(nums.size());
-
-        dp[0] = nums[0];
-        int max_sub = nums[0];
-        for (int i = 1; i < nums.size(); ++i) {
-            dp[i] = std::max(nums[i], dp[i - 1] + nums[i]);
-            max_sub = std::max(max_sub, dp[i]);
-        }
-
-        return max_sub;
-        */
+        return by_iterative_dp(nums);
     }
 };

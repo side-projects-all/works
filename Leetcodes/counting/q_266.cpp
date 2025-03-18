@@ -33,19 +33,24 @@ Constraints:
 class Solution {
 public:
     bool canPermutePalindrome(string s) {
-        std::unordered_map<char, int> m;
-
-        for (int i = 0; i < s.size(); ++i) {
-            m[s[i]] += 1;
+        int n = s.size();
+        if (n == 1) {
+            return true;
         }
 
-        int countOdd = 0;
-        for (auto& p : m) {
-            if (p.second % 2 != 0) {
-                ++countOdd;
+        std::vector<int> cnt(26);
+
+        for (int i = 0; i < n; ++i) {
+            ++cnt[s[i] - 'a'];
+        }
+
+        int odd = 0;
+        for (int i = 0; i < 26; ++i) {
+            if (cnt[i] % 2) {
+                ++odd;
             }
         }
 
-        return (countOdd <= 1) ? true : false;
+        return odd <= 1;
     }
 };

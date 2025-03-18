@@ -5,14 +5,20 @@
 class Solution {
 private:
     bool greedy(vector<int>& nums) {
-        int lastPos = nums.size() - 1;
+        int n = nums.size();
+        if (n == 1) {
+            return true;
+        }
 
-        for (int i = lastPos; i >= 0; --i) {
-            if (i + nums[i] >= lastPos) {
-                lastPos = i;
+        int end_pos = n - 1;
+        for (int i = n - 2; i >= 0; --i) {
+
+            if (i + nums[i] >= end_pos) {
+                end_pos = i;
             }
         }
-        return lastPos == 0;
+
+        return end_pos == 0;
     }
 
     bool iterative(vector<int>& nums) {

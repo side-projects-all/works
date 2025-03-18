@@ -51,43 +51,45 @@ Constraints:
 
 class Solution {
 private:
-    int byBS(vector<int>& weights, int days) {
-        int left = 0;
-        int right = 0;
-        for (int w : weights) {
-            right += w;
-            left = std::max(left, w);
+    int by_binary_search(vector<int>& weights, int& days) {
+        int n = weights.size();
+        if (n == 1) {
+            return weights[0] % days == 0 ? weights[0] / days : weights[0] / days + 1;
         }
-        
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            int minDays = 1;
-            int acc = 0;
-            for (int w : weights) {
 
-                acc += w;
-                if (acc > mid) {
-                    ++minDays;
+        int b = weights[0];
+        int e = weights[0];
+        for (int i = 1; i < n; ++i) {
+            b = std::max(b, weights[i]);
+            e += weights[i];
+        }
 
-                    //if accumulated weight were larger than mid, it means we need another day, 
-                    //so after add minDays, we change acc to current weight to recalculate accumulated weight
-                    acc = w;
+        while (b < e) {
+            int mid = b + (e - b) / 2;
+            int possible_days = 1;
+            int sum = 0;
+            
+            for (int i = 0; i < n; ++i) {
+
+                sum += weights[i];
+                if (sum > mid) {
+                    sum = weights[i];
+                    ++possible_days;   
                 }
             }
 
-            if (days >= minDays) {
-                right = mid;
+            if (possible_days > days) {
+                b = mid + 1;
                 
             } else {
-                left = mid + 1;
+                e = mid;
             }
-            
         }
 
-        return left;
+        return b;
     }
 public:
     int shipWithinDays(vector<int>& weights, int days) {
-        return byBS(weights, days);
+        return by_binary_search(weights, days);
     }
 };

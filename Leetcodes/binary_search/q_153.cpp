@@ -47,34 +47,36 @@ class Solution {
 private:
     int by_binary_search(vector<int>& nums) {
         int n = nums.size();
-        //corner cases: only 1 element or no rotation
-        if (n == 1 || nums[0] < nums[n - 1]) {
+        if (n == 1) {
             return nums[0];
         }
 
-        int left = 0;
-        int right = n - 1;
-        while (left < right) {
-            int mid = left + (right - left) / 2;
+        if (nums[0] <= nums[n - 1]) {
+            return nums[0];
+        }
+        int b = 0;
+        int e = n - 1;
 
-            //mid at largest
-            if (nums[mid] > nums[mid + 1]) {
-                return nums[mid + 1];
-            }
-            //mid at smallest
-            if (nums[mid] < nums[mid - 1]) {
+        while (b < e) {
+            int mid = b + (e - b) / 2;
+            //at min
+            if (mid - 1 >= 0 && nums[mid] < nums[mid - 1]) {
                 return nums[mid];
             }
+            //at max
+            if (mid + 1 < n && nums[mid] > nums[mid + 1]) {
+                return nums[mid + 1];
+            }
 
-            //compare with nums[0] to move left or right
-            if (nums[mid] < nums[0]) {
-                right = mid;
+            if (nums[mid] < nums[b]) {
+                e = mid;
+                
             } else {
-                left = mid + 1;
+                b = mid + 1;
             }
         }
 
-        return nums[left];
+        return nums[b];
     }
 public:
     int findMin(vector<int>& nums) {

@@ -37,100 +37,50 @@ Follow up: This problem is similar to Search in Rotated Sorted Array, but nums m
 class Solution {
 private:
     bool by_binary_search(vector<int>& nums, int& target) {
-      int n = nums.size();
-      if (n == 1) {
-          return nums[0] == target;
-      }
+        int n = nums.size();
+        if (n == 1) {
+            return nums[0] == target;
+        }
 
-      int left = 0;
-      int right = n - 1;
+        int b = 0;
+        int e = n - 1;
+        while (b <= e) {
+            while (b < e && nums[b] == nums[b + 1]) {
+                ++b;
+            }
 
-      while (left <= right) {
-          while (left < right && nums[left] == nums[left + 1]) {
-              ++left;
-          }
+            while (b < e && nums[e] == nums[e - 1]) {
+                --e;
+            }
 
-          while (right > left && nums[right - 1] == nums[right]) {
-              --right;
-          }
+            int mid = b + (e - b) / 2;
 
-          int mid = left + (right - left) / 2;
+            if (nums[mid] == target) {
+                return true;
+            }
 
-          if (nums[mid] == target) {
-              return true;
-          }
+            if (nums[mid] >= nums[b]) {
+                if (target >= nums[b] && target < nums[mid]) {
+                    e = mid - 1;
 
-          //separate two parts: first part non-descending ordered or else
-          if (nums[left] <= nums[mid]) {
-              //check if target in first part or else
-              if (target >= nums[left] && target < nums[mid]) {
-                  right = mid - 1;
-              } else {
-                  left = mid + 1;
-              }
+                } else {
+                    b = mid + 1;
+                }
 
-          } else {
-              if (target > nums[mid] && target <= nums[right]) {
-                  left = mid + 1;
-              } else {
-                  right = mid - 1;
-              }
-          }
-      }
+            } else {
+                if (target <= nums[e] && target > nums[mid]) {
+                    b = mid + 1;
+                    
+                } else {
+                    e = mid - 1;
+                }
+            }
+        }
 
-      return false;
+        return false;
     }
 public:
     bool search(vector<int>& nums, int target) {
-        
-        /*
-        int N = nums.size();
-        if (N == 1) {
-            return nums[0] == target;
-        }
-        int left = 0;
-        int right = N - 1;
-        
-        std::function<bool(int, int, int)> bs = [&](int begin, int end, int goal) -> bool {
-
-            while (begin <= end) {
-                while (begin < end && nums[begin] == nums[begin + 1]) {
-                    ++begin;
-                }
-
-                while (begin < end && nums[end] == nums[end - 1]) {
-                    --end;
-                }
-
-                int mid = begin + (end - begin) / 2;
-
-                if (nums[mid] == goal) {
-                    return true;
-                }
-
-                if (nums[mid] >= nums[begin]) {
-                    if (goal >= nums[begin] && goal < nums[mid]) {
-                        end = mid - 1;
-                    } else {
-                        begin = mid + 1;
-                    }
-                    
-                } else {
-                    if (goal <= nums[end] && goal > nums[mid]) {
-                        begin = mid + 1;
-                        
-                    } else {
-                        end = mid - 1;
-                    }
-                }
-            }
-
-            return false;
-        };
-        
-        return bs(left, right, target);
-        */
-        
         return by_binary_search(nums, target);
     }
 };

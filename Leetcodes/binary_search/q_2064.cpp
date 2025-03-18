@@ -49,28 +49,35 @@ Constraints:
 */
 
 class Solution {
-public:
-    int minimizedMaximum(int n, vector<int>& quantities) {
-        int l = 0;
-        int r = std::pow(10, 5) + 1;
-        int ans = 0;
+private:
+    int by_binary_search(int& n, vector<int>& quantities) {
+        int qn = quantities.size();
+        if (qn == 1) {
+            return quantities[0] % n == 0 ? quantities[0] / n : quantities[0] / n + 1;
+        }
 
-        while(l < r) {
+        int b = 1;
+        int e = *std::max_element(quantities.begin(), quantities.end());
 
-            int mid = (l + r) / 2;
-            long count = 0;
-            for(int& ele : quantities) {
-                count += mid == 0 ? INT_MAX : ((ele + mid - 1) / mid);
+        while (b < e) {
+            int mid = b + (e - b) / 2;
+            int cnt = 0;
+            for (int i = 0; i < qn; ++i) {
+                cnt += quantities[i] % mid == 0 ? quantities[i] / mid : quantities[i] / mid + 1;
             }
 
-            if (count <= n) {
-                ans = mid;
-                r = mid;
-
+            if (cnt > n) {
+                b = mid + 1;
+                
             } else {
-                l = mid + 1;
+                e = mid;
             }
         }
-        return ans;
+
+        return b;
+    }
+public:
+    int minimizedMaximum(int n, vector<int>& quantities) {
+        return by_binary_search(n, quantities);
     }
 };

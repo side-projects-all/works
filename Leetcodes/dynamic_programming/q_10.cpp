@@ -42,25 +42,62 @@ Constraints:
 class Solution {
 private:
     bool iterative(std::string& s, std::string& p) {
-        int sN = s.size();
-        int pN = p.size();
-        std::vector<std::vector<bool>> mem(sN + 1, std::vector<bool>(pN + 1, 0));
-        mem[sN][pN] = true;
+        int sn = s.size();
+        int pn = p.size();
 
-        for (int sI = sN; sI >= 0; --sI) {
-            for (int pI = pN - 1; pI >= 0; --pI) {
-                bool currMatch = (sI < sN && (p[pI] == s[sI] || p[pI] == '.'));
+        std::vector<std::vector<bool>> dp(sn + 1, std::vector<bool>(pn + 1));
+        dp[0][0] = true;
 
-                if (pI + 1 < pN && p[pI + 1] == '*') {
-                    mem[sI][pI] = (mem[sI][pI + 2]) || (currMatch && mem[sI + 1][pI]);
-                    
-                } else {
-                    mem[sI][pI] = currMatch && mem[sI + 1][pI + 1];
+        for (int len = 2; len <= pn; ++len) {
+
+            if (p[len - 1] == '*') {
+                dp[0][len] = dp[0][len - 2];
+            }
+        }
+
+        //for every length of s matches every length of p
+        for (int sl = 1; sl <= sn; ++sl) {
+            for (int pl = 1; pl <= pn; ++pl) {
+
+                if (s[sl - 1] == p[pl - 1] || p[pl - 1] == '.') {
+                    dp[sl][pl] = dp[sl - 1][pl - 1];
+
+                } else if (p[pl - 1] == '*') {
+
+                    if (s[sl - 1] == p[pl - 2] || p[pl - 2] == '.') {
+                        dp[sl][pl] = dp[sl][pl - 2] || dp[sl - 1][pl];
+
+                    } else {
+                        dp[sl][pl] = dp[sl][pl - 2];
+                    }
                 }
             }
         }
 
-        return mem[0][0];
+        return dp[sn][pn];
+        
+        /*
+        int sn = s.size();
+        int pn = p.size();
+
+        std::vector<std::vector<bool>> dp(sn + 1, std::vector<bool>(pn + 1));
+        dp[sn][pn] = true;  //both are empty string, then they are equal, so it is true
+
+        //from the recursion, the idea of getting suffix to compare
+        for (int si = sn; si >= 0; --si) {
+            for (int pi = pn - 1; pi >= 0; --pi) {
+                bool curr = si < sn && (s[si] == p[pi] || p[pi] == '.');
+
+                if (pi + 1 < pn && p[pi + 1] == '*') {
+                    dp[si][pi] = (dp[si][pi + 2] || (curr && dp[si + 1][pi]));
+                } else {
+                    dp[si][pi] = (curr && dp[si + 1][pi + 1]);
+                }
+            }
+        }
+
+        return dp[0][0];
+        */
     }
     bool recursive(std::string& s, std::string& p) {
         int sN = s.size();

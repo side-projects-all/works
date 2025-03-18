@@ -31,23 +31,26 @@ Constraints:
 class Solution {
 public:
     int findKthPositive(vector<int>& arr, int k) {
-        if (k <= arr[0] - 1) {
-            return k;
-        }
+        // by binary search
+        int left = 0;
+        int right = arr.size() - 1;
 
-        k -= arr[0] - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
 
-        int N = arr.size();
-        for (int i = 0; i < N - 1; ++i) {
-            int currMissing = arr[i + 1] - arr[i] - 1;
-
-            if (k <= currMissing) {
-                return arr[i] + k;
+            if (arr[mid] - mid - 1 < k) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
             }
-
-            k -= currMissing;
         }
 
-        return arr[N - 1] + k;
+        /*
+            At the end of the loop, left = right + 1,
+            and the kth missing is in-between arr[right] and arr[left].
+            The number of integers missing before arr[right] is arr[right] - right - 1 -->
+            the number to return is arr[right] + k - (arr[right] - right - 1) = k + left
+        */
+        return left + k;
     }
 };

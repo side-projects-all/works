@@ -81,7 +81,31 @@ private:
     }
 
     bool iterative(string& s, string& p) {
+        int sn = s.size();
+        int pn = p.size();
+        std::vector<std::vector<bool>> dp(sn + 1, std::vector<bool>(pn + 1));
+        dp[0][0] = true;
 
+        //important preprocessing
+        for (int pl = 0; pl < pn && p[pl] == '*'; ++pl) {
+            dp[0][pl + 1] = true;
+        }
+
+        for (int sl = 1; sl <= sn; ++sl) {
+            for (int pl = 1; pl <= pn; ++pl) {
+
+                if (s[sl - 1] == p[pl - 1] || p[pl - 1] == '?') {
+                    dp[sl][pl] = dp[sl - 1][pl - 1];
+
+                } else if (p[pl - 1] == '*') {
+                    dp[sl][pl] = dp[sl - 1][pl] || dp[sl][pl - 1];
+                }
+            }
+        }
+
+        return dp[sn][pn];
+        
+        /*
         int s_len = s.size();
         int p_len = p.size();
 
@@ -107,6 +131,7 @@ private:
         }
         
         return mem[s_len][p_len];
+        */
     }
 
     bool recursive(string& s, string& p) {

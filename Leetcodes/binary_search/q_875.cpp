@@ -36,26 +36,38 @@ Constraints:
 */
 
 class Solution {
-public:
-    int minEatingSpeed(vector<int>& piles, int h) {
-        int left = 1;
-        int right = *std::max_element(piles.begin(), piles.end());
+private:
+    int by_binary_search(vector<int>& piles, int& h) {
+        int n = piles.size();
+        if (n == 1) {
+            return piles[0] / h + (piles[0] % h != 0);
+        }
 
-        while (left < right) {
-            int mid = left + (right - left) / 2;
-            int hour = 0;
+        int b = 1;
+        int e = piles[0];
+        for (int i = 1; i < n; ++i) {
+            e = std::max(e, piles[i]);
+        }
 
-            for (int p : piles) {
-                hour += p / mid + (p % mid != 0);
+        while (b < e) {
+            int mid = b + (e - b) / 2;
+            int hours = 0;
+            for (int i = 0; i < n; ++i) {
+                hours += piles[i] / mid + (piles[i] % mid != 0);
             }
 
-            if (h >= hour) {
-                right = mid;
+            if (hours > h) {
+                b = mid + 1;
+
             } else {
-                left = mid + 1;
+                e = mid;
             }
         }
 
-        return right;
+        return b;
+    }
+public:
+    int minEatingSpeed(vector<int>& piles, int h) {
+        return by_binary_search(piles, h);
     }
 };

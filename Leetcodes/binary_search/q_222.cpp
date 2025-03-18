@@ -58,8 +58,9 @@ private:
     }
 
     bool find_node_by_binary_search(int node_cnt, int& depth, TreeNode* root) {
+        //represent the count of leaves
         int left = 0;
-        int right = std::pow(2, depth) - 1;
+        int right = std::pow(2, depth) - 1; //because it is not full, we reduce 1 for max leaves
         TreeNode* b = root;
 
         for (int i = 0; i < depth; ++i) {

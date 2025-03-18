@@ -31,32 +31,44 @@ Constraints:
 */
 
 class Solution {
-public:
-    int smallestDivisor(vector<int>& nums, int threshold) {
-        
-        long sum = 0;
-        long left = 1;
-        for (int n : nums) {
-            sum += n;
-            left = std::min(left, (long)n);
+private:
+    int by_binary_search(vector<int>& nums, int& threshold) {
+        int n = nums.size();
+        if (n == 1) {
+            return nums[0] % threshold == 0 ? nums[0] / threshold : nums[0] / threshold + 1;
         }
-        long right = sum;
-        
-        while (left < right) {
-            long divisor = left + (right - left) / 2;
-            long division = 0;
-            
-            for (int n : nums) {
-                division += std::ceil(1.0 * n / divisor);
+
+        int b = 1;
+        int e = nums[0];
+        for (int i = 1; i < n; ++i) {
+            e = std::max(e, nums[i]);
+        }
+
+        while (b < e) {
+            int mid = b + (e - b) / 2;
+            int sum = 0;
+            for (int i = 0; i < n; ++i) {
+
+                if (nums[i] % mid != 0) {
+                    sum += nums[i] / mid + 1;
+
+                } else {
+                    sum += nums[i] / mid;
+                }
             }
-            
-            if ((long)threshold < division) {
-                left = divisor + 1;
+
+            if (sum > threshold) {
+                b = mid + 1;
+
             } else {
-                right = divisor;
+                e = mid;
             }
         }
 
-        return left;
+        return b;
+    }
+public:
+    int smallestDivisor(vector<int>& nums, int threshold) {
+        return by_binary_search(nums, threshold);
     }
 };
