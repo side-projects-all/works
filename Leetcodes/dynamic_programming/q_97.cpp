@@ -43,51 +43,90 @@ Constraints:
 */
 
 class Solution {
-public:
-    bool isInterleave(string s1, string s2, string s3) {
-        if (s1.length() + s2.length() != s3.length()) {
+private:
+    bool recursive(string& s1, string& s2, string& s3, std::vector<std::vector<int>>& mem, int i, int j, int k) {
+        if (i == s1.size()) {
+            return s2.substr(j) == s3.substr(k);
+        }
+
+        if (j == s2.size()) {
+            return s1.substr(i) == s3.substr(k);
+        }
+
+        if (mem[i][j] != -1) {
+            return mem[i][j];
+        }
+
+        if ((s3[k] == s1[i] && recursive(s1, s2, s3, mem, i + 1, j, k + 1)) || (s3[k] == s2[j] && recursive(s1, s2, s3, mem, i, j + 1, k + 1))) {
+            return mem[i][j] = true;
+        }
+
+        return mem[i][j] = false;
+    }
+    bool by_recursive_dp(string& s1, string& s2, string& s3) {
+        int n1 = s1.size();
+        int n2 = s2.size();
+        int n3 = s3.size();
+        if (n1 + n2 != n3) {
             return false;
         }
-        
-        p_s1 = s1;
-        p_s2 = s2;
-        p_s3 = s3;
-        p_s1Len = s1.length();
-        p_s2Len = s2.length();
-        p_s3Len = s3.length();
-        memo = std::vector<std::vector<bool>>(p_s1Len, std::vector<bool>(p_s2Len, -1));
-        
-        return topDown(0, 0, "");
-    }
 
-private:
-    std::string p_s1;
-    std::string p_s2;
-    std::string p_s3;
-    int p_s1Len;
-    int p_s2Len;
-    int p_s3Len;
-    std::vector<std::vector<bool>> memo;
-    
-    bool topDown(int s1Pos, int s2Pos, std::string res) {
-        if (res.compare(p_s3) == 0 && s1Pos == p_s1Len && s2Pos == p_s2Len) {
-            return true;
+        if (n1 == 0) {
+            return s2 == s3;
         }
-        
-        if (memo[s1Pos][s2Pos] != -1) {
-            return memo[s1Pos][s2Pos];
+
+        if (n2 == 0) {
+            return s1 == s3;
         }
-        
-        bool ans = false;
-        if (s1Pos < p_s1Len) {
-            ans |= topDown(s1Pos + 1, s2Pos, res + p_s1[s1Pos]);
+
+        //n3 equal to n1 + n2, so it is the result of all combination 
+        std::vector<std::vector<int>> mem(n1, std::vector<int>(n2, -1));
+
+
+        return recursive(s1, s2, s3, mem, 0, 0, 0);
+    }
+    bool by_iterative_dp(string& s1, string& s2, string& s3) {
+        int n1 = s1.size();
+        int n2 = s2.size();
+        int n3 = s3.size();
+        if (n1 + n2 != n3) {
+            return false;
         }
-        if (s2Pos < p_s2Len) {
-            ans |= topDown(s1Pos, s2Pos + 1, res + p_s2[s2Pos]);
+
+        //under the premise of n1 + n2 == n3!
+        if (n1 == 0) {
+            return s2 == s3;
         }
+
+        if (n2 == 0) {
+            return s1 == s3;
+        }
+        //n3 equal to n1 + n2, so it is the result of all combination 
+        std::vector<std::vector<bool>> dp(n1 + 1, std::vector<bool>(n2 + 1));
+        //all empty
+        dp[0][0] = true;
+        //n2 = 0
+        for (int i = 1; i <= n1; ++i) {
+            dp[i][0] = dp[i - 1][0] && s1[i - 1] == s3[i - 1];
+        }
+
+        //n1 = 0
+        for (int i = 1; i <= n2; ++i) {
+            dp[0][i] = dp[0][i - 1] && s2[i - 1] == s3[i - 1];
+        }
+
+        for (int i = 1; i <= n1; ++i) {
+            for (int j = 1; j <= n2; ++j) {
+                dp[i][j] = (dp[i - 1][j] && s1[i - 1] == s3[i + j - 1]) || (dp[i][j - 1] && s2[j - 1] == s3[i + j - 1]);
+            }
+        }
+
+        return dp[n1][n2];
+    }
+public:
+    bool isInterleave(string s1, string s2, string s3) {
+        //return by_iterative_dp(s1, s2, s3);
         
-        memo[s1Pos][s2Pos] = ans;
-        
-        return ans;
+        return by_recursive_dp(s1, s2, s3);
     }
 };

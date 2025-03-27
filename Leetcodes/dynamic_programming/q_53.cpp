@@ -32,19 +32,13 @@ private:
         }
 
         int max_sum = nums[0];
-        //int curr_sum = nums[0];
-        int curr_sum = 0;
-        int prev_sum = nums[0];
         //std::vector<int> dp(n);
         //dp[0] = nums[0];
+        int curr_sum = nums[0];
 
         for (int i = 1; i < n; ++i) {
-            //curr_sum = std::max(0, curr_sum) + nums[i];
-            curr_sum = std::max(0, prev_sum) + nums[i];
+            curr_sum = std::max(0, curr_sum) + nums[i];
             max_sum = std::max(max_sum, curr_sum);
-            prev_sum = curr_sum;
-            //dp[i] = std::max(0, dp[i - 1]) + nums[i];
-            //max_sum = std::max(max_sum, dp[i]);
         }
 
         return max_sum;

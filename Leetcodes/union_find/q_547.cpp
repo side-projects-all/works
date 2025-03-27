@@ -36,59 +36,60 @@ Constraints:
 class Solution {
 private:
     std::vector<int> rank;
-    std::vector<int> root;
-
-    int findRoot(int x) {
-        //path compression
-        if (x == root[x]) {
+    std::vector<int> parent;
+    int find(int x) {
+        if (parent[x] == -1) {
             return x;
         }
 
-        return root[x] = findRoot(root[x]);
+        return parent[x] = find(parent[x]);
     }
 
-    void unionByRank(int x, int y) {
-        int rootX = findRoot(x);
-        int rootY = findRoot(y);
+    void union_set(int x, int y) {
+        int rx = find(x);
+        int ry = find(y);
 
-        if (rootX != rootY) {
-            if (rank[rootX] > rank[rootY]) {
-                root[rootY] = rootX;
-                
-            } else if (rank[rootX] < rank[rootY]) {
-                root[rootX] = rootY;
+        if (rx == ry) {
+            return;
+        }
 
-            } else {
-                root[rootY] = rootX;
-                rank[rootX] += 1;
+        if (rank[rx] > rank[ry]) {
+            parent[ry] = rx;
+            rank[rx] += rank[ry];   //using nodes number to represent the rank
 
-            }
+        } else {
+            parent[rx] = ry;
+            rank[ry] += rank[rx]; 
         }
     }
+    int by_union_find(vector<vector<int>>& isConnected) {
+        int n = isConnected.size();
+        if (n == 1) {
+            return 1;
+        }
 
+        parent.resize(n + 1, -1);
+        rank.resize(n + 1, 1);
+
+        for (int r = 0; r < n; ++r) {
+            for (int c = r + 1; c < n; ++c) {
+                if (isConnected[r][c] == 1) {
+                    union_set(r + 1, c + 1);
+                }
+            }
+        }
+
+        int cnt = 0;
+        for (int i = 1; i <= n; ++i) {
+            if (parent[i] == -1) {
+                ++cnt;
+            }
+        }
+
+        return cnt;
+    }
 public:
     int findCircleNum(vector<vector<int>>& isConnected) {
-        rank = std::vector<int>(isConnected.size(), 1);
-        root = std::vector<int>(isConnected.size(), 0);
-
-        for (int i = 0; i < isConnected.size(); ++i) {
-            root[i] = i;
-        }
-
-        int result = isConnected.size();
-        for (int r = 0; r < isConnected.size(); ++r) {
-            for (int c = 0; c < isConnected[r].size(); ++c) {
-                if (r == c) {
-                    continue;
-                }
-
-                if (isConnected[r][c] == 1 && findRoot(r) != findRoot(c)) {
-                    --result;
-                    unionByRank(r, c);
-                }
-            }
-        }
-
-        return result;
+        return by_union_find(isConnected);
     }
 };

@@ -42,74 +42,98 @@ Constraints:
 
 class WordDictionary {
 private:
-    struct TrieNode {
-        //std::string val;
-        bool isEnd;
-        static const int arr_len = 26;
-        TrieNode* subs[arr_len];
+    struct Trie_node {
+        bool is_end;
+        int link_cnt;
+        Trie_node* subs[26];
 
-        TrieNode () {
-            isEnd = false;
-
-            for (auto& s : subs) {
-                s = nullptr;
+        Trie_node() : is_end{ false }, link_cnt{ 0 } {
+            for (int i = 0; i < 26; ++i) {
+                subs[i] = nullptr;
             }
+        }
+
+        void put(char c, Trie_node* node) {
+            if (subs[c - 'a'] == nullptr) {
+                subs[c - 'a'] = node;
+                ++link_cnt;
+            }
+        }
+
+        bool contains(char c) {
+            return subs[c - 'a'] != nullptr;
+        }
+
+        int get_links_cnt() const {
+            return link_cnt;
         }
     };
 
-    TrieNode* root;
+    struct Trie {
+        public:
+            Trie_node* root;
 
-    //this is the hardest part of this question
-    //when you met dot(.), how you handle it?
-    //here, i did it by resursive way.
-    //could we change it into iterative way?
-    bool checkChildren(TrieNode* ptr, std::string word) {
-        
-        TrieNode* n = ptr;
-
-        if (word.length() == 0) {
-            return ptr->isEnd;
-        }
-
-        char ch = word[0];
-        if (ch == '.') {
-            for (TrieNode* p : ptr->subs) {
-                if (p != nullptr && checkChildren(p, word.substr(1))) {
-                    return true;
-                }
+            Trie() {
+                root = new Trie_node();
             }
-        } else if (ptr->subs[ch - 'a'] != nullptr) {
-            TrieNode* next = ptr->subs[ch - 'a'];
-            return checkChildren(next, word.substr(1));
-        }
 
-        return false;
-    }
+            void insert(std::string& str) {
+                int n = str.size();
+                Trie_node* node = root;
 
+                for (int i = 0; i < n; ++i) {
+                    if (!node->contains(str[i])) {
+                        node->put(str[i], new Trie_node());
+                    }
+
+                    node = node->subs[str[i] - 'a'];
+                }
+
+                node->is_end = true;
+            }
+
+            bool has_word(std::string& str, Trie_node* now) {
+                int n = str.size();
+                Trie_node* node = now;
+
+                for (int i = 0; i < n; ++i) {
+                    if (str[i] == '.') {
+
+                        std::string rest = str.substr(i + 1);
+                        for (int j = 0; j < 26; ++j) {
+                            if (node->subs[j] != nullptr && has_word(rest, node->subs[j])) {
+                                return true;
+                            }
+                        }
+
+                        return false;
+
+                    } else {
+                        if (!node->contains(str[i])) {
+                            return false;
+
+                        } else {
+                            node = node->subs[str[i] - 'a'];
+                        }
+                    }
+                }
+
+                return node->is_end;
+            }
+    };
+
+    Trie trie;
 public:
     WordDictionary() {
-        root = new TrieNode();
+        
     }
     
     void addWord(string word) {
-        TrieNode* n = root;
-
-        for (char c : word) {
-            int i = c - 'a';
-            
-            if (n->subs[i] == nullptr) {
-                n->subs[i] = new TrieNode();
-            }
-
-            n = n->subs[i];
-        }
-
-        n->isEnd = true;
+        trie.insert(word);
     }
     
     bool search(string word) {
-        
-        return checkChildren(root, word);
+        return trie.has_word(word, trie.root);
     }
 };
 

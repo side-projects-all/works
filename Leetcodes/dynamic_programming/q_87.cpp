@@ -48,73 +48,61 @@ Constraints:
 
 class Solution {
 private:
-    bool recursive(string& s1, string& s2) {
-        int n = s1.size();
+    bool recursive(string& s1, int i1, string& s2, int i2, std::vector<std::vector<std::vector<int>>>& mem, int len) {
+        if (len == 1) {
+            return s1[i1] == s2[i2];
+        }
 
-        //n + 1 means the length of two strings; n means position!!
-        std::vector<std::vector<std::vector<int>>> mem(n + 1, std::vector<std::vector<int>>(n, 
-                                                                            std::vector<int>(n, -1)));
+        if (mem[len][i1][i2] != -1) {
+            return mem[len][i1][i2];
+        }
 
-        std::function<bool(int, int, int)> recurr = [&](int i, int j, int len) -> bool {
-            if (len == 1) {
-                return mem[len][i][j] = (s1[i] == s2[j]);
+        for (int cut_at = 1; cut_at < len; ++cut_at) {
+            
+            int not_swap = recursive(s1, i1, s2, i2, mem, cut_at) && recursive(s1, i1 + cut_at, s2, i2 + cut_at, mem, len - cut_at);
+            int swap = recursive(s1, i1, s2, len + i2 - cut_at, mem, cut_at) && recursive(s1, i1 + cut_at, s2, i2, mem, len - cut_at);
+            if (not_swap || swap) {
+                return mem[len][i1][i2] = true;
             }
+        }
 
-            if (mem[len][i][j] != -1) {
-                return mem[len][i][j];
-            }
-
-            for (int cut = 1; cut < len; ++cut) {
-                //not swap
-                if (recurr(i, j, cut) && recurr(i + cut, j + cut, len -cut)) {
-                    return mem[len][i][j] = 1;
-                }
-                //swap
-                if (recurr(i, len + j - cut, cut) && recurr(i + cut, j, len - cut)) {
-                    return mem[len][i][j] = 1;
-                }
-            }
-
-            return mem[len][i][j] = 0;
-        };
-
-        return recurr(0, 0, n);
+        return mem[len][i1][i2] = false;
     }
-    bool iterative(string& s1, string& s2) {
+    bool by_recursive_dp(string& s1, string& s2) {
         int n = s1.size();
+        std::vector<std::vector<std::vector<int>>> mem(n + 1, std::vector<std::vector<int>>(n, std::vector<int>(n, -1)));
 
-        //n + 1 means the length of two strings; n means position!!
-        std::vector<std::vector<std::vector<int>>> mem(n + 1, std::vector<std::vector<int>>(n, 
-                                                                            std::vector<int>(n)));
+        return recursive(s1, 0, s2, 0, mem, n);
+    }
+    bool by_iterative_dp(string& s1, string& s2) {
+        int n = s1.size();
+        std::vector<std::vector<std::vector<int>>> dp(n + 1, std::vector<std::vector<int>>(n, std::vector<int>(n)));
 
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < n; ++j) {
-                mem[1][i][j] = s1[i] == s2[j];
+        for (int i1 = 0; i1 < n; ++i1) {
+            for (int i2 = 0; i2 < n; ++i2) {
+                dp[1][i1][i2] = s1[i1] == s2[i2];
             }
         }
 
         for (int len = 2; len <= n; ++len) {
-            for (int i = 0; i < n + 1 - len; ++i) {
-                for (int j = 0; j < n + 1 - len; ++j) {
-
-                    for (int newLen = 1; newLen < len; ++newLen) {
-                        //const std::vector<int>& mem1 = mem[newLen][i];
-                        //const std::vector<int>& mem2 = mem[len - newLen][i + newLen];
-
-                        //the cases: not swap & swap
-                        mem[len][i][j] |= mem[newLen][i][j] && mem[len - newLen][i + newLen][j + newLen];
-                        mem[len][i][j] |= mem[newLen][i][j + len - newLen] && mem[len - newLen][i + newLen][j];
-                        
+            for (int i1 = 0; i1 <= n - len; ++i1) {
+                for (int i2 = 0; i2 <= n - len; ++i2) {
+                    
+                    for (int cut_at = 1; cut_at < len; ++cut_at) {
+                        //not swap
+                        dp[len][i1][i2] |= (dp[cut_at][i1][i2] && dp[len - cut_at][i1 + cut_at][i2 + cut_at]);
+                        //swap 
+                        dp[len][i1][i2] |= (dp[cut_at][i1][len - cut_at + i2] && dp[len - cut_at][i1 + cut_at][i2]);
                     }
                 }
             }
         }
 
-        return mem[n][0][0];
+        return dp[n][0][0];
     }
 public:
     bool isScramble(string s1, string s2) {
-        //return iterative(s1, s2);
-        return recursive(s1, s2);
+        //return by_iterative_dp(s1, s2);
+        return by_recursive_dp(s1, s2);
     }
 };

@@ -19,72 +19,78 @@ Output: 127
 Constraints:
 
     1 <= nums.length <= 2 * 10^5
-    0 <= nums[i] <= 231 - 1
+    0 <= nums[i] <= 2^31 - 1
 
 
 */
 
 class Solution {
 private:
+    struct Trie_node {
+        Trie_node* subs[2];
+        Trie_node() {
+            subs[0] = nullptr;
+            subs[1] = nullptr;
+        }
 
-    struct TrieNode {
-        TrieNode* children[2];
-
-        TrieNode() {
-
-            for (auto& node : children) {
-                node = nullptr;
+        void put(int i, Trie_node* node) {
+            if (i >= 0 && i <= 1 && subs[i] == nullptr) {
+                subs[i] = node;
             }
+        }
+
+        bool contains(int i) {
+            return i >= 0 && i <= 1 && subs[i] != nullptr;
         }
     };
 
-    TrieNode* root;
+    struct Trie {
+        Trie_node* root;
+        Trie() {
+            root = new Trie_node();
+        }
+    };
 
-public:
-
-    int findMaximumXOR(vector<int>& nums) {
-        root = new TrieNode();
-        int max = 0;
-        
-        //by the constraint of this question, we set the length of bitset as 32
-        std::bitset<32> binaryForm;
-        for (int num : nums) {
-            TrieNode* now = root;
-            TrieNode* xorNow = now;
-            int currXor = 0;
-
-            binaryForm = num;
-            std::string binaryStr = binaryForm.to_string();
-            for (int i = 0; i < binaryStr.size(); ++i) {
-                int index = binaryStr[i] - '0';
-
-                if (now->children[index] == nullptr) {
-                    now->children[index] = new TrieNode();
-                }
-
-                now = now->children[index];
-
-                //index could be 1 or 0, to maximize by XOR, 
-                //if index was 0, we try to find 1, 
-                //if index was 1, we try to find 0
-                int reverse = (index == 1) ? 0 : 1;
-                if (xorNow->children[reverse] != nullptr) {
-                    //if we found it, current xor result will become 1,
-                    //so we carry 1 and plus 1
-                    currXor = ((currXor << 1) | 1);
-                    xorNow = xorNow->children[reverse];     //if we found it, we go to the child of reverse
-                    
-                } else {
-                    //if we did not find it, current xor result will become 0,
-                    //so we just carry 1
-                    currXor = (currXor << 1);
-                    xorNow = xorNow->children[index];       //if we could notfound it, we go to the child of index
-                }
-
-                max = std::max(max, currXor);
-            }
+    int by_trie(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return 0;
         }
 
-        return max;
+        Trie trie;
+        Trie_node* now;
+        Trie_node* rev;
+        int ans = 0;
+        for (int i = 0; i < n; ++i) {
+            now = trie.root;
+            rev = trie.root;
+            int tmp = 0;
+
+            for (int bits = 31; bits >= 0; --bits) {
+                int digit = (nums[i] >> bits) & 1;  //get most significant bit!
+
+                if (!now->contains(digit)) {
+                    now->put(digit, new Trie_node());
+                }
+
+                if (rev->contains(1 - digit)) {
+                    tmp += 1 << bits;
+                    rev = rev->subs[1 - digit];
+
+                } else {
+                    rev = rev->subs[digit];
+                }
+
+                now = now->subs[digit];
+            }
+
+            ans = std::max(ans, tmp);
+        }
+
+        return ans;
+    }
+public:
+    int findMaximumXOR(vector<int>& nums) {
+        return by_trie(nums);
     }
 };

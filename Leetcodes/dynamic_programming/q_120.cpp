@@ -36,123 +36,42 @@ Follow up: Could you do this using only O(n) extra space, where n is the total n
 
 class Solution {
 private:
-    int iterative(vector<vector<int>>& triangle) {
-        /*
+    int by_iterative_dp(vector<vector<int>>& triangle) {
         int rows = triangle.size();
-        int cols = triangle[rows - 1].size();
-        int bigNum = 10001 * cols;
-
-        std::vector<std::vector<int>> mem(cols, std::vector<int>(cols));
-        mem[0][0] = triangle[0][0];
-        
-
-        for (int r = 1; r < triangle.size(); ++r) {
-
-            for (int c = 0; c < triangle[r].size(); ++c) {
-                int prev = 0;
-                int prevMinusOne = 0;
-
-                if (c < 0 || c >= triangle[r - 1].size()) {
-                    prev = bigNum;
-                } else {
-                    //prev = triangle[r - 1][c];
-                    prev = mem[r - 1][c];
-                }
-
-                if (c - 1 < 0 || c - 1 >= triangle[r - 1].size()) {
-                    prevMinusOne = bigNum;
-                } else {
-                    //prevMinusOne = triangle[r - 1][c - 1];
-                    prevMinusOne = mem[r - 1][c - 1];
-                }
-
-                mem[r][c] = triangle[r][c] + std::min(prev, prevMinusOne);
-                
-            }
-        }
-        int min = bigNum;
-
-        for (int i = 0; i < cols; ++i) {
-            min = std::min(min, mem[rows - 1][i]);
-        }
-        
-        return min;
-        */
-        
-        int rows = triangle.size();
-        int cols = triangle[rows - 1].size();
-
         if (rows == 1) {
             return triangle[0][0];
         }
 
-        std::vector<std::vector<int>> dp(2, std::vector<int>(cols));
-        dp[0][0] = triangle[0][0];
+        int cols = triangle[rows - 1].size();
 
-        for (int r = 1; r < rows; ++r) {
+        std::vector<int> prev(cols);
+        prev[0] = triangle[1][0] + triangle[0][0];
+        prev[1] = triangle[1][1] + triangle[0][0];
 
-            int prev_rows = r - 1;
-            int prev_cols = triangle[r - 1].size();
+        for (int r = 2; r < rows; ++r) {
 
-            int curr_cols = triangle[r].size();
+            int len = triangle[r].size();
+            int top_left = prev[0];
+            int top = prev[1];
+            prev[0] = triangle[r][0] + prev[0];
+            prev[len - 1] = triangle[r][len - 1] + prev[len - 2];
 
-            dp[1][0] = dp[0][0] + triangle[r][0];
-            dp[1][curr_cols - 1] = dp[0][prev_cols - 1] + triangle[r][curr_cols - 1];
-
-            for (int c = 1; c < curr_cols - 1; ++c) {
-                dp[1][c] = triangle[r][c] + std::min(dp[0][c], dp[0][c - 1]);
+            for (int c = 1; c < len - 1; ++c) {
+                prev[c] = triangle[r][c] + std::min(top_left, top);
+                top_left = top;
+                top = prev[c + 1];
             }
-
-            dp[0] = dp[1];
         }
 
         int min = INT_MAX;
-        for (int c = 0; c < cols; ++c) {
-            min = std::min(min, dp[1][c]);
+        for (int i = 0; i < cols; ++i) {
+            min = std::min(min, prev[i]);
         }
 
         return min;
     }
-
-    int recursive(vector<vector<int>>& triangle, int r, int c, std::vector<std::vector<int>>& mem, const int& bigNum) {
-        
-        if (c < 0 || c >= triangle[r].size()) {
-            return bigNum;    //give a limitation for comparison
-        }
-
-        if (r == 0 && c == 0) {
-            return triangle[0][0];
-        }
-
-        //if it was not a limitation, we retrieve val from mem
-        if (mem[r][c] != bigNum) {
-            return mem[r][c];
-        }
-
-        mem[r][c] = triangle[r][c] + std::min(recursive(triangle, r - 1, c - 1, mem, bigNum), 
-                                                recursive(triangle, r - 1, c, mem, bigNum));
-
-        return mem[r][c];
-    }
-
 public:
     int minimumTotal(vector<vector<int>>& triangle) {
-        /*
-        int rows = triangle.size();
-        int cols = triangle[rows - 1].size();
-        int bigNum = 10001 * cols;
-        int min = bigNum;
-
-        std::vector<std::vector<int>> mem(cols, std::vector<int>(cols, bigNum));
-        
-
-        for (int i = 0; i < cols; ++i) {
-            min = std::min(min, recursive(triangle, rows - 1, i, mem, bigNum));
-        }
-        
-        return min;
-        */
-
-        return iterative(triangle);
+        return by_iterative_dp(triangle);
     }
 };

@@ -33,95 +33,113 @@ Constraints:
 
 class Solution {
 private:
-    //trie node
-    struct TrieNode {
-        //bool isEnd;
-        TrieNode* children[26];
+    struct Trie_node {
         std::string word;
+        int links_cnt;
+        Trie_node* subs[26];
 
-        TrieNode() {
-            //isEnd = false;
-            word = "";
-
-            for (auto& child : children) {
-                child = nullptr;
+        Trie_node() : word{ "" }, links_cnt{ 0 } {
+            for (int i = 0; i < 26; ++i) {
+                subs[i] = nullptr;
             }
+        }
+        void put(char c, Trie_node* node) {
+            if (subs[c - 'a'] == nullptr) {
+                subs[c - 'a'] = node;
+                ++links_cnt;
+            }
+        }
+        bool contains(char c) {
+            return subs[c - 'a'] != nullptr;
+        }
+        int get_links_cnt() const {
+            return links_cnt;
         }
     };
 
-    //trie root pointer
-    TrieNode* root;
+    struct Trie {
+    private:
+        Trie_node* root;
+    public:
+        Trie() {
+            root = new Trie_node();
+        }
 
-    //four directions: left, up, right, down
-    int dir[4][2] = { {-1, 0}, {0, 1}, {1, 0}, {0, -1} };
-
-    //build trie
-    void createTrie(const std::vector<string>& words) {
-        root = new TrieNode();
-        TrieNode* now = root;
-
-        for (auto& w : words) {
-
-            for (char c : w) {
-
-                int i = c - 'a';
-                if (now->children[i] == nullptr) {
-                    now->children[i] = new TrieNode();
+        void insert(const std::string& s) {
+            Trie_node* now = root;
+            for (int i = 0; i < s.size(); ++i) {
+                if (!now->contains(s[i])) {
+                    now->put(s[i], new Trie_node());
                 }
-                now = now->children[i];
+                
+                now = now->subs[s[i] - 'a'];
             }
 
-            //now->isEnd = true;
-            now->word = w;
-            now = root;
+            now->word = s;
         }
+
+        Trie_node* search_char_by_node(char c, Trie_node* node) {
+            return node->subs[c - 'a'];
+        }
+
+        Trie_node* get_root() {
+            return root;
+        }
+    };
+
+    void back_tracking(vector<vector<char>>& board, std::vector<std::string>& ans, Trie_node* pos, int r, int c) {
+        if (pos->word != "") {
+            ans.push_back(pos->word);
+            pos->word = "";     //marked empty if used, and do not just return!
+        }
+
+        int rows = board.size();
+        int cols = board[0].size();
+
+        char tmp = board[r][c];
+        board[r][c] = '#';
+        if (r + 1 < rows && board[r + 1][c] != '#' && pos->contains(board[r + 1][c])) {
+            back_tracking(board, ans, pos->subs[board[r + 1][c] - 'a'], r + 1, c);
+        }
+
+        if (r - 1 >= 0 && board[r - 1][c] != '#' && pos->contains(board[r - 1][c])) {
+            back_tracking(board, ans, pos->subs[board[r - 1][c] - 'a'], r - 1, c);
+        }
+
+        if (c + 1 < cols && board[r][c + 1] != '#' && pos->contains(board[r][c + 1])) {
+            back_tracking(board, ans, pos->subs[board[r][c + 1] - 'a'], r, c + 1);
+        }
+
+        if (c - 1 >= 0 && board[r][c - 1] != '#' && pos->contains(board[r][c - 1])) {
+            back_tracking(board, ans, pos->subs[board[r][c - 1] - 'a'], r, c - 1);
+        }
+
+        board[r][c] = tmp;
     }
+    vector<string> by_trie_back_tracking(vector<vector<char>>& board, vector<string>& words) {
+        Trie trie;
 
-    //backtracking method
-    void backtracking(std::vector<std::vector<char>>& board, TrieNode* parent,
-                                            int row, int col, std::vector<std::string>& result) {
-
-        char letter = board[row][col];  //for temporary store of the character we will explore
-        TrieNode* now = parent;
-
-        if (now->word != "") {
-            result.push_back(now->word);
-            now->word = "";
+        //build trie
+        for (int i = 0; i < words.size(); ++i) {
+            trie.insert(words[i]);
         }
 
-        board[row][col] = '#';  //temporarily marks this letter
+        //do back_tracking
+        std::vector<std::string> ans;
+        Trie_node* now = trie.get_root();
 
-        for (int i = 0; i < 4; ++i) {
-            int r = row + dir[i][0];
-            int c = col + dir[i][1];
-
-            if (r < 0 || r >= board.size() || c < 0 || c >= board[0].size()) {
-                continue;
-            }
-
-            int index = board[r][c] - 'a';
-            //for the letter that was changed to #
-            if (index >= 0 && now->children[index] != nullptr) {
-                backtracking(board, now->children[index], r, c, result);
-            }
-        }
-
-        board[row][col] = letter;   //recover this letter
-    }
-
-public:
-    std::vector<std::string> findWords(vector<vector<char>>& board, vector<string>& words) {
-        createTrie(words);
-
-        std::vector<std::string> result;
         for (int r = 0; r < board.size(); ++r) {
             for (int c = 0; c < board[0].size(); ++c) {
-                int i = board[r][c] - 'a';
-                if (root->children[i] != nullptr) {
-                    backtracking(board, root->children[i], r, c, result);
+                if (trie.search_char_by_node(board[r][c], now) != nullptr) {
+                    back_tracking(board, ans, now->subs[board[r][c] - 'a'], r, c);
                 }
             }
         }
-        return result;
+
+        return ans;
+    }
+public:
+    vector<string> findWords(vector<vector<char>>& board, vector<string>& words) {
+        return by_trie_back_tracking(board, words);
     }
 };

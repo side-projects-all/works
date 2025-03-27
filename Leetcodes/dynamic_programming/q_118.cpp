@@ -22,31 +22,30 @@ Constraints:
 */
 
 class Solution {
-public:
-    vector<vector<int>> generate(int numRows) {
-        vector<vector<int>> result(numRows);
-        vector<int> rowLast;
-        vector<int> rowCurrent;
-        
-        result[0] = vector<int>(1, 1);
-        
+private:
+    vector<vector<int>> by_iterative_dp(int& numRows) {
         if (numRows == 1) {
-            return result;
+            return {{1}};
         }
-        
-        result[1] = vector<int>(2, 1);
-        if (numRows == 2) {
-            return result;
-        }
-        
-        for (int i = 2; i < numRows; ++i) {
-            result[i] = vector<int>(i + 1, 1);
-            
-            for (int j = 1; j < result[i].size() - 1; ++j) {
-                result[i][j] = result[i - 1][j - 1] + result[i - 1][j];
+
+        std::vector<std::vector<int>> dp(numRows);
+        dp[0] = {1};
+        dp[1] = {1, 1};
+
+        for (int r = 2; r < numRows; ++r) {
+            dp[r] = std::vector<int>(r + 1);
+            dp[r][0] = 1;
+            dp[r][r] = 1;
+
+            for (int c = 1; c < r; ++c) {
+                dp[r][c] = dp[r - 1][c - 1] + dp[r - 1][c];
             }
         }
-        
-        return result;
+
+        return dp;
+    }
+public:
+    vector<vector<int>> generate(int numRows) {
+        return by_iterative_dp(numRows);
     }
 };

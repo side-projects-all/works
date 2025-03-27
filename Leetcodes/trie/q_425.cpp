@@ -1,105 +1,138 @@
 /*
+Given an array of unique strings words, return all the word squares you can build from words. The same word from words can be used multiple times. You can return the answer in any order.
+
+A sequence of strings forms a valid word square if the kth row and column read the same string, where 0 <= k < max(numRows, numColumns).
+
+    For example, the word sequence ["ball","area","lead","lady"] forms a word square because each word reads the same both horizontally and vertically.
+
+ 
+
+Example 1:
+
+Input: words = ["area","lead","wall","lady","ball"]
+Output: [["ball","area","lead","lady"],["wall","area","lead","lady"]]
+Explanation:
+The output consists of two word squares. The order of output does not matter (just the order of words in each word square matters).
+
+Example 2:
+
+Input: words = ["abat","baba","atan","atal"]
+Output: [["baba","abat","baba","atal"],["baba","abat","baba","atan"]]
+Explanation:
+The output consists of two word squares. The order of output does not matter (just the order of words in each word square matters).
+
+ 
+
+Constraints:
+
+    1 <= words.length <= 1000
+    1 <= words[i].length <= 4
+    All words[i] have the same length.
+    words[i] consists of only lowercase English letters.
+    All words[i] are unique.
+
 
 */
 
 class Solution {
 private:
-    struct TrieNode {
-        std::vector<int> wordIndex;
-        TrieNode* children[26];
+    struct Trie_node {
+        std::vector<int> str_indices;   //string index using this character
+        Trie_node* subs[26];
+        int links_cnt;
 
-        TrieNode() {
-            for (auto& child : children) {
-                child = nullptr;
+        Trie_node() : links_cnt{ 0 } {
+            for (int i = 0; i < 26; ++i) {
+                subs[i] = nullptr;
             }
+        }
+
+        void put(char c, Trie_node* node) {
+            if (subs[c - 'a'] == nullptr) {
+                subs[c - 'a'] = node;
+                ++links_cnt;
+            }
+        }
+
+        bool contains(char c) {
+            return subs[c - 'a'] != nullptr;
         }
     };
 
-    TrieNode* root;
+    struct Trie {
+        Trie_node* root;
 
-    void createTrie(vector<string>& words) {
+        Trie() {
+            root = new Trie_node();
+        }
 
-        root = new TrieNode();
-        TrieNode* now;
+        void insert(vector<string>& words) {
+            Trie_node* now;
 
-        for (int index = 0; index < words.size(); ++index) {
+            for (int i = 0; i < words.size(); ++i) {
 
-            now = root;
-            for (char c : words[index]) {
-                int i = c - 'a';
-                if (now->children[i] == nullptr) {
-                    now->children[i] = new TrieNode();
+                now = root;
+                for (int j = 0; j < words[i].size(); ++j) {
+                    if (!now->contains(words[i][j])) {
+                        now->put(words[i][j], new Trie_node());
+                    }
+
+                    now = now->subs[words[i][j] - 'a'];
+                    now->str_indices.push_back(i);
                 }
-
-                now = now->children[i];
-                //we record every row index here!!
-                //because of the symmetry of wordSquare, 
-                //the letter will appear in the same number of column and row
-                now->wordIndex.push_back(index);    
             }
         }
-    }
-
-    //based on the constraints
-    int totalSteps = 0;
-
-    //the first parameter starts from 1 because we do not need the value on diagonal
-    //the second parameter is for temprarily storring the possible answer
-    void backtracking(int step, std::vector<std::string>& wordSquare, std::vector<string>& words, 
-                        std::vector<std::vector<std::string>>& result) {
-        
-        if (step == totalSteps) {
-            result.push_back(wordSquare);
+    };
+    void back_tracking(Trie_node* root, vector<string>& words, std::vector<std::vector<std::string>>& ans, 
+                                                    int col, std::vector<std::string>& sqr) {
+        if (col == words[0].size()) {
+            ans.push_back(sqr);
             return;
         }
 
-        std::string prefix = "";
-        for (std::string& w : wordSquare) {
-            prefix += w[step];
+        std::string col_chars;
+        for (std::string& s : sqr) {
+            //when you at column 1, you will have 1 string; column 2, 2 strings, column 3, 3 strings
+            col_chars += s[col];    
         }
 
-        //find in trie
-        //if we could loop through all prefix letters, 
-        //now will be assigned to it children[i], 
-        //so if now were not nullptr, we just get its index list
-        TrieNode* now = root;
-        for (char c : prefix) {
-            int i = c - 'a';
-
-            if (now->children[i] == nullptr) {
-                now = nullptr;
+        //using the symmetry to compare in trie
+        Trie_node* now = root;
+        for (char c : col_chars) {
+            if (!now->contains(c)) {
+                now = nullptr;  //this is necessary!!!
                 break;
-            } 
-            now = now->children[i];
+            }
+
+            now = now->subs[c - 'a'];
         }
 
         std::vector<int> indices;
         if (now != nullptr) {
-            indices = now->wordIndex;
+            indices = now->str_indices;
         }
 
-        //backtracking recursion
         for (int i : indices) {
-            wordSquare.push_back(words[i]);
-            backtracking(step + 1, wordSquare, words, result);
-            wordSquare.pop_back();
+            sqr.push_back(words[i]);
+            back_tracking(root, words, ans, col + 1, sqr);
+            sqr.pop_back();
         }
     }
 
+    vector<vector<string>> by_trie_back_tracking(vector<string>& words) {
+        std::vector<std::vector<std::string>> ans;
+        Trie trie;
+        trie.insert(words);
+        
+        for (int i = 0; i < words.size(); ++i) {
+            std::vector<std::string> sqr{ words[i] };
+            back_tracking(trie.root, words, ans, 1, sqr);
+        }
+
+        return ans;
+    }
 public:
     vector<vector<string>> wordSquares(vector<string>& words) {
-        //set the total steps size by the string size
-        totalSteps = words[0].size();
-        std::vector<std::vector<string>> result;
-
-        createTrie(words);
-
-        for (auto word : words) {
-            std::vector<std::string> wordSquare;
-            wordSquare.push_back(word);
-            backtracking(1, wordSquare, words, result);
-        }
-        
-        return result;
+        return by_trie_back_tracking(words);
     }
 };

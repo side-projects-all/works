@@ -38,55 +38,102 @@ Constraints:
 
 class Solution {
 private:
-    bool iterative(std::string& s, std::vector<std::string>& wordDict) {
-        std::vector<bool> dp(s.size());
+    struct Trie_node {
+        bool is_end;
+        int links_cnt;
+        Trie_node* subs[26]{ nullptr };
+        Trie_node() : is_end{ false }, links_cnt{ 0 } {
 
-        for (int i = 0; i < s.size(); ++i) {
-            for (std::string& w : wordDict) {
-                if (i < w.size() - 1) {
+        }
+
+        void put(char c) {
+            if (subs[c - 'a'] == nullptr) {
+                subs[c - 'a'] = new Trie_node();
+                ++links_cnt;
+            }
+        }
+
+        bool contains(char c) {
+            return subs[c - 'a'] != nullptr;
+        }
+    };
+
+    struct Trie {
+        Trie_node* root{ new Trie_node() };
+        Trie() {
+
+        }
+
+        void insert(const std::string& s) {
+            Trie_node* now = root;
+            for (int i = 0; i < s.size(); ++i) {
+                if (!now->contains(s[i])) {
+                    now->put(s[i]);
+                }
+
+                now = now->subs[s[i] - 'a'];
+            }
+
+            now->is_end = true;
+        }
+    };
+    bool by_trie_iterative_dp(string& s, vector<string>& wordDict) {
+        
+        //build trie
+        Trie trie;
+        for (int i = 0; i < wordDict.size(); ++i) {
+            trie.insert(wordDict[i]);
+        }
+
+        //search in trie
+        int n = s.size();
+        std::vector<bool> dp(n);
+        Trie_node* now;
+        for (int i = 0; i < n; ++i) {
+
+            if (i == 0 || dp[i - 1]) {
+
+                now = trie.root;
+                for (int j = i; j < n; ++j) {
+                    if (!now->contains(s[j])) {
+                        break;
+                    }
+
+                    now = now->subs[s[j] - 'a'];
+                    if (now->is_end) {
+                        dp[j] = true;
+                    }
+                }
+            }
+        }
+
+        return dp[n - 1];
+    }
+    bool by_iterative_dp(string& s, vector<string>& wordDict) {
+        int n = s.size();
+        std::vector<bool> dp(n);
+
+        for (int i = 0; i < n; ++i) {
+
+            for (int w = 0; w < wordDict.size(); ++w) {
+                if (i < wordDict[w].size() - 1) {
                     continue;
                 }
 
-                if (i == w.size() - 1 || dp[i - w.size()]) {
-                    if (s.substr(i - w.size() + 1, w.size()) == w) {
+                if (i == wordDict[w].size() - 1 || dp[i - wordDict[w].size()]) {
+                    if (s.substr(i - wordDict[w].size() + 1, wordDict[w].size()) == wordDict[w]) {
                         dp[i] = true;
                         break;
                     }
                 }
             }
         }
-
-        return dp[s.size() - 1];
-    }
-
-    bool recursive(std::string& s, std::vector<std::string>& wordDict, int len, std::vector<int>& mem) {
-        if (len < 0) {
-            return true;
-        }
-
-        if (mem[len] != -1) {
-            return mem[len];
-        }
-
-        for (std::string& w : wordDict) {
-            int w_len = w.size();
-
-            if (len - w_len + 1 < 0) {
-                continue;
-            }
-
-            if (s.substr(len - w_len + 1, w_len) == w && recursive(s, wordDict, len - w_len, mem)) {
-                return mem[len] = 1;
-            }
-        }
-
-        return mem[len] = 0;
+        return dp[n - 1];
     }
 public:
     bool wordBreak(string s, vector<string>& wordDict) {
-        //std::vector<int> mem(s.size(), -1);
-
-        //return recursive(s, wordDict, s.size() - 1, mem);
-        return iterative(s, wordDict);
+        //return by_iterative_dp(s, wordDict);
+        
+        return by_trie_iterative_dp(s, wordDict);
     }
 };

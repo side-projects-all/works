@@ -1,22 +1,21 @@
 #include <iostream>
 #include "All_tricks.h"
-#include "Lc_questions.h"
+#include "Solution.h"
 
 int main(int argc, char *argv[]) {
 
-  /**/
-  All_tricks at;
-  //at.Compute_the_sign_of_an_integer();
-  //at.Compute_the_integer_absolute_value_without_branching();
-  at.Detect_if_two_integers_have_opposite_signs();
-  
-  
+	/*
+	All_tricks at;
+	//at.Compute_the_sign_of_an_integer();
+	//at.Compute_the_integer_absolute_value_without_branching();
+	at.Detect_if_two_integers_have_opposite_signs();
+	*/
+	
+	/**/
+	Solution sol;
+	std::vector<int> nums{-3,-2,-1,0,0,1,2};
+	long long ans = sol.maximumCount(nums);
+	std::cout << ans << "\n";
 
-  /*
-  Lc_questions lcq;
-  std::vector<int> nums = {1,1,2,2,3,4,2,3};
-  int k = 6, x = 2;
-  lcq.q(nums, k, x);
-  */
-  return 0;
+	return 0;
 }

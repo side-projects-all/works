@@ -40,69 +40,77 @@ Constraints:
 
 class Trie {
 private:
-    struct Node {
-        bool isEnd;
-        Node* links[26]; //using pointer array is faster than unordered_map!!!!
+    struct Trie_node {
+        bool is_end;
+        int links_cnt;
+        Trie_node* subs[26];
 
-        Node() {
-            isEnd = false;
-            for (auto& link : links) {
-                link = nullptr;
+        Trie_node() : is_end{ false }, links_cnt{ 0 } {
+            for (int i = 0; i < 26; ++i) {
+                subs[i] = nullptr;
             }
+        }
+
+        bool contains(char c) {
+            return subs[c - 'a'] != nullptr;
+        }
+
+        void put(char c, Trie_node* node) {
+            if (subs[c - 'a'] == nullptr) {
+                subs[c - 'a'] = node;
+                ++links_cnt;
+            }
+        }
+
+        int get_links_cnt() const {
+            return links_cnt;
         }
     };
 
-    Node root;
-
+    Trie_node* root;
 public:
     Trie() {
-        
+        root = new Trie_node();
     }
     
     void insert(string word) {
-        Node* n = &root;
-        
-        for (auto& ch : word) {
-            int i = ch - 'a';
+        Trie_node* node = root;
 
-            if (n->links[i] == nullptr) {
-                n->links[i] = new Node();
+        for (int i = 0; i < word.size(); ++i) {
+            if (!node->contains(word[i])) {
+                node->put(word[i], new Trie_node());
             }
 
-            n = n->links[i];
+            node = node->subs[word[i] - 'a'];
         }
 
-        n->isEnd = true;
+        node->is_end = true;
     }
     
     bool search(string word) {
-        Node* n = &root;
+        Trie_node* node = root;
 
-        for (auto& ch : word) {
-            int i = ch - 'a';
-
-            if (n->links[i] == nullptr) {
+        for (int i = 0; i < word.size(); ++i) {
+            if (!node->contains(word[i])) {
                 return false;
             }
 
-            n = n->links[i];
+            node = node->subs[word[i] - 'a'];
         }
 
-        //check if word was just prefix
-        return (n->isEnd) ? true : false;
+
+        return node->is_end;
     }
     
     bool startsWith(string prefix) {
-        Node* n = &root;
+        Trie_node* node = root;
 
-        for (const auto& ch : prefix) {
-            int i = ch - 'a';
-
-            if (n->links[i] == nullptr) {
+        for (int i = 0; i < prefix.size(); ++i) {
+            if (!node->contains(prefix[i])) {
                 return false;
             }
 
-            n = n->links[i];
+            node = node->subs[prefix[i] - 'a'];
         }
 
         return true;

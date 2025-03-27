@@ -31,69 +31,49 @@ Constraints:
 
 class Solution {
 private:
-    class Union_find {
-    private:
-        std::vector<int> parent;
-        std::vector<int> rank;
-
-    public:
-        Union_find(const int& n) {
-            parent.resize(n);
-            rank.resize(n, 1);
-
-            for (int i = 0; i < n; ++i) {
-                parent[i] = i;
-            }
+    std::vector<int> parent;
+    std::vector<int> rank;
+    int find(int x) {
+        if (parent[x] == -1) {
+            return x;
         }
 
-        int find(int x) {
-            if (parent[x] == x) {
-                return x;
-            }
+        return parent[x] = find(parent[x]);
+    }
 
-            return parent[x] = find(parent[x]);
+    bool union_set(int x, int y) {
+        int rx = find(x);
+        int ry = find(y);
+
+        if (rx == ry) {
+            return false;
         }
 
-        bool union_set(int x, int y) {
-            int px = find(x);
-            int py = find(y);
+        if (rank[rx] > rank[ry]) {
+            parent[ry] = rx;
+            rank[rx] += rank[ry];
 
-            if (px == py) {
-                return false;
-            }
-
-            if (rank[px] > rank[py]) {
-                parent[py] = px;
-
-            } else if (rank[px] < rank[py]) {
-                parent[px] = py;
-
-            } else {
-                parent[py] = px;
-                rank[py] += 1;
-            }
-
-            return true;
+        } else {
+            parent[rx] = ry;
+            rank[ry] += rank[rx];
         }
-    };
+
+        return true;
+    }
     bool by_union_find(int& n, vector<vector<int>>& edges) {
-        if (n == 1) {
-            return true;
-        }
+        parent.resize(n, -1);
+        rank.resize(n, 1);
 
         if (edges.size() != n - 1) {
             return false;
         }
 
-        Union_find uf(n);
-
         for (int i = 0; i < edges.size(); ++i) {
-
-            if (!uf.union_set(edges[i][0], edges[i][1])) {
+            if (!union_set(edges[i][0], edges[i][1])) {
                 return false;
             }
         }
-
+        
         return true;
     }
 public:

@@ -100,6 +100,7 @@ private:
                 ++b;
             }
 
+            //the most important part, how this sliding window speed up!
             while (b < n && vowel_cnt.size() == 5 && cons == k) {
 
                 ans += next_cons[e] - e;

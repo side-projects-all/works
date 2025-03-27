@@ -88,26 +88,32 @@ public:
 class Solution {
 private:
     int by_iterative_dp(string& s, string& t) {
-        int ls = s.size();
-        int lt = t.size();
-        std::vector<std::vector<unsigned int>> dp(ls + 1, std::vector<unsigned int>(lt + 1, 0));
-
-        for (int i = 0; i <= ls; ++i) {
-            dp[i][lt] = 1;
+        int sn = s.size();
+        int tn = t.size();
+        if (sn == tn) {
+            return s == t;
         }
 
-        for (int i = ls - 1; i >= 0; --i) {
-            for (int j = lt - 1; j >= 0; --j) {
+        if (sn < tn) {
+            return 0;
+        }
 
-                dp[i][j] = dp[i + 1][j];
+        std::vector<std::vector<unsigned int>> dp(sn + 1, std::vector<unsigned int>(tn + 1));
+        for (int i = 0; i <= sn; ++i) {
+            dp[i][0] = 1;
+        }
 
-                if (s[i] == t[j]) {
-                    dp[i][j] += dp[i + 1][j + 1];
+        for (int i = 1; i <= sn; ++i) {
+            for (int j = 1; j <= tn; ++j) {
+                dp[i][j] += dp[i - 1][j];           //not choose
+
+                if (s[i - 1] == t[j - 1]) {         //choose
+                    dp[i][j] += dp[i - 1][j - 1];
                 }
             }
         }
 
-        return dp[0][0];
+        return dp[sn][tn];
     }
     int recursive(string& s, string& t, std::vector<std::vector<int>>& mem, int i, int j) {
         if ((i == s.size() && j < t.size()) || (s.size() - i < t.size() - j)) {

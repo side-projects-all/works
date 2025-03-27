@@ -37,40 +37,67 @@ Constraints:
 
 class Solution {
 private:
-    vector<string> backtracking(string& s, vector<string>& wordDict) {
-        int N = s.size();
-        std::unordered_set<std::string> words(wordDict.begin(), wordDict.end());
-        std::vector<std::string> ans;
-        std::string curr;
+    vector<string> by_iterative_dp(string& s, vector<string>& wordDict) {
+        int n = s.size();
+        std::unordered_set<std::string> dict(wordDict.begin(), wordDict.end());
+        std::unordered_map<int, std::vector<std::string>> dp; // dp[i]: sentences starting from index i
+        dp[n] = {""}; // Base case: empty string can be formed at the end
 
-        std::function<void(int)> bt = [&](int now) {
-            if (now == N) {
-                ans.push_back(curr);
-                return;
-            }
+        for (int b = n - 1; b >= 0; --b) {
 
-            for (int end = now + 1; end <= N; ++end) {
-                std::string sub = s.substr(now, end - now);
+            std::vector<std::string> curr_sentences;
+            for (int e = b + 1; e <= n; ++e) {
 
-                if (words.find(sub) != words.end()) {
-                    std::string tmp = curr;
-                    if (!curr.empty()) {
-                        curr += " ";
+                std::string word = s.substr(b, e - b);
+                if (dict.count(word)) {
+
+                    for (const std::string& sentence : dp[e]) {
+
+                        if (sentence.empty()) {
+                            curr_sentences.push_back(word);
+
+                        } else {
+                            curr_sentences.push_back(word + (" ") + sentence);
+                        }
                     }
-                    curr += sub;
-                    bt(end);
-
-                    curr = tmp;
                 }
             }
-        };
+            dp[b] = std::move(curr_sentences);
+        }
 
-        bt(0);
+        return dp[0];
+    }
+    void back_tracking(string& s, std::unordered_set<std::string>& set, 
+                            std::vector<std::string>& ans, int b, std::string&& curr) {
+        int n = s.size();
+        if (b == n) {
+            ans.push_back(curr);
+        }
 
+        for (int e = b + 1; e <= n; ++e) {
+            std::string pre = s.substr(b, e - b);
+            
+            if (set.find(pre) != set.end()) {
+
+                if (curr.empty()) {
+                    back_tracking(s, set, ans, e, std::move(pre));
+                } else {
+                    back_tracking(s, set, ans, e, std::move(curr + " " + pre));
+                }
+            }
+        }
+    }
+    vector<string> by_back_tracking(string& s, vector<string>& wordDict) {
+        std::vector<std::string> ans;
+        std::unordered_set<std::string> set{wordDict.begin(), wordDict.end()};
+
+        back_tracking(s, set, ans, 0, "");
         return ans;
     }
 public:
     vector<string> wordBreak(string s, vector<string>& wordDict) {
-        return backtracking(s, wordDict);
+        //return by_back_tracking(s, wordDict);
+        
+        return by_iterative_dp(s, wordDict);
     }
 };

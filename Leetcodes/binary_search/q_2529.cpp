@@ -36,39 +36,47 @@ Constraints:
 */
 
 class Solution {
-public:
-    int maximumCount(vector<int>& nums) {
-        
-        int N = nums.size();
-        int left = 0;
-        int right = N - 1;
+private:
+    int by_binary_search(std::vector<int>& nums) {
+        int n = nums.size();
+        int b = 0;
+        int e = n - 1;
 
-        //find maximum number which is less than zero
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
+        //find negative end
+        while (b <= e) {
+            int mid = b + (e - b) / 2;
 
-            if (nums[mid] < 0) {
-                left = mid + 1;
+            if (nums[mid] >= 0) {
+                e = mid - 1;
             } else {
-                right = mid - 1;
+                
+                b = mid + 1;
             }
         }
 
-        int negative_size = left;
-        right = N - 1;
-        //find minimum numer which is larger than zero 
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
+        int neg = b;
+        
+        e = n - 1;
+        while (b <= e) {
+            int mid = b + (e - b) / 2;
 
             if (nums[mid] > 0) {
-                right = mid - 1;
-                
+                e = mid - 1;
             } else {
-                left = mid + 1;
+                
+                b = mid + 1;
             }
         }
 
-        int positive_size = N - left;
-        return (negative_size > positive_size) ? negative_size : positive_size;
+        int pos = n - b;
+
+        return pos > neg ? pos : neg;
+    }
+public:
+    Solution() {}
+    ~Solution() {}
+
+    int maximumCount(std::vector<int>& nums) {
+        return by_binary_search(nums);
     }
 };

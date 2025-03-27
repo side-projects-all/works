@@ -22,21 +22,25 @@ private:
     }
 
     bool iterative(vector<int>& nums) {
-        std::vector<int> mem(nums.size(), -1);
-        mem[mem.size() - 1] = 1;
+        int n = nums.size();
+        if (n == 1) {
+            return true;
+        }
 
-        for (int i = nums.size() - 2; i >= 0; --i) {
-            int maxJump = std::min(i + nums[i], (int)(nums.size() - 1));
+        std::vector<bool> dp(n);
+        dp[0] = true;
 
-            for (int j = i + 1; j <= maxJump; ++j) {
-                if (mem[j] == 1) {
-                    mem[i] = 1;
+        //dp relationship: dp[i] = (j + nums[j]) >= i && dp[j]
+        for (int i = 1; i < n; ++i) {
+            for (int j = 0; j < i; ++j) {
+                if (j + nums[j] >= i && dp[j]) {
+                    dp[i] = true;
                     break;
                 }
             }
         }
 
-        return mem[0] == 1;
+        return dp[n - 1];
     }
 
     bool recursive02(vector<int>& nums, int i, std::vector<int>& mem) {

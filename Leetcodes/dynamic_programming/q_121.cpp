@@ -26,28 +26,23 @@ Constraints:
 
 class Solution {
 private:
-    int by_iterative(vector<int>& prices) {
-        int max_profit = 0;
-        int min_price = prices[0];
-
-        for (int i = 1; i < prices.size(); ++i) {
-
-            min_price = std::min(min_price, prices[i]);
-            max_profit = std::max(max_profit, prices[i] - min_price);
-            /*
-            if (prices[i] < min_price) {
-                min_price = prices[i];
-
-            } else {
-                max_profit = std::max(max_profit, prices[i] - min_price);
-            }*/
+    int by_iterative_dp(vector<int>& prices) {
+        int n = prices.size();
+        if (n == 1) {
+            return 0;
         }
 
-        return max_profit;
-    }
+        int cost = prices[0];
+        int profit = 0;
+        for (int i = 1; i < n; ++i) {
+            cost = std::min(cost, prices[i]);
+            profit = std::max(profit, prices[i] - cost);
+        }
 
+        return profit;
+    }
 public:
     int maxProfit(vector<int>& prices) {
-        return by_iterative(prices);
+        return by_iterative_dp(prices);
     }
 };
