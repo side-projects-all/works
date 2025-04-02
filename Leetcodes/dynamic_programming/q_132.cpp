@@ -37,140 +37,107 @@ Constraints:
 
 class Solution {
 private:
-    int from_palindrome_center(std::string& s) {
+    void palindrome_min_cuts(string& s, std::vector<int>& dp, int b, int e) {
         int n = s.size();
-        std::vector<int> cuts_mem(n);
-        for (int i = 1; i < n; ++i) {
-            cuts_mem[i] = i;
+        int min_cuts = 0;
+        while (b >= 0 && e < n && s[b] == s[e]) {
+
+            min_cuts = (b == 0) ? 0 : 1 + dp[b - 1];
+            dp[e] = std::min(dp[e], min_cuts);
+
+            --b;
+            ++e;
         }
-
-        std::function<void(int, int)> find_min_cuts = [&cuts_mem, &s, &n](int b, int e) {
-            for (int begin = b, end = e; begin >= 0 && end < n && s[begin] == s[end]; 
-                --begin, ++end) {
-
-                int new_cut = (begin == 0) ? 0 : cuts_mem[begin - 1] + 1;
-                cuts_mem[end] = std::min(cuts_mem[end], new_cut);
-            }
-        };
-
-        for (int mid = 0; mid < n; ++mid) {
-            find_min_cuts(mid, mid);
-            find_min_cuts(mid - 1, mid);
-        }
-
-        return cuts_mem[n - 1];
     }
-    int iterative_optimize(std::string& s) {
+    int from_possible_mid(string& s) {
         int n = s.size();
-        std::vector<int> mem_pCut(n);
-        std::vector<std::vector<bool>> mem_isP(n, std::vector<bool>(n));
-
-        for (int e = 0; e < n; ++e) {
-            int min_cut = e;
-
-            for (int b = 0; b <= e; ++b) {
-                if (s[b] == s[e] && (e - b <= 2 || mem_isP[b + 1][e - 1])) {
-                    mem_isP[b][e] = true;
-                    //b - 1 means previous one's end!
-                    min_cut = (b == 0) ? 0 : std::min(min_cut, mem_pCut[b - 1] + 1);
-                }
-            }
-
-            mem_pCut[e] = min_cut;
-        }
-
-        return mem_pCut[n - 1];
-    }
-    int iterative(std::string& s) {
-        int n = s.size();
-        std::vector<int> mem_pCut(n);
-        std::vector<std::vector<bool>> mem_isP(n, std::vector<bool>(n));
-
-        //build palindrome memo 2d array
-        for (int e = 0; e < n; ++e) {
-            for (int b = 0; b <= e; ++b) {
-                if (s[b] == s[e] && (e - b <= 2 || mem_isP[b + 1][e - 1])) {
-                    mem_isP[b][e] = true;
-                }
-            }
-        }
-
-        for (int e = 0; e < n; ++e) {
-            int min_cut = e;
-
-            for (int b = 0; b <= e; ++b) {
-                if (mem_isP[b][e]) {
-
-                    //b - 1 means previous one's end!
-                    min_cut = (b == 0) ? 0 : std::min(min_cut, mem_pCut[b - 1] + 1);
-                }
-            }
-
-            mem_pCut[e] = min_cut;
-        }
-
-        return mem_pCut[n - 1];
-    }
-
-    std::vector<int> mem_pCut;
-    std::vector<std::vector<int>> mem_isP;
-    bool isPalindrome(std::string& s, int b, int e) {
-        if (mem_isP[b][e] == 0) {
-            return false;
-        }
-
-        if (mem_isP[b][e] == 1) {
-            return true;
-        }
-
-        int b1 = b;
-        int e1 = e;
-        while (b1 < e1) {
-            if (s[b1] != s[e1]) {
-
-                mem_isP[b1][e1] = 0;
-                while (b1 != b && e1 != e) {
-                    --b1;
-                    ++e1;
-                    mem_isP[b1][e1] = 0;
-                }
-                break;
-            }
-
-            mem_isP[b1][e1] = 1;
-            ++b1;
-            --e1;
-        }
-
-        return mem_isP[b][e];
-    }
-
-    int recursive(std::string& s, int b, int e, int min_cut) {
-        if (b == e || isPalindrome(s, b, e)) {
+        if (n == 1) {
             return 0;
         }
 
-        if (mem_pCut[b] != -1) {
-            return mem_pCut[b];
+        //maximal cuts at every index
+        std::vector<int> dp(n);
+        for (int i = 1; i < n; ++i) {
+            dp[i] = i;
         }
 
-        for (int end_now = b; end_now <= e; ++end_now) {
-            if (isPalindrome(s, b, end_now)) {
-                min_cut = std::min(min_cut, 1 + recursive(s, end_now + 1, e, min_cut));
+        for (int i = 0; i < n; ++i) {
+            palindrome_min_cuts(s, dp, i, i);
+            palindrome_min_cuts(s, dp, i, i + 1);
+        }
+
+        return dp[n - 1];
+    }
+    int by_optimize_iterative_dp(string& s) {
+        int n = s.size();
+        if (n == 1) {
+            return 0;
+        }
+
+        //for every combination of subsring in s, check if palindrome
+        std::vector<std::vector<bool>> is_palindrome(n, std::vector<bool>(n));
+        //cuts at every index
+        std::vector<int> dp(n);
+        for (int e = 0; e < n; ++e) {
+
+            int min_cuts = e;
+            for (int b = 0; b <= e; ++b) {
+                if (s[b] == s[e] && (e - b <= 2 || is_palindrome[b + 1][e - 1])) {
+                    is_palindrome[b][e] = true;
+
+                    min_cuts = b == 0 ? 0 : std::min(min_cuts, 1 + dp[b - 1]);
+                }
+            }
+
+            dp[e] = min_cuts;
+        }
+
+        return dp[n - 1];
+    }
+    int by_iterative_dp(string& s) {
+        int n = s.size();
+        if (n == 1) {
+            return 0;
+        }
+
+        //for every combination of subsring in s, check if palindrome
+        std::vector<std::vector<bool>> is_palindrome(n, std::vector<bool>(n));
+        
+        for (int i = 0; i < n; ++i) {
+            is_palindrome[i][i] = true;
+        }
+        for (int i = 1; i < n; ++i) {
+            if (s[i - 1] == s[i]) {
+                is_palindrome[i - 1][i] = true;
+            }
+        }
+        for (int e = 2; e < n; ++e) {
+            for (int b = 0; b < e; ++b) {
+                if (s[b] == s[e] && is_palindrome[b + 1][e - 1]) {
+                    is_palindrome[b][e] = true;
+                }
             }
         }
 
-        return mem_pCut[b] = min_cut;
+        std::vector<int> dp(n);
+        for (int e = 1; e < n; ++e) {
+
+            int min_cuts = e;
+            for (int b = 0; b <= e; ++b) {
+                if (is_palindrome[b][e]) {
+                    min_cuts = (b == 0) ? 0 : std::min(min_cuts, 1 + dp[b - 1]);
+                }
+            }
+
+            dp[e] = min_cuts;
+        }
+
+        return dp[n - 1];
     }
 public:
     int minCut(string s) {
-        //mem_pCut.resize(s.size(), -1);
-        //mem_isP.resize(s.size(), std::vector<int>(s.size(), -1));
-
-        //return recursive(s, 0, s.size() - 1, s.size() - 1);
-        //return iterative(s);
-        
-        //return iterative_optimize(s);
-        return from_palindrome_center(s);
+        //return by_iterative_dp(s);
+        //return by_optimize_iterative_dp(s);
+        return from_possible_mid(s);
     }
 };

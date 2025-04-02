@@ -31,32 +31,28 @@ Constraints:
 */
 
 class Solution {
+private:
+    int by_iterative_dp(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return nums[0];
+        }
+        int max_prod = nums[0];
+        int curr_min_prod = nums[0];
+        int curr_max_prod = nums[0];
+        for (int i = 1; i < n; ++i) {
+
+            int curr_max = std::max(nums[i], std::max(curr_max_prod * nums[i], curr_min_prod * nums[i]));
+            curr_min_prod = std::min(nums[i], std::min(curr_max_prod * nums[i], curr_min_prod * nums[i]));
+
+            curr_max_prod = curr_max;
+            max_prod = std::max(max_prod, curr_max_prod);
+        }
+
+        return max_prod;
+    }
 public:
     int maxProduct(vector<int>& nums) {
-        double max = INT_MIN;
-        double prod = 1;
-
-        //from left
-        for (int i = 0; i < nums.size(); ++i) {
-            prod *= (double)nums[i];
-            max = std::max(max, prod);
-
-            if (prod == 0) {
-                prod = 1;
-            }
-        }
-
-        //from right
-        prod = 1;
-        for (int i = nums.size() - 1; i >= 0; --i) {
-            prod *= (double)nums[i];
-            max = std::max(max, prod);
-
-            if (prod == 0) {
-                prod = 1;
-            }
-        }
-
-        return (int)max;
+        return by_iterative_dp(nums);
     }
 };

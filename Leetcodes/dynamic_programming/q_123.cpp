@@ -39,57 +39,59 @@ Constraints:
 
 class Solution {
 private:
-    int iterative_optimize(vector<int>& prices) {
-        int t1Cost = 100001;
-        int t2Cost = 100001;
-        int t1Profit = 0;
-        int t2Profit = 0;
-
-        for (int p : prices) {
-            t1Cost = std::min(t1Cost, p);
-            t1Profit = std::max(t1Profit, p - t1Cost);
-
-            t2Cost = std::min(t2Cost, p - t1Profit);
-            t2Profit = std::max(t2Profit, p - t2Cost);
-        }
-
-        return t2Profit;
-    }
-
-    int iterative(vector<int>& prices) {
-        int N = prices.size();
-        if (N <= 1) {
+    int by_itertive_dp(vector<int>& prices) {
+        int n = prices.size();
+        if (n == 1) {
             return 0;
         }
 
-        int leftMin = prices[0];
-        int rightMax = prices[N - 1];
+        std::vector<int> max_profit1(n);
+        int min_cost1 = prices[0];
+        std::vector<int> max_profit2(n + 1);
+        int max_price2 = prices[n - 1];
 
-        std::vector<int> leftProfits(N, 0);
-        std::vector<int> rightProfits(N + 1, 0);
+        for (int i = 1; i < n; ++i) {
+            max_profit1[i] = std::max(max_profit1[i - 1], prices[i] - min_cost1);
+            min_cost1 = std::min(min_cost1, prices[i]);
 
-        for (int left = 1; left < N; ++left) {
-            leftProfits[left] = std::max(leftProfits[left - 1], prices[left] - leftMin);
-            leftMin = std::min(leftMin, prices[left]);
-
-            int r = N - 1 - left;
-            rightProfits[r] = std::max(rightProfits[r + 1], rightMax - prices[r]);
-            rightMax = std::max(rightMax, prices[r]);
+            int r = n - i - 1;
+            //pass from right to left
+            max_profit2[r] = std::max(max_profit2[r + 1], max_price2 - prices[r]);
+            max_price2 = std::max(max_price2, prices[r]);
         }
 
-        int maxProfit = 0;
-        for (int i = 0; i < N; ++i) {
-            //why left and right would be i and i + 1?
-            //because left i means max profit for selling at i day, 
-            //and i + 1 means the begin of second transaction at i + 1 day!!
-            maxProfit = std::max(maxProfit, leftProfits[i] + rightProfits[i + 1]);
+        int max_profit = 0;
+        for (int i = 0; i < n; ++i) {
+            max_profit = std::max(max_profit, max_profit1[i] + max_profit2[i + 1]);
         }
 
-        return maxProfit;
+        return max_profit;
+    }
+    int by_optimize_itertive_dp(vector<int>& prices) {
+        int n = prices.size();
+        if (n == 1) {
+            return 0;
+        }
+
+        int cost1 = prices[0];
+        int profit1 = 0;
+        int cost2 = prices[0];
+        int profit2 = 0;
+
+        for (int i = 1; i < n; ++i) {
+            cost1 = std::min(cost1, prices[i]);
+            profit1 = std::max(profit1, prices[i] - cost1);
+
+            cost2 = std::min(cost2, prices[i] - profit1);
+            profit2 = std::max(profit2, prices[i] - cost2);
+        }
+
+        return profit2;
     }
 public:
     int maxProfit(vector<int>& prices) {
-        //return iterative(prices);
-        return iterative_optimize(prices);
+        return by_itertive_dp(prices);
+        
+        //return by_optimize_itertive_dp(prices);
     }
 };

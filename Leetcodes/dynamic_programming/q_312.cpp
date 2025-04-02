@@ -32,25 +32,69 @@ Constraints:
 */
 
 class Solution {
-public:
-    int maxCoins(vector<int>& nums) {
+private:
+    int recursive(vector<int>& nums, std::vector<std::vector<int>>& mem, int b, int e) {
+        if (b > e) {
+            return 0;
+        }
+
+        if (mem[b][e] != -1) {
+            return mem[b][e];
+        }
+
+        for (int i = b; i <= e; ++i) {
+            int gain = nums[b - 1] * nums[i] * nums[e + 1];
+            int remain = recursive(nums, mem, b, i - 1) + recursive(nums, mem, i + 1, e);
+
+            mem[b][e] = std::max(mem[b][e], gain + remain);
+        }
+
+        return mem[b][e];
+    }
+    int by_recursive_dp(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return nums[0];
+        }
+
         nums.insert(nums.begin(), 1);
-        nums.emplace_back(1);
+        nums.push_back(1);
+        n += 2;
 
-        std::vector<std::vector<int>> dp(nums.size(), std::vector<int>(nums.size(), 0));
-        for (int left = nums.size() - 2; left >= 1; --left) {
-            for (int right = left; right <= nums.size() - 2; ++right) {
-                
-                for (int i = left; i <= right; ++i) {
-                    //this means we gain as last step
-                    int gain = nums[left - 1] * nums[i] * nums[right + 1];
-                    int remaining = dp[left][i - 1] + dp[i + 1][right];
+        std::vector<std::vector<int>> mem(n, std::vector<int>(n, -1));
 
-                    dp[left][right] = std::max(dp[left][right], remaining + gain);
+        return recursive(nums, mem, 1, n - 2);
+    }
+    int by_iterative_dp(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return nums[0];
+        }
+
+        nums.insert(nums.begin(), 1);
+        nums.push_back(1);
+        n += 2;
+
+        std::vector<std::vector<int>> dp(n, std::vector<int>(n));
+
+        for (int b = n - 2; b >= 1; --b) {
+            for (int e = b; e <= n - 2; ++e) {
+
+                for (int i = b; i <= e; ++i) {
+                    //using b-1, e+1 means nums[i] is burst at last
+                    int gain = nums[b - 1] * nums[i] * nums[e + 1];
+                    int remain = dp[b][i - 1] + dp[i + 1][e];
+
+                    dp[b][e] = std::max(dp[b][e], gain + remain);
                 }
             }
         }
 
-        return dp[1][nums.size() - 2];
+        return dp[1][n - 2];
+    }
+public:
+    int maxCoins(vector<int>& nums) {
+        return by_iterative_dp(nums);
+        //return by_recursive_dp(nums);
     }
 };

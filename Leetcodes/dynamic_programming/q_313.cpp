@@ -33,27 +33,37 @@ Constraints:
 */
 
 class Solution {
-public:
-    int nthSuperUglyNumber(int n, vector<int>& primes) {
-        int p = primes.size();
-        std::vector<int> primes_pos(p, 0);
-        std::vector<long> super_ugly(n);
-        super_ugly[0] = 1;
-
-        for (int i = 1; i < n; ++i) {
-            long min_ugly = INT_MAX;
-
-            for (int j = 0; j < p; ++j) {
-                min_ugly = std::min(min_ugly, super_ugly[primes_pos[j]] * primes[j]);
-            }
-
-            for (int j = 0; j < p; ++j) {
-                primes_pos[j] += (min_ugly == super_ugly[primes_pos[j]] * primes[j]);
-            }
-
-            super_ugly[i] = min_ugly;
+private:
+    int by_iterative_dp(int& n, vector<int>& primes) {
+        if (n == 1) {
+            return 1;
         }
 
-        return super_ugly[n - 1];
+        int pn = primes.size();
+        std::vector<int> times_of_prime(pn);
+        std::vector<int> dp(n);
+        dp[0] = 1;
+
+        for (int i = 1; i < n; ++i) {
+            unsigned int min_val = UINT_MAX;
+
+            for (int j = 0; j < pn; ++j) {
+                min_val = std::min(min_val, (unsigned int)dp[times_of_prime[j]] * primes[j]);
+            }
+
+            for (int j = 0; j < pn; ++j) {
+                if (min_val == (unsigned int)dp[times_of_prime[j]] * primes[j]) {
+                    ++times_of_prime[j];
+                }
+            }
+
+            dp[i] = min_val;
+        }
+
+        return dp[n - 1];
+    }
+public:
+    int nthSuperUglyNumber(int n, vector<int>& primes) {
+        return by_iterative_dp(n, primes);
     }
 };

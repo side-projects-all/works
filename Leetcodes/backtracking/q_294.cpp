@@ -29,33 +29,35 @@ Constraints:
 
 class Solution {
 private:
-    //record the possibile combination that starting use could win
-    std::unordered_map<std::string, int> m; 
-
-public:
-    bool canWin(string currentState) {
-        if (m.find(currentState) != m.end()) {
-            return m[currentState];
+    bool recursive(std::string&& s, std::unordered_map<std::string, int>& m) {
+        if (m.find(s) != m.end()) {
+            return m[s];
         }
+        for (int i = 1; i < s.size(); ++i) {
+            if (s[i - 1] == '+' && s[i] == '+') {
 
-        for (int i = 1; i < currentState.size(); ++i) {
-            if (currentState[i] == '+' && currentState[i - 1] == '+') {
-                currentState[i] = '-';
-                currentState[i - 1] = '-';
+                s[i - 1] = '-';
+                s[i] = '-';
+                
+                bool sec_win = recursive(std::move(s), m);
 
-                bool opponent_win = canWin(currentState);
+                s[i - 1] = '+';
+                s[i] = '+';
 
-                currentState[i] = '+';
-                currentState[i - 1] = '+';
-
-                if (!opponent_win) {
-                    m[currentState] = true;
-                    return true;
+                if (!sec_win) {
+                    return m[s] = true;
                 }
             }
         }
 
-        m[currentState] = false;
-        return false;
+        return m[s] =false;
+    }
+    bool by_back_tracking(string& currentState) {
+        std::unordered_map<std::string, int> m;
+        return recursive(std::move(currentState), m);
+    }
+public:
+    bool canWin(string currentState) {
+        return by_back_tracking(currentState);
     }
 };

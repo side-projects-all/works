@@ -13,9 +13,11 @@ int main(int argc, char *argv[]) {
 	
 	/**/
 	Solution sol;
-	std::vector<int> nums{-3,-2,-1,0,0,1,2};
-	long long ans = sol.maximumCount(nums);
+	int ans = 0;
+	
+	ans = sol.countDigitOne(13);
 	std::cout << ans << "\n";
+	
 
 	return 0;
 }

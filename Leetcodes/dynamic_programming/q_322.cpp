@@ -37,22 +37,32 @@ Constraints:
 class Solution {
 private:
   int iterative(vector<int>& coins, int amount) {
-    int N = coins.size();
-    std::vector<int> mem(amount + 1, amount + 1); //this means minimal number of coins we need for 1 to amount
-    mem[0] = 0;
+    if (amount == 0) {
+        return 0;
+    }
 
-    //do every combination
-    for (int t = 1; t <= amount; ++t) {
+    int n = coins.size();
+    if (n == 1) {
+        if (coins[0] == 1) {
+            return amount;
+        }
+        return amount % coins[0] != 0 ? -1 : amount / coins[0];
+    }
 
-        for (int i = 0; i < N; ++i) {
+    std::vector<int> dp(amount + 1, amount + 1);
+    dp[0] = 0;
 
-            if (coins[i] <= t) {
-                mem[t] = std::min(mem[t], mem[t - coins[i]] + 1);
+    for (int a = 1; a <= amount; ++a) {
+        for (int i = 0; i < n; ++i) {
+
+            if (a < coins[i]) {
+                continue;
             }
+            dp[a] = std::min(dp[a], 1 + dp[a - coins[i]]);
         }
     }
 
-    return mem[amount] == amount + 1 ? -1 : mem[amount];
+    return dp[amount] > amount ? -1 : dp[amount];
   }
   int recursive(vector<int>& coins, int amount, std::vector<int>& mem) {
     if (amount < 0) {

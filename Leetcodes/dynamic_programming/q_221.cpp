@@ -32,46 +32,63 @@ Constraints:
 
 class Solution {
 private:
-    int iterative(vector<vector<char>>& matrix) {
-        /*
+    int by_optimize_iterative_dp(vector<vector<char>>& matrix) {
         int rows = matrix.size();
         int cols = matrix[0].size();
-        
-        int max = 0;
-        std::vector<std::vector<int>> mem(rows + 1, std::vector<int>(cols + 1, 0));
-        
-        for (int r = 1; r < rows + 1; ++r) {
-            for (int c = 1; c < cols + 1; ++c) {
 
-                if (matrix[r - 1][c - 1] == '1') {
-                    mem[r][c] = (std::min(mem[r - 1][c - 1], 
-                                    std::min(mem[r - 1][c], mem[r][c - 1]))) + 1;
+        if (rows == 1 && cols == 1) {
+            return matrix[0][0] - '0';
+        }
 
-                    max = std::max(max, mem[r][c]);
-                }                
+        if (rows == 1) {
+            for (int c = 0; c < cols; ++c) {
+                if (matrix[0][c] == '1') {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+        if (cols == 1) {
+            for (int r = 0; r < rows; ++r) {
+                if (matrix[r][0] == '1') {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+
+        std::vector<int> dp(cols);  //initialize with first row
+        int max_len = 0;
+        if (matrix[0][0] == '1') {
+            dp[0] = 1;
+            max_len = 1;
+        }
+        for (int c = 1; c < cols; ++c) {
+            if (matrix[0][c] == '1') {
+                dp[c] = 1;
+                max_len = 1;
             }
         }
 
-        return max * max;
-        */
         
-        int rows = matrix.size();
-        int cols = matrix[0].size();
+        for (int r = 1; r < rows; ++r) {
 
-        int top_left = 0;
-        std::vector<int> dp(cols + 1);
-        int max_len = 0;
+            int top_left = matrix[r - 1][0] - '0';
+            if (top_left == 1) {
+                max_len = std::max(max_len, top_left);  //for corner case: '1' only exists on the first column
+            }
 
-        for (int r = 1; r < rows + 1; ++r) {
-            for (int c = 1; c < cols + 1; ++c) {
+            dp[0] = matrix[r][0] - '0'; //for init left
+            for (int c = 1; c < cols; ++c) {
+
                 int top = dp[c];
+                if (matrix[r][c] == '1') {
+                    
+                    //from left, top, top left
+                    dp[c] = 1 + std::min({dp[c - 1], top, top_left});
 
-                if (matrix[r - 1][c - 1] == '1') {
-                    //top_left: top_left dp position
-                    //dp[c - 1]: left dp position
-                    //dp[c]: upper dp position
-                    dp[c] = std::min({top_left, dp[c - 1], dp[c]}) + 1;
                     max_len = std::max(max_len, dp[c]);
+                    
                 } else {
                     dp[c] = 0;
                 }
@@ -81,60 +98,69 @@ private:
         }
 
         return max_len * max_len;
+
     }
-
-    int recursive(vector<vector<char>>& matrix, int r, int c, std::vector<std::vector<int>>& mem, int& max) {
-        if (r == 0 || c == 0) {
-            return mem[r][c];
-        }
-
-        if (mem[r][c] != -1) {
-            return mem[r][c];
-        }
-
-        int top = recursive(matrix, r - 1, c, mem, max);
-        int left = recursive(matrix, r, c - 1, mem, max);
-        int leftTop = recursive(matrix, r - 1, c - 1, mem, max);
-
-        if (matrix[r][c] == '1') {
-            mem[r][c] = std::min(top, std::min(left, leftTop)) + 1;
-        } else {
-            mem[r][c] = 0;
-        }
-
-        max = std::max(max, mem[r][c]);
-
-        return mem[r][c];
-    }
-
-public:
-    int maximalSquare(vector<vector<char>>& matrix) {
+    int by_iterative_dp(vector<vector<char>>& matrix) {
         int rows = matrix.size();
         int cols = matrix[0].size();
-        //edge case
+
         if (rows == 1 && cols == 1) {
-            return (matrix[0][0] == '1') ? 1 : 0;
+            return matrix[0][0] - '0';
         }
 
-        /*
-        std::vector<std::vector<int>> mem(rows, std::vector<int>(cols, -1));
+        if (rows == 1) {
+            for (int c = 0; c < cols; ++c) {
+                if (matrix[0][c] == '1') {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+        if (cols == 1) {
+            for (int r = 0; r < rows; ++r) {
+                if (matrix[r][0] == '1') {
+                    return 1;
+                }
+            }
+            return 0;
+        }
 
-        int max = -1;
-        for (int c = 0; c < cols; ++c) {
-            mem[0][c] = matrix[0][c] - '0';
-            max = std::max(max, mem[0][c]);
+        std::vector<std::vector<int>> dp(rows, std::vector<int>(cols));     //it means max square length
+        int max_len = 0;
+        if (matrix[0][0] == '1') {
+            dp[0][0] = 1;
+            max_len = 1;
+        }
+        for (int c = 1; c < cols; ++c) {
+            if (matrix[0][c] == '1') {
+                dp[0][c] = 1;
+                max_len = 1;
+            }
+        }
+        for (int r = 1; r < rows; ++r) {
+            if (matrix[r][0] == '1') {
+                dp[r][0] =  1;
+                max_len = 1;
+            }
         }
 
         for (int r = 1; r < rows; ++r) {
-            mem[r][0] = matrix[r][0] - '0';
-            max = std::max(max, mem[r][0]);
+            for (int c = 1; c < cols; ++c) {
+                if (matrix[r][c] == '1') {
+                    //from left, top, top left
+                    dp[r][c] = 1 + std::min({dp[r][c - 1], dp[r - 1][c], dp[r - 1][c - 1]});
+
+                    max_len = std::max(max_len, dp[r][c]);
+                }
+            }
         }
 
-        recursive(matrix, rows - 1, cols - 1, mem, max);
-
-        return max * max;
-        */
-
-        return iterative(matrix);
+        return max_len * max_len;
+    }
+public:
+    int maximalSquare(vector<vector<char>>& matrix) {
+        //return by_iterative_dp(matrix);
+        
+        return by_optimize_iterative_dp(matrix);
     }
 };

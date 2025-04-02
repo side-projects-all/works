@@ -37,52 +37,55 @@ Constraints:
 
 class Solution {
 private:
-    std::unordered_map<std::string, std::vector<int>> m;
-    int ops(int x, int y, char op) {
+    int cal(char op, int v1, int v2) {
+
         if (op == '+') {
-            return x + y;
+            return v1 + v2;
         }
-        
+
         if (op == '-') {
-            return x - y;
-        }
+            return v1 - v2;
+        } 
 
-        return x * y;
+        return v1 * v2;
     }
+    vector<int> recursive(std::string&& s, std::unordered_map<std::string, std::vector<int>>& mem) {
 
-public:
-    vector<int> diffWaysToCompute(string expression) {
-
-        if (m.find(expression) != m.end()) {
-            return m[expression];
+        if (mem.find(s) != mem.end()) {
+            return mem[s];
         }
 
         std::vector<int> ans;
-        bool is_num = true;
+        bool is_num = true; //is the string s now a number? ex: 45, 119
 
-        for (int i = 0; i < expression.size(); ++i) {
+        for (int i = 0; i < s.size(); ++i) {
 
-            if (!std::isdigit(expression[i])) {
+            if (!std::isdigit(s[i])) {
                 is_num = false;
+                std::vector<int> left = recursive(std::move(s.substr(0, i)), mem);
+                std::vector<int> right = recursive(std::move(s.substr(i + 1)), mem);
 
-                std::vector<int> left = diffWaysToCompute(expression.substr(0, i));
-                std::vector<int> right = diffWaysToCompute(expression.substr(i + 1));
-
-                for (int x : left) {
-                    for (int y : right) {
-                        int n = ops(x, y, expression[i]);
-                        ans.push_back(n);
+                for (int& v1 : left) {
+                    for (int& v2 : right) {
+                        ans.push_back(cal(s[i], v1, v2));
                     }
                 }
             }
         }
 
         if (is_num) {
-            ans.push_back(std::stoi(expression));
+            ans.push_back(std::stoi(s));
         }
 
-        m[expression] = ans;
+        return mem[s] = ans;
+    }
+    vector<int> by_recursive_dp(string& expression) {
+        std::unordered_map<std::string, std::vector<int>> mem;
 
-        return ans;
+        return recursive(std::move(expression), mem);
+    }
+public:
+    vector<int> diffWaysToCompute(string expression) {
+        return by_recursive_dp(expression);
     }
 };
