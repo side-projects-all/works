@@ -39,78 +39,64 @@ Constraints:
 */
 
 class Solution {
-public:
-    int numberOfPatterns(int m, int n) {
-        int jump[10][10] = { 0 };
-
-        jump[1][3] = jump[3][1] = 2;
-        jump[4][6] = jump[6][4] = 5;
-        jump[7][9] = jump[9][7] = 8;
-        jump[1][7] = jump[7][1] = 4;
-        jump[2][8] = jump[8][2] = 5;
-        jump[3][9] = jump[9][3] = 6;
-        jump[1][9] = jump[9][1] = jump[3][7] = jump[7][3] = 5;
-
-        int visited_nums = 0;
-        int total = 0;
-        int dp[10][1 << 10] = { 0 };
-        memset(dp, -1, sizeof(dp));
-
-        total += recursive(1, 1, m, n, jump, visited_nums, dp) * 4;
-        total += recursive(2, 1, m, n, jump, visited_nums, dp) * 4;
-        total += recursive(5, 1, m, n, jump, visited_nums, dp);
-
-
-        return total;
-    }
-
 private:
-    int recursive(int curr_num, int curr_len, int min_len, int max_len, int jump[10][10], 
-                    int visited_nums, int dp[10][1 << 10]) {
-
-        if (curr_len > max_len) {
+    int recursive(int& m, int& n, int (&jumps)[10][10], int (&mem)[10][1 << 10], int now, int len, int visited) {
+        if (len > n) {
             return 0;
         }
 
-        if (dp[curr_num][visited_nums] != -1) {
-            return dp[curr_num][visited_nums];
+        if (mem[now][visited] != -1) {
+            return mem[now][visited];
         }
 
-        int valid_ptn = 0;
-        if (curr_len >= min_len) {
-            ++valid_ptn;
+        int valids = 0;
+        if (len >= m) {
+            ++valids;
         }
 
-        visited_nums = set_bit(visited_nums, curr_num);
+        visited |= 1 << (now - 1);      //add this bit
 
-        for (int next_num = 1; next_num <= 9; ++next_num) {
-            int jump_over = jump[curr_num][next_num];
+        for (int next_dot = 1; next_dot <= 9; ++next_dot) {
 
-            if (!is_set(visited_nums, next_num) && (jump_over == 0 || is_set(visited_nums, jump_over))) {
-                valid_ptn += recursive(next_num, curr_len + 1, min_len, max_len, jump, visited_nums, dp);
+            if (next_dot == now) {
+                continue;
+            }
+
+            int cross = jumps[now][next_dot];
+            bool next_dot_used = ((visited >> (next_dot - 1)) & 1) == 1;
+            bool cross_used = cross != 0 ? ((visited >> (cross - 1)) & 1) == 1 : false;
+
+            if (!next_dot_used && (cross == 0 || cross_used)) {
+                valids += recursive(m, n, jumps, mem, next_dot, len + 1, visited);
             }
         }
 
-        visited_nums = clear_bit(visited_nums, curr_num);
+        visited ^= 1 << (now - 1);      //clear this bit
 
-        return dp[curr_num][visited_nums] = valid_ptn;
+        return mem[now][visited] = valids;
     }
+    int by_recursive_dp(int& m, int& n) {
 
-    int set_bit(int num, int pos) {
-        num |= 1 << (pos - 1);
+        int jumps[10][10]{ 0 };
+        jumps[1][3] = jumps[3][1] = 2;
+        jumps[1][7] = jumps[7][1] = 4;
+        jumps[3][9] = jumps[9][3] = 6;
+        jumps[7][9] = jumps[9][7] = 8;
+        jumps[1][9] = jumps[9][1] = jumps[3][7] = jumps[7][3] = 5;
+        jumps[4][6] = jumps[6][4] = jumps[2][8] = jumps[8][2] = 5;
 
-        return num;
+        int mem[10][1 << 10]{ -1 };
+        memset(mem, -1, sizeof(mem));   //necessary, or only first would be set -1
+
+        int total = 0;
+        total += recursive(m, n, jumps, mem, 1, 1, 0) * 4;
+        total += recursive(m, n, jumps, mem, 2, 1, 0) * 4;
+        total += recursive(m, n, jumps, mem, 5, 1, 0);
+
+        return total; 
     }
-
-    int clear_bit(int num, int pos) {
-        num ^= 1 << (pos - 1);
-
-        return num;
-    }
-
-    bool is_set(int num, int pos) {
-        int bit_pos = (num >> (pos - 1)) & 1;
-
-        return bit_pos == 1;
+public:
+    int numberOfPatterns(int m, int n) {
+        return by_recursive_dp(m, n);
     }
 };

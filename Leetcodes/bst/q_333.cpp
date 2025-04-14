@@ -43,110 +43,43 @@ Constraints:
  *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
  * };
  */
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
 class Solution {
 private:
-    struct NodeVal {
-        int minNode;
-        int maxNode;
-        int maxSize;
+    struct Node_info {
+        int min_node{ INT_MAX };
+        int max_node{ INT_MIN };
+        int cnts{ 0 };
     };
 
-    NodeVal postOrder(TreeNode* root) {
+    Node_info post_order(TreeNode* root) {
         if (root == nullptr) {
             return {INT_MAX, INT_MIN, 0};
         }
 
-        NodeVal left = postOrder(root->left);
-        NodeVal right = postOrder(root->right);
+        Node_info left = post_order(root->left);
+        Node_info right = post_order(root->right);
 
-        if (left.maxNode < root->val && root->val < right.minNode) {
-            return {std::min(root->val, left.minNode), std::max(root->val, right.maxNode), 
-                                                            (left.maxSize + right.maxSize + 1)};
+        if (left.max_node < root->val && right.min_node > root->val) {
+            return {std::min(left.min_node, root->val), std::max(right.max_node, root->val), 1 + left.cnts + right.cnts};
         }
 
-        return {INT_MIN, INT_MAX, std::max(left.maxSize, right.maxSize)};
-    }
-
-    int findMax(TreeNode* root) {
-        if (root == nullptr) {
-            return INT_MIN;
-        }
-
-        return std::max({root->val, findMax(root->left), findMax(root->right)});
-    }
-
-    int findMin(TreeNode* root) {
-        if (root == nullptr) {
-            return INT_MAX;
-        }
-
-        return std::min({root->val, findMin(root->left), findMin(root->right)});
-    }
-
-    int countNodes(TreeNode* root) {
-        if (root == nullptr) {
-            return 0;
-        }
-
-        return 1 + countNodes(root->left) + countNodes(root->right);
-    }
-
-    bool isValidBST(TreeNode* root, TreeNode*& prev) {
-        if (root == nullptr) {
-            return true;
-        }
-
-        if (!isValidBST(root->left, prev)) {
-            return false;
-        }
-
-        if (prev != nullptr && prev->val >= root->val) {
-            return false;
-        }
-
-        prev = root;
-
-        return isValidBST(root->right, prev);
-
-        /*
-        int leftMax = findMax(root->left);
-
-        if (leftMax >= root->val) {
-            return false;
-        }
-
-        int rightMin = findMin(root->right);
-
-        if (rightMin <= root->val) {
-            return false;
-        }
-
-        if (isValidBST(root->left, root) && isValidBST(root->right, root)) {
-            return true;
-        }
-
-        return false;
-        */
-    }
-
-    int recursive(TreeNode* root) {
-        if (root == nullptr) {
-            return 0;
-        }
-
-        TreeNode* prev = nullptr;
-        if (isValidBST(root, prev)) {
-            return countNodes(root);
-        }
-
-        return std::max(recursive(root->right), recursive(root->left));
+        return {INT_MIN, INT_MAX, std::max(left.cnts, right.cnts)};
     }
 public:
     int largestBSTSubtree(TreeNode* root) {
-        //return recursive(root);
+        Node_info n = post_order(root);
 
-        NodeVal n = postOrder(root);
-
-        return n.maxSize;
+        return n.cnts;
     }
 };

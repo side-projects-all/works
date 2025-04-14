@@ -33,17 +33,15 @@ Constraints:
 */
 
 class Solution {
-public:
-    vector<int> countBits(int n) {
-        std::vector<int> ans(n + 1, 0);
+private:
+    vector<int> by_MSP_iterative_dp(int& n) {
+        std::vector<int> dp(n + 1);
         int x = 0;
         int b = 1;
 
-        //in different viewpoint ans[x] means count
-        //https://leetcode.com/problems/counting-bits/solutions/657068/Javascript-and-C++-solutions/
         while (b <= n) {
-            while(x < b && x + b <= n) {
-                ans[x + b] = ans[x] + 1;
+            while (x < b && x + b <= n) {
+                dp[x + b] = dp[x] + 1;
                 ++x;
             }
 
@@ -51,6 +49,10 @@ public:
             b <<= 1;
         }
 
-        return ans;
+        return dp;
+    }
+public:
+    vector<int> countBits(int n) {
+        return by_MSP_iterative_dp(n);
     }
 };

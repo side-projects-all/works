@@ -35,30 +35,32 @@ Constraints:
 
 class Solution {
 private:
-    bool recursive(vector<int>& nums) {
-        int N = nums.size();
-        int mem[N][N];
-        memset(mem, -1, sizeof(mem));
+    int recursive(vector<int>& nums, std::vector<std::vector<int>>& mem, int left, int right) {
+        if (left == right) {
+            return nums[left];
+        }
 
-        std::function<int(int, int)> recurr = [&](int left, int right) -> int {
-            if (left == right) {
-                return nums[left];
-            }
+        if (mem[left][right] != -1) {
+            return mem[left][right];
+        }
 
-            if (mem[left][right] != -1) {
-                return mem[left][right];
-            }
+        int l = nums[left] - recursive(nums, mem, left + 1, right);
+        int r = nums[right] - recursive(nums, mem, left, right - 1);
+        return mem[left][right] = std::max(l, r);
+    }
+    bool by_recursive_dp(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return true;
+        }
 
-            int leftScore = nums[left] - recurr(left + 1, right);
-            int rightScore = nums[right] - recurr(left, right - 1);
+        std::vector<std::vector<int>> mem(n, std::vector<int>(n, -1));  //in different i, j max profit
+        recursive(nums, mem, 0, n - 1);
 
-            return mem[left][right] = std::max(leftScore, rightScore);
-        };
-
-        return recurr(0, N - 1) >= 0;
+        return mem[0][n - 1] >= 0;
     }
 public:
     bool predictTheWinner(vector<int>& nums) {
-        return recursive(nums);
+        return by_recursive_dp(nums);
     }
 };

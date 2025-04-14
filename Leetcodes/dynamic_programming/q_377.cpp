@@ -39,15 +39,20 @@ Constraints:
 class Solution {
 private:
     int iterative(vector<int>& nums, int target) {
+        int n = nums.size();
+        if (n == 1) {
+            return target % nums[0] == 0;
+        }
+
         std::vector<unsigned int> dp(target + 1);
         dp[0] = 1;
 
-        for (int p = 1; p <= target; ++p) {
-            for (int i = 0; i < nums.size(); ++i) {
-                if (nums[i] <= p) {
-                    dp[p] += dp[p - nums[i]];
+        for (int v = 1; v <= target; ++v) {
+            for (int i = 0; i < n; ++i) {
+
+                if (nums[i] <= v) {
+                    dp[v] += dp[v - nums[i]];
                 }
-                
             }
         }
 
@@ -75,8 +80,8 @@ private:
     }
 public:
     int combinationSum4(vector<int>& nums, int target) {
-        std::vector<int> mem(target + 1, -1);
-        return recursive(nums, target, mem);
-        //return iterative(nums, target);
+        //std::vector<int> mem(target + 1, -1);
+        //return recursive(nums, target, mem);
+        return iterative(nums, target);
     }
 };

@@ -32,78 +32,40 @@ Constraints:
 
 class Solution {
 private:
-    vector<int> iterative(vector<int>& nums) {
-
-        int N = nums.size();
-        if (N == 0) {
-            return {};
+    vector<int> by_iterative_dp(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return {nums[0]};
         }
 
         std::sort(nums.begin(), nums.end());
-        std::vector<int> mem(N, 1);
-        int maxi = 1;
+        std::vector<int> dp(n, 1);      //max length
+        int max_len = 1;
 
-        for (int i = 1; i < N; ++i) {
+        for (int e = 1; e < n; ++e) {
 
-            for (int j = 0; j < i; ++j) {
-                if (nums[i] % nums[j] == 0 && mem[i] < mem[j] + 1) {
-                    mem[i] = mem[j] + 1;
-                    
-                    if (maxi < mem[i]) {
-                        maxi = mem[i];
-                    }
+            for (int b = 0; b < e; ++b) {
+                if (nums[e] % nums[b] == 0 && dp[e] < dp[b] + 1) {
+                    dp[e] = dp[b] + 1;
+                    max_len = std::max(max_len, dp[e]);
                 }
             }
         }
 
-        int num = -1;
-        std::vector<int> ans;
-        for (int i = N - 1; i >= 0; --i) {
-            if (maxi == mem[i] && (num == -1 || num % nums[i] == 0)) {
-                ans.push_back(nums[i]);
-                --maxi;
-                num = nums[i];
+        std::vector<int> ans(max_len);
+        int max_num = -1;
+        for (int i = n - 1; i >= 0; --i) {
+            if (max_len == dp[i] && (max_num == -1 || max_num % nums[i] == 0)) {
+                ans[max_len - 1] = nums[i];
+                max_num = nums[i];
+                --max_len;
             }
         }
 
         return ans;
-        /*
-        int N = nums.size();
-        if (N == 0) {
-            return {};
-        }
-
-        std::sort(nums.begin(), nums.end());
-        std::vector<std::vector<int>> allPossible(N, std::vector<int>());
-
-        for (int i = 0; i < N; ++i) {
-            std::vector<int> maxSub;
-
-            for (int k = 0; k < i; ++k) {
-                if (nums[i] % nums[k] == 0 && maxSub.size() < allPossible[k].size()) {
-                    maxSub = allPossible[k];
-                }
-            }
-
-            if (maxSub.size() > 0) {
-                allPossible[i].insert(allPossible[i].end(), maxSub.begin(), maxSub.end());
-            }
-            
-            allPossible[i].emplace_back(nums[i]);
-        }
-
-        std::vector<int> ans;
-        for (int i = 0; i < N; ++i) {
-            if (ans.size() < allPossible[i].size()) {
-                ans = allPossible[i];
-            }
-        }
-
-        return ans;
-        */
     }
 public:
     vector<int> largestDivisibleSubset(vector<int>& nums) {
-        return iterative(nums);
+        return by_iterative_dp(nums);
     }
 };

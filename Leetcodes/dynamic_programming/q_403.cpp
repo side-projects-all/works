@@ -33,36 +33,94 @@ Constraints:
 
 class Solution {
 private:
-    int recursive(vector<int>& stones, int now, int preJump, 
-                    std::vector<std::vector<int>>& mem, std::unordered_map<int, int>& map) {
-        if (now == stones.size() - 1) {
-            return 1;
+    bool by_iterative_dp(vector<int>& stones) {
+        int n = stones.size();
+        if (n == 2) {
+            return stones[0] + 1 == stones[1];
         }
 
-        if (mem[now][preJump] != -1) {
-            return mem[now][preJump];
+        std::unordered_map<int, int> stones_pos;
+        for (int i = 0; i < n; ++i) {
+            stones_pos[stones[i]] = i;
         }
 
-        int ans = 0;
-        for (int nextJump = preJump - 1; nextJump <= preJump + 1; ++nextJump) {
-            
-            int next_pos = stones[now] + nextJump;
-            if (nextJump > 0 && map.find(next_pos) != map.end()) {
-                ans = ans || recursive(stones, map[next_pos], nextJump, mem, map);
+        //index and prev_jump
+        std::vector<std::vector<bool>> dp(n + 1, std::vector<bool>(n + 1));
+        dp[0][0] = true;
+
+        for (int i = 0; i < n; ++i) {
+            for (int prev_jump = 0; prev_jump <= n; ++prev_jump) {
+
+                if (dp[i][prev_jump]) {
+
+                    //find next stone
+                    if (stones_pos[stones[i] + prev_jump]) {
+                        dp[stones_pos[stones[i] + prev_jump]][prev_jump] = true;
+                    }
+
+                    if (stones_pos[stones[i] + prev_jump + 1]) {
+                        dp[stones_pos[stones[i] + prev_jump + 1]][prev_jump + 1] = true;
+                    }
+
+                    if (stones_pos[stones[i] + prev_jump - 1]) {
+                        dp[stones_pos[stones[i] + prev_jump - 1]][prev_jump - 1] = true;
+                    }
+                }
             }
         }
 
-        return mem[now][preJump] = ans;
+        for (int prev_jump = 0; prev_jump <= n; ++prev_jump) {
+            if (dp[n - 1][prev_jump]) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    bool recursive(vector<int>& stones, std::vector<std::vector<int>>& mem, int pos, int prev_jump) {
+        int n = stones.size();
+        if (pos == n - 1) {
+            return true;
+        }
+
+        if (mem[pos][prev_jump] != -1) {
+            return mem[pos][prev_jump];
+        }
+
+        bool ans = false;
+        for (int jump = prev_jump - 1; jump <= prev_jump + 1; ++jump) {
+            if (jump <= 0) {
+                continue;
+            }
+
+            int next = std::lower_bound(stones.begin(), stones.end(), jump + stones[pos]) - stones.begin();
+
+            if (next != n && stones[next] == jump + stones[pos]) {
+
+                if (next == n - 1 && stones[next] == jump + stones[pos]) {
+                    ans = true;
+                    break;
+                } else {
+                    ans = ans || recursive(stones, mem, next, jump);
+                }
+            }
+        }
+
+        return mem[pos][prev_jump] = ans;
+    }
+    bool by_recursive_dp(vector<int>& stones) {
+        int n = stones.size();
+        if (n == 2) {
+            return stones[1] == 1;
+        }
+
+        std::vector<std::vector<int>> mem(n, std::vector<int>(n, -1));
+
+        return recursive(stones, mem, 0, 0);
     }
 public:
     bool canCross(vector<int>& stones) {
-        int len = stones.size();
-        std::unordered_map<int, int> map;
-        for (int i = 0; i < len; ++i) {
-            map[stones[i]] = i;
-        }
-        
-        std::vector<std::vector<int>> mem(len + 1, std::vector<int>(len + 1, -1));
-        return recursive(stones, 0, 0, mem, map);
+        return by_recursive_dp(stones);
+        //return by_iterative_dp(stones);
     }
 };

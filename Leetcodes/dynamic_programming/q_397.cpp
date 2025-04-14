@@ -44,21 +44,20 @@ public:
     }
 private:
     int iterative(int n) {
+        unsigned num = n;   //avoid overflow issues 
         int cnt = 0;
-        long num = n; // Use long to avoid overflow issues with large integers
+        while (num > 1) {
 
-        while (num != 1) {
-
-            //it is even
-            if ((num & 1) == 0) {
+            if (!(num & 1)) {   //it is even
                 num >>= 1;
-
+                
             } else {
+
                 //when it is odd
 
                 //for this condition, if n == 3 or 
                 //after right shift, the last bit will be zero
-                if (num == 3 || ((num >> 1) & 1) == 0) {
+                if (num == 3 || !(((num - 1) >> 1) & 1)) {
                     --num;
                 } else {
                     ++num;
@@ -67,6 +66,7 @@ private:
 
             ++cnt;
         }
+
         return cnt;
     }
     int recursive(long n, std::unordered_map<int, int>& mem) {

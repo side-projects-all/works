@@ -28,46 +28,57 @@ Constraints:
 */
 
 class Solution {
-public:
-    int maxKilledEnemies(vector<vector<char>>& grid) {
+private:
+    int by_iterative_dp(vector<vector<char>>& grid) {
         int rows = grid.size();
         int cols = grid[0].size();
 
-        int ans = 0;
+        int max_hits = 0;
         int row_hits = 0;
-        std::vector<int> col_hits(cols);
+        std::vector<int> col_hits_dp(cols);
+
 
         for (int r = 0; r < rows; ++r) {
             for (int c = 0; c < cols; ++c) {
-                
+
                 if (c == 0 || grid[r][c - 1] == 'W') {
-                    row_hits = 0;
-                    for (int k = c; k < cols; ++k) {
-                        if (grid[r][k] == 'W') {
-                            break;
-                        } else if (grid[r][k] == 'E') {
+                    row_hits = 0;   //for hits in this row before wall
+
+                    for (int col = c; col < cols; ++col) {
+
+                        if (grid[r][col] == 'E') {
                             row_hits += 1;
+                        } else if (grid[r][col] == 'W'){
+                            break;
                         }
                     }
+
+                    
                 }
 
                 if (r == 0 || grid[r - 1][c] == 'W') {
-                    col_hits[c] = 0;
-                    for (int k = r; k < rows; ++k) {
-                        if (grid[k][c] == 'W') {
+                    col_hits_dp[c] = 0; //for hits in this column, accumulate from rows before!
+
+                    for (int row = r; row < rows; ++row) {
+
+                        if (grid[row][c] == 'E') {
+                            col_hits_dp[c] += 1;
+                        } else if (grid[row][c] == 'W'){
                             break;
-                        } else if (grid[k][c] == 'E') {
-                            col_hits[c] += 1;
                         }
                     }
                 }
 
                 if (grid[r][c] == '0') {
-                    ans = std::max(ans, row_hits + col_hits[c]);
+                    max_hits = std::max(max_hits, row_hits + col_hits_dp[c]);
                 }
             }
         }
 
-        return ans;
+        return max_hits;
+    }
+public:
+    int maxKilledEnemies(vector<vector<char>>& grid) {
+        return by_iterative_dp(grid);
     }
 };

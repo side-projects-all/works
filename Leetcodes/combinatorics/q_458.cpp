@@ -47,9 +47,23 @@ Constraints:
 */
 
 class Solution {
+private:
+    int by_math(int& buckets, int& minutesToDie, int& minutesToTest) {
+        //int states = minutesToTest / minutesToDie + 1;
+        //return std::ceil(std::log2(buckets) / std::log2(states));
+        if (buckets == 1) {
+            return 0;
+        }
+
+        int buckets_to_feed = minutesToTest / minutesToDie + 1;
+        int pigs = 1;
+        while (std::pow(buckets_to_feed, pigs) < buckets) {
+            ++pigs;
+        }
+        return pigs;
+    }
 public:
     int poorPigs(int buckets, int minutesToDie, int minutesToTest) {
-        int states = minutesToTest / minutesToDie + 1;
-        return std::ceil(std::log2(buckets) / std::log2(states));
+        return by_math(buckets, minutesToDie, minutesToTest);
     }
 };

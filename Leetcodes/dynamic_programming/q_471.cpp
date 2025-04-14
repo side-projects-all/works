@@ -36,57 +36,65 @@ Constraints:
 */
 
 class Solution {
-public:
-    // Helper function to check if a substring is a repeated version of a smaller substring
-    bool isRepeat(const string& s, int i, int j, int k) {
+private:
+    //check if a substring is a repeated version of a smaller substring
+    bool is_repeat(std::string& s, int i, int j, int k) {
         int len = j - i + 1;
-        
+
         //need to divisible by k
         if (len % k != 0) {
             return false;
         }
-        
+
         //compare with previous substring
         for (int m = i + k; m <= j; ++m) {
             if (s[m] != s[m - k]) {
                 return false;
             }
         }
+
         return true;
     }
-
-    string encode(string s) {
+    std::string by_iterative_dp(std::string& s) {
         int n = s.size();
-        // DP table to store the shortest encoding of substring s[i:j+1]
-        std::vector<std::vector<std::string>> dp(n, std::vector<std::string>(n, ""));
-        
-        // Iterate over all possible lengths of substrings
-        for (int l = 0; l < n; ++l) {
-            for (int i = 0; i + l < n; ++i) {
-                int j = i + l;
-                std::string sub_str = s.substr(i, l + 1);
-                dp[i][j] = sub_str;  // Initialize the DP table with the substring itself
+        if (n <= 4) {
+            return s;
+        }
 
-                // Try to split the substring into two parts and concatenate the encodings
+        //store shortest encoded string between i, j
+        std::vector<std::vector<std::string>> dp(n, std::vector<std::string>(n));   
+
+        //all possible lengths of substrings
+        for (int len = 0; len < n; ++len) {
+            for (int i = 0; i < n - len; ++i) {
+                int j = i + len;
+                std::string sub = s.substr(i, len + 1);
+                dp[i][j] = sub;     //init the DP table with the substring itself
+
+                //adjust shortest encoded string, split the substring into two parts and concatenate the encodings
                 for (int k = i; k < j; ++k) {
                     if (dp[i][k].size() + dp[k + 1][j].size() < dp[i][j].size()) {
                         dp[i][j] = dp[i][k] + dp[k + 1][j];
                     }
                 }
 
-                // Check for repeating patterns in the current substring
-                for (int k = 1; k <= (l + 1) / 2; ++k) {
-                    if (isRepeat(s, i, j, k)) {
-                        string encoded_str = std::to_string((l + 1) / k) + "[" + dp[i][i + k - 1] + "]";
-                        if (encoded_str.size() < dp[i][j].size()) {
-                            dp[i][j] = encoded_str;
+                //check if repeated
+                for (int k = 1; k <= (len + 1) / 2; ++k) {  //(len + 1) / 2 for decimal part removed situation
+                    if (is_repeat(s, i, j, k)) {
+                        std::string encoded = std::to_string((len + 1) / k) + "[" + dp[i][i + k - 1] + "]";
+
+                        if (encoded.size() < dp[i][j].size()) {
+                            dp[i][j] = encoded;
                         }
                     }
                 }
             }
         }
-        
-        // Return the shortest encoding for the entire string s[0:n-1]
+
         return dp[0][n - 1];
+    }
+public:
+    string encode(string s) {
+        return by_iterative_dp(s);
     }
 };

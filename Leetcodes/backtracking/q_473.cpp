@@ -28,8 +28,37 @@ Constraints:
 */
 
 class Solution {
-public:
-    bool makesquare(vector<int>& matchsticks) {
+private:
+    bool recursive(vector<int>& matchsticks, int& n, std::vector<int>& mem, int& side_len, int curr_len, int rest_sides, int pos, int used) {
+        if (rest_sides == 1) {
+            return true;
+        }
+
+        //this case is necessary for efficiency
+        if (pos == n) {
+            return false;
+        }
+
+        if (mem[used] != -1) {
+            return mem[used];
+        }
+
+        if (curr_len == side_len) {
+            return mem[used] = recursive(matchsticks, n, mem, side_len, 0, rest_sides - 1, 0, used);
+        }
+
+        for (int i = pos; i < n; ++i) {
+
+            if (!(used & (1 << i)) && curr_len + matchsticks[i] <= side_len && 
+                    recursive(matchsticks, n, mem, side_len, curr_len + matchsticks[i], rest_sides, i, used ^ (1 << i))) {
+
+                return mem[used] = true;
+            }
+        }
+
+        return false;
+    }
+    bool by_back_tracking(vector<int>& matchsticks) {
         int n = matchsticks.size();
         if (n < 4) {
             return false;
@@ -40,84 +69,12 @@ public:
             return false;
         }
 
-        int per_side = sum / 4;
-        int len = matchsticks.size();
-        //std::vector<bool> used(len);
-        std::vector<int> mem((1 << matchsticks.size()) + 1, -1);
-
-        return recursive(matchsticks, mem, per_side, 4, 0, 0, 0);
-
-        //return backtracking(matchsticks, used, per_side, 0, 4, 0);
+        int side_len = sum / 4;
+        std::vector<int> mem(1 << n, -1);
+        return recursive(matchsticks, n, mem, side_len, 0, 4, 0, 0);
     }
-
-private:
-    bool backtracking(std::vector<int>& matchsticks, std::vector<bool>& used, 
-                                int& per_side, int pos, int sides, int curr_sum) {
-        if (sides == 1) {
-            return true;
-        }
-
-        if (curr_sum > per_side) {
-            return false;
-        }
-
-        if (curr_sum == per_side) {
-            return backtracking(matchsticks, used, per_side, 0, sides - 1, 0);
-        }
-
-        int prev = -1;
-        for (int i = pos; i < matchsticks.size(); ++i) {
-            if (used[i]) {
-                continue;
-            }
-
-            if (matchsticks[i] == prev) {
-                continue;
-            }
-
-            used[i] = true;
-            prev = matchsticks[i];
-
-            if (backtracking(matchsticks, used, per_side, i + 1, sides, curr_sum + matchsticks[i])) {
-                return true;
-            }
-
-            used[i] = false;
-        }
-
-        return false;
+public:
+    bool makesquare(vector<int>& matchsticks) {
+        return by_back_tracking(matchsticks);
     }
-    
-    bool recursive(std::vector<int>& matchsticks, std::vector<int>& mem, 
-                                    int& per_side, int rest_sides, int curr_sum, int mask, int i) {
-        
-        if (rest_sides == 1) {
-            return true;
-        }
-
-        if (i == matchsticks.size()) {
-            return false;
-        }
-
-        if (mem[mask] != -1) {
-            return mem[mask];
-        }
-
-        //find one side
-        if (curr_sum == per_side) {
-            return mem[mask] = recursive(matchsticks, mem, per_side, rest_sides - 1, 0, mask, 0);
-        }
-
-        for (int j = i; j < matchsticks.size(); ++j) {
-            if (!(mask & (1 << j)) && matchsticks[j] + curr_sum <= per_side && 
-                    recursive(matchsticks, mem, per_side, rest_sides, 
-                                matchsticks[j] + curr_sum, mask | (1 << j), j + 1)) {
-
-                return mem[mask] = true;
-            }
-        }
-
-        return mem[mask] = false;
-    }
-    
 };

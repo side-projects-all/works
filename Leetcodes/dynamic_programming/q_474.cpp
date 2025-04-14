@@ -35,25 +35,20 @@ Constraints:
 
 class Solution {
 private:
-    std::vector<int> zerosOnes(std::string& s) {
-        //v[0]: counts of zeros; v[1]: counts of ones
-        std::vector<int> v(2, 0);
-        for (char c : s) {
-            ++v[c - '0'];
-        }
+    int by_iterative_dp(vector<string>& strs, int& m, int& n) {
+        int len = strs.size();
 
-        return v;
-    }
-    int iterative(std::vector<std::string>& strs, int& m, int& n) {
+        //longest subset under all m, n combination
         std::vector<std::vector<int>> dp(m + 1, std::vector<int>(n + 1));
+        for (int i = 0; i < len; ++i) {
 
-        for (int i = 0; i < strs.size(); ++i) {
             int zeros = 0;
             int ones = 0;
-
             for (int j = 0; j < strs[i].size(); ++j) {
+
                 if (strs[i][j] == '0') {
                     ++zeros;
+
                 } else {
                     ++ones;
                 }
@@ -61,6 +56,7 @@ private:
 
             for (int z = m; z >= zeros; --z) {
                 for (int o = n; o >= ones; --o) {
+
                     dp[z][o] = std::max(dp[z][o], 1 + dp[z - zeros][o - ones]);
                 }
             }
@@ -69,39 +65,8 @@ private:
         return dp[m][n];
     }
 
-    int recursive(std::vector<std::string>& strs, int m, int n, int i, 
-                                                            std::vector<std::vector<std::vector<int>>>& mem) {
-        if (i == strs.size()) {
-            return 0;
-        }
-
-        if (mem[i][m][n] != -1) {
-            return mem[i][m][n];
-        }
-
-        std::vector<int> counts = zerosOnes(strs[i]);
-        int use = 0;
-        int notUse = 0;
-
-        if (m - counts[0] >= 0 && n - counts[1] >= 0) {
-            use = 1 + recursive(strs, m - counts[0], n - counts[1], i + 1, mem);
-        }
-
-        notUse = recursive(strs, m, n, i + 1, mem);
-
-        mem[i][m][n] = std::max(use, notUse);
-
-        return mem[i][m][n];
-    }
 public:
     int findMaxForm(vector<string>& strs, int m, int n) {
-        /*
-        std::vector<std::vector<std::vector<int>>> mem(strs.size(), 
-                                                        std::vector<std::vector<int>>(m + 1, 
-                                                                                std::vector<int>(n + 1, -1)));
-        */
-        //return recursive(strs, m, n, 0, mem);
-
-        return iterative(strs, m, n);
+        return by_iterative_dp(strs, m, n);
     }
 };

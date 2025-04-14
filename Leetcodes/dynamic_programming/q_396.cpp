@@ -39,24 +39,31 @@ Constraints:
 */
 
 class Solution {
-public:
-    int maxRotateFunction(vector<int>& nums) {
+private:
+    int by_iterative_dp(vector<int>& nums) {
         int n = nums.size();
-        int prev = 0;
-        int sum = 0;
+        if (n == 1) {
+            return 0;
+        }
 
+        std::vector<int> dp(n);
+        int sum = 0;
         for (int i = 0; i < n; ++i) {
-            prev += i * nums[i];
+            dp[0] += i * nums[i];
             sum += nums[i];
         }
 
-        //like the fibonacci dp relationship
-        int ans = prev;
+        int max_sum = dp[0];
         for (int i = 1; i < n; ++i) {
-            prev = prev + sum - nums[n - i] * n;
-            ans = std::max(ans, prev);
+
+            dp[i] = dp[i - 1] + sum - n * nums[n - i];
+            max_sum = std::max(max_sum, dp[i]);
         }
 
-        return ans;
+        return max_sum;
+    }
+public:
+    int maxRotateFunction(vector<int>& nums) {
+        return by_iterative_dp(nums);
     }
 };

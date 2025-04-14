@@ -59,24 +59,30 @@ Constraints:
 */
 
 class Solution {
-public:
-    int getMoneyAmount(int n) {
-
-        //dp[i][j] i and j means the range, and the value is the min cost
-        std::vector<std::vector<int>> dp(n + 1, std::vector<int>(n + 1));
-        for (int len = 2; len <= n; ++len) {
-            for (int start = 1; start <= n - len + 1; ++start) {
-                int min = INT_MAX;
-
-                for (int piv = start; piv < start + len - 1; ++piv) {
-                    int r = piv + std::max(dp[start][piv - 1], dp[piv + 1][start + len - 1]);
-                    min = std::min(r, min);
-                }
-
-                dp[start][start + len - 1] = min;
-            }
+private:
+    int by_iterative_dp(int& n) {
+        if (n <= 2) {
+            return n - 1;
         }
 
+        std::vector<std::vector<int>> dp(n + 1, std::vector<int>(n + 1));
+
+        for (int len = 2; len <= n; ++len) {
+            for (int b = 1; b <= n - len + 1; ++b) {
+                int min_cost = INT_MAX;
+
+                for (int pivot = b; pivot < b + len - 1; ++pivot) {
+                    int cost = pivot + std::max(dp[b][pivot - 1], dp[pivot + 1][b + len - 1]);
+                    min_cost = std::min(min_cost, cost);
+                }
+
+                dp[b][b + len - 1] = min_cost;
+            }
+        }
         return dp[1][n];
+    }
+public:
+    int getMoneyAmount(int n) {
+        return by_iterative_dp(n);
     }
 };

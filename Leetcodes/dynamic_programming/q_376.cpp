@@ -39,163 +39,54 @@ Constraints:
 
 class Solution {
 private:
-    int iterative_greedy(vector<int>& nums) {
-        int prevDiff = nums[1] - nums[0];
-        int cnt = (prevDiff != 0) ? 2 : 1;
-
-        for (int i = 2; i < nums.size(); ++i) {
-            int diff = nums[i] - nums[i - 1];
-
-            if ((diff > 0 && prevDiff <= 0) || (diff < 0 && prevDiff >= 0)) {
-                ++cnt;
-                prevDiff = diff;
-            }
+    int by_iterative_dp(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return 1;
+        }
+        if (n == 2) {
+            return nums[0] != nums[1] ? 2 : 1;
         }
 
-        return cnt;
-    }
-    int iterative_space_optimize(vector<int>& nums) {
+        std::vector<int> pos_dp(n, 1);
+        std::vector<int> neg_dp(n, 1);
 
-        int upNow = 0;
-        int upPrev = 1;
-        int downNow = 0;
-        int downPrev = 1;
-
-        for (int i = nums.size() - 2; i > -1; --i) {
-            if (nums[i] > nums[i + 1]) {
-                upNow = downPrev + 1;
-                downNow = downPrev;
-            } else if (nums[i] < nums[i + 1]) {
-                downNow = upPrev + 1;
-                upNow = upPrev;
-            } else {
-                downNow = downPrev;
-                upNow = upPrev;
-            }
-
-            upPrev = upNow;
-            downPrev = downNow;
-        }
-
-        return std::max(upNow, downNow);
-    }
-    int iterative_better(vector<int>& nums) {
-
-        std::vector<int> up(nums.size());
-        std::vector<int> down(nums.size());
-        up[nums.size() - 1] = 1;
-        down[nums.size() - 1] = 1;
-
-        // from the iterative function, we could conclude
-        // if we update memPos[i], then we do not update memNeg[i], 
-        // it implies that memNeg[i] did not change from memNeg[i - 1] and vice versa.
-        // so, we could reduce the time complexity from O(n^2) to O(n) by updating two array at the same time.
-        for (int i = nums.size() - 2; i > -1; --i) {
-            if (nums[i] > nums[i + 1]) {
-                up[i] = down[i + 1] + 1;
-                down[i] = down[i + 1];
-            } else if (nums[i] < nums[i + 1]) {
-                down[i] = up[i + 1] + 1;
-                up[i] = up[i + 1];
-            } else {
-                down[i] = down[i + 1];
-                up[i] = up[i + 1];
-            }
-        }
-
-        return std::max(down[0], up[0]);
         /*
-        up[0] = 1;
-        down[0] = 1;
+        for (int e = 1; e < n; ++e) {
 
-        for (int i = 1; i < nums.size(); ++i) {
-            if (nums[i] > nums[i - 1]) {
-                up[i] = down[i - 1] + 1;
-                down[i] = down[i - 1];
-            } else if (nums[i] < nums[i - 1]) {
-                down[i] = up[i - 1] + 1;
-                up[i] = up[i - 1];
-            } else {
-                down[i] = down[i - 1];
-                up[i] = up[i - 1];
-            }
-        }
+            for (int b = 0; b < e; ++b) {
+                if (nums[e] > nums[b]) {
+                    neg_dp[e] = std::max(neg_dp[e], 1 + pos_dp[b]);
 
-        return std::max(down[nums.size() - 1], up[nums.size() - 1]);
-        */
-    }
-
-    int iterative(vector<int>& nums) {
-        std::vector<int> memPos(nums.size(), 0);
-        std::vector<int> memNeg(nums.size(), 0);
-
-        for (int i = nums.size() - 2; i > -1; --i) {
-            for (int j = i + 1; j < nums.size(); ++j) {
-                if (nums[i] > nums[j]) {
-                    memNeg[i] = std::max(memNeg[i], 1 + memPos[j]);
-                    
-                } else if (nums[i] < nums[j]) {
-                    memPos[i] = std::max(memPos[i], 1 + memNeg[j]);
+                } else if (nums[e] < nums[b]) {
+                    pos_dp[e] = std::max(pos_dp[e], 1 + neg_dp[b]);
                 } 
             }
         }
-
-        return 1 + std::max(memPos[0], memNeg[0]);
-    }
-
-    int recursive(vector<int>& nums, int now, bool isUp, std::vector<int>& memPos, std::vector<int>& memNeg) {
-        if (now == nums.size() - 1) {
-            return 0;
-        }
-
-        if (isUp && memPos[now] != -1) {
-            return memPos[now];
-        }
-
-        if (!isUp && memNeg[now] != -1) {
-            return memNeg[now];
-        }
-
-        int negMaxLen = 0;
-        int posMaxLen = 0;
-
-        for (int i = now + 1; i < nums.size(); ++i) {
-            if (isUp && nums[now] < nums[i]) {
-                posMaxLen = std::max(posMaxLen, 1 + recursive(nums, i, !isUp, memPos, memNeg));
-
-            } else if (!isUp && nums[now] > nums[i]) {
-                negMaxLen = std::max(negMaxLen, 1 + recursive(nums, i, !isUp, memPos, memNeg));                
-            } 
-        }
-
-        if (isUp) {
-            memPos[now] = posMaxLen;
-            return posMaxLen;
-        } else {
-            memNeg[now] = negMaxLen;
-            return negMaxLen;
-        }
-    }
-
-public:
-    int wiggleMaxLength(vector<int>& nums) {
-
-        //corner case
-        if (nums.size() < 2) {
-            return nums.size();
-        }
-
-        /*
-        std::vector<int> memPos(nums.size(), -1);
-        std::vector<int> memNeg(nums.size(), -1);
-        
-        return 1 + std::max(recursive(nums, 0, true, memPos, memNeg), 
-                                recursive(nums, 0, false, memPos, memNeg));
         */
         
-        //return iterative(nums);
-        //return iterative_better(nums);
-        //return iterative_space_optimize(nums);
-        return iterative_greedy(nums);
+        for (int e = 1; e < n; ++e) {
+
+            if (nums[e] > nums[e - 1]) {
+                neg_dp[e] = 1 + pos_dp[e - 1];
+                pos_dp[e] = pos_dp[e - 1];
+
+            } else if (nums[e] < nums[e - 1]) {
+                pos_dp[e] = 1 + neg_dp[e - 1];
+                neg_dp[e] = neg_dp[e - 1];
+
+            } else {
+                neg_dp[e] = neg_dp[e - 1];
+                pos_dp[e] = pos_dp[e - 1];
+            }
+        }
+        
+
+        return std::max(neg_dp[n - 1], pos_dp[n - 1]);
+        
+    }
+public:
+    int wiggleMaxLength(vector<int>& nums) {
+        return by_iterative_dp(nums);
     }
 };

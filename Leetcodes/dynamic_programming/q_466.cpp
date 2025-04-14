@@ -36,134 +36,51 @@ Constraints:
 
 class Solution {
 public:
-    int getMaxRepetitions(std::string s1, int n1, std::string s2, int n2) {
-         //return optimized_from_example(s1, n1, s2, n2);
-         //return by_scanning_s1_n1_times(s1, n1, s2, n2);
+    int getMaxRepetitions(string s1, int n1, string s2, int n2) {
 
-         return by_scanning_s1_n1_times_with_hashmap(s1, n1, s2, n2);
-    }
+        int len1 = s1.size();
+        int len2 = s2.size();
+        std::unordered_map<int, std::pair<int, int>> indexMap; // s2_index -> (s1_count, s2_count)
 
-private:
-    int by_scanning_s1_n1_times_with_hashmap(std::string& s1, int n1, std::string& s2, int n2) {
-        int s1_cnt = 0;     // Tracks how many times we've processed s1
-        int s2_cnt = 0;     // Tracks how many times we've matched s2
-        int s2_pos = 0;      // Tracks the current index in s2
-        std::unordered_map<int, std::pair<int, int>> same_index_at;  // Stores index and (s1_count, s2_count)
+        int s1_count = 0;
+        int s2_count = 0; 
+        int index = 0;
 
-        // Loop through s1 up to n1 times
-        while (s1_cnt < n1) {
-            ++s1_cnt;
-            for (char c : s1) {
-                if (c == s2[s2_pos]) {
-                    ++s2_pos;
-                    if (s2_pos == s2.size()) {
-                        ++s2_cnt;
-                        s2_pos = 0;
+        while (s1_count < n1) {
+
+            for (int i = 0; i < len1; ++i) {
+                if (s1[i] == s2[index]) {
+
+                    ++index;    //s2 position
+                    if (index == len2) {
+                        index = 0;
+                        ++s2_count;
                     }
                 }
             }
 
-            // Detect if the same state (index, s2_count) has occurred before
-            if (same_index_at.find(s2_pos) != same_index_at.end()) {
-                auto [prev_s1_cnt, prev_s2_cnt] = same_index_at[s2_pos];
-                int pre_loop_s1 = prev_s1_cnt;
-                int pre_loop_s2 = prev_s2_cnt;
-                int in_loop_s1 = s1_cnt - prev_s1_cnt;
-                int in_loop_s2 = s2_cnt - prev_s2_cnt;
+            ++s1_count;
 
-                // Calculate how many full loops can be made
-                int loops = (n1 - pre_loop_s1) / in_loop_s1;
+            // Cycle detected
+            if (indexMap.count(index)) {
+                int prev_s1_count = indexMap[index].first;
+                int prev_s2_count = indexMap[index].second;
 
-                // Jump forward by as many full loops as possible
-                s1_cnt = pre_loop_s1 + loops * in_loop_s1;
-                s2_cnt = pre_loop_s2 + loops * in_loop_s2;
-            }
+                int cycle_len = s1_count - prev_s1_count;
+                int cycle_s2 = s2_count - prev_s2_count;
 
-            // Store current state for cycle detection
-            same_index_at[s2_pos] = {s1_cnt, s2_cnt};
-        }
+                int remaining = n1 - s1_count;
+                int cycles = remaining / cycle_len;
 
-        return s2_cnt / n2;
-    }
-    int by_scanning_s1_n1_times(std::string& s1, int n1, std::string& s2, int n2) {
-        std::vector<int> repeat_cnt(n1 + 1, 0);
-        std::vector<int> next_i(n1 + 1, 0);
-
-        int j = 0;  //for s2 index
-        int cnt = 0;
-        for (int k = 1; k <= n1; ++k) {     //repeat n1 times
-            for (int i = 0; i < s1.size(); ++i) {
-                if (s1[i] == s2[j]) {
-                    ++j;
-
-                    if (j == s2.size()) {       //complete s2(original) 1 time
-                        j = 0;
-                        ++cnt;
-                    }
-                }
-            }
-
-            repeat_cnt[k] = cnt;
-            next_i[k] = j;
-
-            for (int b = 0; b < k; ++b) {
-                if (next_i[b] == j) {
-                    int prefix_cnt = repeat_cnt[b];
-                    int pattern_cnt = (n1 - b) / (k - b) * (repeat_cnt[k] - prefix_cnt);
-                    int suffix_cnt = repeat_cnt[b + (n1 - b) % (k - b)] - prefix_cnt;
-
-                    return (prefix_cnt + pattern_cnt + suffix_cnt) / n2;
-                }
-            }
-        }
-
-        return repeat_cnt[n1] / n2;
-    }
-    int optimized_from_example(std::string& s1, int n1, std::string& s2, int n2) {
-        std::vector<int> rapport(101, -1);
-        std::vector<int> rest(101, -1);
-        int b = -1;
-        int posRest = 0;
-        int rap = 0;
-        int last = -1;
-        rapport[0] = 0;
-        rest[0] = 0;
-
-        for(int i = 1; i <= s2.size(); ++i) {
-
-            int j;
-            for(j = 0; j < s1.size(); ++j) {
-
-                if(s2[posRest] == s1[j]) {
-
-                    ++posRest;
-                    if(posRest == s2.size()) {
-                        ++rap;
-                        posRest = 0;
-                    }
-                }
-            }
-            
-            for(int k = 0; k < i; ++k) {
+                s1_count += cycles * cycle_len;
+                s2_count += cycles * cycle_s2;
                 
-                if(posRest == rest[k]) {
-                    b = k;
-                    last = i;
-                    break;
-                }
+            } else {
+                indexMap[index] = {s1_count, s2_count};
             }
-            
-            rapport[i] = rap;
-            rest[i] = posRest;
-            if (b >= 0) break;
         }
-        
-        int interval = last - b;
-        if (b >= n1) {
-            return rapport[n1] / n2;
-        }       
-        
-        return ((n1 - b) / interval * (rapport[last] - rapport[b]) + rapport[(n1 - b) % interval + b]) / n2; 
+
+        return s2_count / n2;
     }
 };
 

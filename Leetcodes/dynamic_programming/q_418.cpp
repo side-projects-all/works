@@ -48,42 +48,45 @@ Constraints:
 */
 
 class Solution {
-public:
-    int wordsTyping(vector<string>& sentence, int rows, int cols) {
+private:
+    std::pair<int, int> fitting_cnt(vector<string>& sentence, int& n, int& cols, 
+                                        std::vector<std::pair<int, int>>& dp, int pos) {
+        if (dp[pos].first != -1) {
+            return dp[pos];
+        }
+        int cnt = 0;
+        int i = pos;
+        int c = 0;
+
+        while (c + sentence[i].size() <= cols) {
+
+            c += sentence[i].size() + 1;
+            ++i;
+
+            if (i == n) {
+                ++cnt;
+                i = 0;
+            }
+        }
+
+        return dp[pos] = {cnt, i};
+    }
+    int by_iterative_dp(vector<string>& sentence, int& rows, int& cols) {
         int n = sentence.size();
-        int pos = 0;
         int ans = 0;
-
-        std::vector<std::pair<int, int>> dp(n, {-1, -1});
-
-        for (int i = 0; i < rows; ++i) {
-            auto [next, cnt] = used_str(sentence, pos, cols, dp);
-
-            pos = next;
+        std::vector<std::pair<int, int>> dp(n, {-1, -1});   //cnt, next pos
+        int next = 0;
+        for (int r = 0; r < rows; ++r) {
+            auto [cnt, pos] = fitting_cnt(sentence, n, cols, dp, next);
+            
+            next = pos;
             ans += cnt;
         }
 
         return ans;
     }
-private:
-    std::pair<int, int> used_str(std::vector<std::string>& sentence, int pos, int cols, std::vector<std::pair<int, int>>& dp) {
-        if (dp[pos].first != -1) {
-            return dp[pos];
-        }
-
-        int i = pos;
-        int cnt = 0;
-        int c = 0;
-
-        while (c + sentence[i].size() <= cols) {
-            c += sentence[i].size() + 1;
-
-            if (++i == sentence.size()) {
-                i = 0;
-                ++cnt;
-            }
-        }
-
-        return dp[pos] = {i, cnt};
+public:
+    int wordsTyping(vector<string>& sentence, int rows, int cols) {
+        return by_iterative_dp(sentence, rows, cols);
     }
 };

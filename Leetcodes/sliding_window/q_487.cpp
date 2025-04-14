@@ -33,122 +33,41 @@ Constraints:
 
 class Solution {
 private:
-    int slidingWindow2(vector<int>& nums) {
-        //count 1 before first 0
-        int zerosN = 0;
-        //count 1 before second 0
-        int zerosNplusOne = 0;
-        int maxLen = 0;
-
-        int zeros = 0;
-        //find first 0, and count 1 before it
-        //break when we meet zero
-        int i = 0;
-        for (i = 0; i < nums.size(); ++i) {
-            if (nums[i] == 1) {
-                ++zerosN;
-            } else {
-                //for counting zeros
-                zeros += 1;
-                break;
-            }
+    int by_sliding_window(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return 1;
         }
 
-        //start after first zero, 
-        //then calculate and compare max consecutive ones after first zero
-        for (i = i + 1; i < nums.size(); ++i) {
-            if (nums[i] == 1) {
-                ++zerosNplusOne;
-            } else {
-                maxLen = std::max(maxLen, zerosN + zerosNplusOne + 1);
-                zerosN = zerosNplusOne;
-                zerosNplusOne = 0;
-                ++zeros;
-            }
-        }
-
-        //make the last count if no zero till the end
-        maxLen = std::max(maxLen, zerosN + zerosNplusOne + 1);
-
-        //corner case, no zero
-        if (zeros == 0) {
-            maxLen = nums.size();
-        }
-
-        return maxLen;
-    }
-
-    int slidingWindow(vector<int>& nums) {
+        int b = 0;
+        int e = 0;
         int longest = 0;
-        int left = 0;
-        int right = 0;
         int zeros = 0;
-
-        //the sliding window size controled by at most 1 zersos
-        while (right < nums.size()) {
-            if (nums[right] == 0) {
+        while (e < n) {
+            if (nums[e] == 0) {
                 ++zeros;
             }
 
-            while (zeros == 2) {
-                if (nums[left] == 0) {
-                    --zeros;
-                }
+            if (zeros <= 1) {
+                longest = std::max(longest, e - b + 1);
 
-                ++left;
+            } else {
+                while (zeros > 1) {
+                    if (nums[b] == 0) {
+                        --zeros;
+                    }
+
+                    ++b;
+                }
             }
 
-            longest = std::max(longest, right - left + 1);
-            ++right;
+            ++e;
         }
 
         return longest;
     }
-
-    int naiveThough(vector<int>& nums) {
-        int pos = 0;
-            int maxFlip = 0;
-            int allOnes = true;
-
-            for (int i = 0; i < nums.size(); ++i) {
-                if (nums[i] == 0) {
-                    int index = i;
-                    int count = 1;
-
-                    --index;
-                    while (index > -1 && nums[index] != 0) {
-                        ++count;
-                        --index;
-                    }
-
-                    index = i;
-                    ++index;
-                    while (index < nums.size() && nums[index] != 0) {
-                        ++count;
-                        ++index;
-                    }
-
-                    maxFlip = std::max(maxFlip, count);
-                    allOnes = false;
-                } 
-            }
-
-            if (allOnes) {
-                maxFlip = nums.size();
-            }
-
-            return maxFlip;
-    }
 public:
     int findMaxConsecutiveOnes(vector<int>& nums) {
-        //edge case
-        if (nums.size() == 1) {
-            return 1;
-        }
-
-        
-        //return slidingWindow(nums);
-        //return naiveThough(nums);
-        return slidingWindow2(nums);
+        return by_sliding_window(nums);
     }
 };
