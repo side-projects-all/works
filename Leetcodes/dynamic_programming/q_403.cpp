@@ -34,11 +34,40 @@ Constraints:
 class Solution {
 private:
     bool by_iterative_dp(vector<int>& stones) {
+
         int n = stones.size();
-        if (n == 2) {
-            return stones[0] + 1 == stones[1];
+        if (stones[0] + 1 != stones[1]) {
+            return false;
         }
 
+        std::vector<std::vector<int>> dp(n, std::vector<int>(n));
+        dp[0][1] = 1;
+
+        for (int i = 0; i < n - 1; ++i) {
+            for (int j = i + 1; j < n; ++j) {
+
+                int distance = stones[j] - stones[i];
+                if (distance > i + 1) {
+                    break;
+                }
+
+                if (dp[i][distance]) {
+
+                    if (j == n - 1) {
+                        return true;
+                    }
+
+                    dp[j][distance - 1] = 1;
+                    dp[j][distance] = 1;
+                    dp[j][distance + 1] = 1;
+                }
+            }
+        }
+
+        return false;
+        
+
+        /*
         std::unordered_map<int, int> stones_pos;
         for (int i = 0; i < n; ++i) {
             stones_pos[stones[i]] = i;
@@ -76,12 +105,10 @@ private:
         }
 
         return false;
+        */
     }
     bool recursive(vector<int>& stones, std::vector<std::vector<int>>& mem, int pos, int prev_jump) {
         int n = stones.size();
-        if (pos == n - 1) {
-            return true;
-        }
 
         if (mem[pos][prev_jump] != -1) {
             return mem[pos][prev_jump];
@@ -100,7 +127,8 @@ private:
                 if (next == n - 1 && stones[next] == jump + stones[pos]) {
                     ans = true;
                     break;
-                } else {
+                    
+                } else if (stones[next] == jump + stones[pos]) {
                     ans = ans || recursive(stones, mem, next, jump);
                 }
             }
@@ -120,7 +148,7 @@ private:
     }
 public:
     bool canCross(vector<int>& stones) {
-        return by_recursive_dp(stones);
-        //return by_iterative_dp(stones);
+        //return by_recursive_dp(stones);
+        return by_iterative_dp(stones);
     }
 };

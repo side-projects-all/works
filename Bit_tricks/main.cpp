@@ -2,9 +2,57 @@
 #include <numeric>
 #include <fstream>
 #include "All_tricks.h"
-#include "Solution.h"
+#include <algorithm>
+#include <vector>
+//#include "Solution.h"
+
+class Solution {
+private:
+	bool is_less(char a, char b) {
+		std::cout << "? " << a << " " << b << std::endl;
+		char ans;
+		std::cin >> ans;
+		return ans == '<';
+	}
+public:
+	Solution() {}
+	~Solution() {}
+
+	void q1() {
+		
+		int N = 0;
+		int Q = 0;
+		
+		std::cin >> N >> Q;
+		std::vector<char> sorted;
+		sorted.push_back('A');
+
+		for (int i = 1; i < N; ++i) {
+			char curr = 'A' + i;
+			int pos = sorted.size();
+
+			for (int j = 0; j < sorted.size(); ++j) {
+				if (is_less(curr, sorted[j])) {
+					pos = j;
+					break;
+				}
+			}
+
+			sorted.insert(sorted.begin() + pos, curr);
+		}
+
+		std::cout << "! ";
+		for (int i = 0; i < N; ++i) {
+			std::cout << sorted[i];
+		}
+		std::cout << std::endl;
+ 	}
+};
+
 
 int main(int argc, char *argv[]) {
+	Solution sol;
+	sol.q1();
 
 	/*
 	All_tricks at;
@@ -13,7 +61,7 @@ int main(int argc, char *argv[]) {
 	at.Detect_if_two_integers_have_opposite_signs();
 	*/
 	
-	/**/
+	/*
 	Solution sol;
 	//std::vector<int> data{3, 1, 2};
 	//std::vector<int> data(10000);
@@ -24,24 +72,16 @@ int main(int argc, char *argv[]) {
         std::cerr << "Failed to open the file!\n";
         return 1;
     }
-	std::string str = "bacabbacab";
-	std::string final;
-	for (int i = 0; i < 499; ++i) {
-		final += str;
-	}
-	std::string rev = final;
-	std::reverse(final.begin(), final.end());
-	final = final + "z" + rev;
-
-	test_file << final;
-	test_file.close();
-	std::cout << "len: " << final.size() << "\n";
-	std::string str2 = "bacabbacab";
-	//int ans = 0;
-	std::string ans;
-	ans = sol.smallestPalindrome(str2, 5);
-	std::cout << ans << "\n";
 	
+	test_file.close();
+
+	std::vector<std::string> instructions = {"jump","add","add","jump","add","jump"};
+	std::vector<int> values = {2,1,3,1,-2,-3};
+	int ans = 0;
+	//std::string ans;
+	ans = sol.calculateScore(instructions, values);
+	std::cout << ans << "\n";
+	*/
 
 	return 0;
 }

@@ -56,43 +56,39 @@ Constraints:
 
 class Solution {
 private:
-    inline std::size_t hash_str(const std::string& s1, const std::string& s2) const {
-        std::size_t seed = 0;
+    inline void make_key(std::size_t& seed, const std::string& board, const std::string& hand) const {
         std::hash<std::string> hasher;
-
-        seed ^= hasher(s1) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        seed ^= hasher(s2) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-
-        return seed;
+        seed ^= hasher(board) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        seed ^= hasher(hand) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
 
-    void reduce(string& board) {
-        int i = 0;
-        while (i < board.size()) {
-
-            int j = i;
-            while (j < board.size() && board[j] == board[i]) {
-                ++j;
+    void cancel_consecutive_balls(string& board) {
+        int b = 0;
+        while (b < board.size()) {
+            int e = b;
+            while (e < board.size() && board[b] == board[e]) {
+                ++e;
             }
-            if (j - i >= 3) {
-                board = board.substr(0, i) + board.substr(j);
-                i = 0; // start over
+
+            if (e - b >= 3) {
+                board.erase(board.begin() + b, board.begin() + e);
+                b = 0;
             } else {
-                ++i;
+                ++b;
             }
         }
     }
-
-    int dfs(std::unordered_map<std::size_t, int>& mem, std::string&& board, std::string&& hand) {
-
+    int recursive(string&& board, string&& hand, std::unordered_map<std::size_t, int>& mem) {
         if (board.empty()) {
             return 0;
         }
+
         if (hand.empty()) {
             return INT_MAX;
         }
 
-        std::size_t key = hash_str(board, hand);
+        std::size_t key = 0;
+        make_key(key, board, hand);
         if (mem.find(key) != mem.end()) {
             return mem[key];
         }
@@ -100,21 +96,18 @@ private:
         int ans = INT_MAX;
         for (int i = 0; i < hand.size(); ++i) {
 
-            if (i > 0 && hand[i] == hand[i - 1]) {
-                continue;  // skip duplicates
+            if (i > 0 && hand[i - 1] == hand[i]) {
+                continue;   //for performance improvement
             }
-
             for (int j = 0; j < board.size(); ++j) {
 
-                //find case: equal or previous 2 letters equal but different from hand[i] 
-                if ((board[j] == hand[i]) || (j > 0 && board[j - 1] == board[j] && board[j] != hand[i])) {
+                if ((hand[i] == board[j]) || (j > 0 && board[j - 1] == board[j] && hand[i] != board[j])) {
 
                     std::string new_board = board.substr(0, j) + hand[i] + board.substr(j);
                     std::string new_hand = hand.substr(0, i) + hand.substr(i + 1);
-                    reduce(new_board);
+                    cancel_consecutive_balls(new_board);
 
-                    int tmp = dfs(mem, std::move(new_board), std::move(new_hand));
-
+                    int tmp = recursive(std::move(new_board), std::move(new_hand), mem);
                     if (tmp != INT_MAX) {
                         ans = std::min(ans, 1 + tmp);
                     }
@@ -124,13 +117,14 @@ private:
 
         return mem[key] = ans;
     }
+    int by_recursive_dp(string& board, string& hand) {
+        std::unordered_map<std::size_t, int> mem;
+        std::sort(hand.begin(), hand.end());    //for performance improvement
+        int ans = recursive(std::move(board), std::move(hand), mem);
+        return ans != INT_MAX ? ans : -1;
+    }
 public:
     int findMinStep(string board, string hand) {
-        std::sort(hand.begin(), hand.end());
-
-        std::unordered_map<std::size_t, int> mem;
-        int ans = dfs(mem, std::move(board), std::move(hand));
-
-        return ans == INT_MAX ? -1 : ans;
+        return by_recursive_dp(board, hand);
     }
 };

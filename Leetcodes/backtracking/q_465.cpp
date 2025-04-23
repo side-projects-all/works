@@ -65,6 +65,7 @@ private:
         accounts.erase(accounts.begin() + b, accounts.begin() + e + 1);
     }
 
+    /*
     int recursive(std::vector<int>& mem, std::vector<int>&& accounts, int total_mask) {
         if (mem[total_mask] != -1) {
             return mem[total_mask];
@@ -85,6 +86,29 @@ private:
         mem[total_mask] = ans + (balance_sum == 0 ? 1 : 0);
         return mem[total_mask];
     }
+    */
+    
+    int recursive(std::vector<int>&& accounts, std::vector<int>& mem, int& total, int used) {
+        if (used == total) {
+            return 0;
+        }
+        if (mem[used] != -1) {
+            return mem[used];
+        }
+
+        int ans = 0;
+        int balance = 0;
+        for (int i = 0; i < accounts.size(); ++i) {
+
+            if ((used & (1 << i)) == 0) {
+                balance += accounts[i];
+                ans = std::max(ans, recursive(std::move(accounts), mem, total, used ^ (1 << i)));
+            }
+        }
+
+        mem[used] = ans + (balance == 0 ? 1 : 0);
+        return mem[used];
+    }
     int by_recursive_dp(vector<vector<int>>& transactions) {
         int n = transactions.size();
         if (n == 1) {
@@ -96,9 +120,11 @@ private:
 
         n = accounts.size();
         std::vector<int> mem(1 << n, -1);
-        mem[0] = 0;
+        //mem[0] = 0;       //a little difference for handling base case
 
-        return n - recursive(mem, std::move(accounts), (1 << n) - 1);
+        //return n - recursive(mem, std::move(accounts), (1 << n) - 1); 
+        int total_used = (1 << n) - 1;
+        return n - recursive(std::move(accounts), mem, total_used, 0);
     }
     int back_tracking(std::vector<int>&& accounts, int& n, int pos) {
         while (pos < n && accounts[pos] == 0) {
