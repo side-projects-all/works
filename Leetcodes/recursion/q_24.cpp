@@ -39,55 +39,22 @@ Constraints:
  * };
  */
 class Solution {
+private:
+    ListNode* recursion(ListNode* b) {
+        if (b == nullptr || b->next == nullptr) {
+            return b;
+        }
+
+        ListNode* first = b;
+        ListNode* sec = first->next;
+        first->next = recursion(sec->next);
+        sec->next = first;
+        
+        return sec;
+    }
 public:
     ListNode* swapPairs(ListNode* head) {
-        //begin = head;
-        //return swapper(NULL, head);
-        return swapper2(head);
+
+        return recursion(head);
     }
-private:
-    ListNode* swapper2(ListNode* starter) {
-        if (starter == NULL || starter->next == NULL) {
-            return starter;
-        }
-
-        ListNode* tmp = starter;
-        ListNode* tmp_next = starter->next;
-
-        tmp->next = swapper2(tmp_next->next);
-        tmp_next->next = tmp;
-
-        return tmp_next;
-    }
-    /*
-    ListNode* swapper(ListNode* pre, ListNode* starter) {
-        
-        //the critical point here is when you do following swap, 
-        //the pre node should also change its next
-        
-
-        if (starter == NULL || starter->next == NULL) {
-            return begin;
-        }
-        
-        ListNode* tmp = starter;
-        ListNode* tmp_next = starter->next;
-        ListNode* tmp_next_next = starter->next->next;
-        tmp->next = tmp_next_next;
-        tmp_next->next = tmp;
-        
-        if (pre != NULL) {
-            pre->next = tmp_next;
-        }
-        
-        if (change_head) {
-            begin = tmp_next;
-            change_head = false;
-        }
-
-        return swapper(tmp, tmp_next_next);
-    }*/
-
-    //ListNode* begin = NULL;
-    //bool change_head = true;
 };

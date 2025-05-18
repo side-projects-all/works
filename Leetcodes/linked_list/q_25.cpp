@@ -40,83 +40,43 @@ Constraints:
  */
 class Solution {
 private:
-    ListNode* reverse(ListNode* head, int k) {
-        ListNode* new_head = nullptr;
-        ListNode* now = head;
+    ListNode* rev_list(ListNode* head, int& k) {
+        ListNode* prev = nullptr;
+        ListNode* curr = head;
 
-        while (k > 0) {
-            ListNode* next_n = now->next;
-
-            now->next = new_head;
-            new_head = now;
-
-            now = next_n;
-            --k;
+        for (int i = 0; i < k && curr != nullptr; ++i) {
+            ListNode* tmp = curr->next;
+            curr->next = prev;
+            prev = curr;
+            curr = tmp;
         }
 
-        return new_head;
+        return prev;
     }
 
-    ListNode* iterative(ListNode* head, int k) {
-        ListNode* now = head;
-        ListNode* k_end = nullptr;
-        ListNode* new_head = nullptr;
-
-        while (now != nullptr) {
-            int cnt = 0;
-            now = head;
-
-            while (cnt < k && now != nullptr) {
-                now = now->next;
-                ++cnt;
-            }
-
-            if (cnt == k) {
-                ListNode* rev_head = reverse(head, k);
-
-                //setting head to initially reversed list
-                if (new_head == nullptr) {
-                    new_head = rev_head;
-                }
-
-                if (k_end != nullptr) {
-                    k_end->next = rev_head;
-                }
-
-                k_end = head;
-                head = now;
-            }
-
+    ListNode* recursion(ListNode* head, int& k) {
+        if (head == nullptr) {
+            return nullptr;
         }
 
-        if (k_end != nullptr) {
-            k_end->next = head;
+        int i = 0;
+        ListNode* tmp = head;
+        for (; i < k && tmp != nullptr; ++i) {
+            tmp = tmp->next;
         }
 
-        return new_head == nullptr ? head : new_head;
-    }
+        if (i == k) {
+            ListNode* end = head;
+            ListNode* begin = rev_list(head, k);
+            end->next = recursion(tmp, k);
 
-    ListNode* recursive(ListNode* head, int k) {
-        ListNode* now = head;
-        int cnt = 0;
-
-        while (cnt < k && now != nullptr) {
-            now = now->next;
-            ++cnt;
-        }
-
-        if (cnt == k) {
-            ListNode* rev_head = reverse(head, k);
-            head->next = recursive(now, k);
-
-            return rev_head;
+            return begin;
         }
 
         return head;
     }
 public:
     ListNode* reverseKGroup(ListNode* head, int k) {
-        //return recursive(head, k);
-        return iterative(head, k);
+        return recursion(head, k);
     }
 };

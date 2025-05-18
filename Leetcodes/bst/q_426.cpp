@@ -57,39 +57,40 @@ public:
 */
 
 class Solution {
-public:
-    Node* treeToDoublyList(Node* root) {
-        if (root == nullptr) {
-            return nullptr;
-        }
-
-        recursive(root);
-        max->right = min;
-        min->left = max;
-
-        return min;
-    }
-
 private:
-    Node* min = nullptr;
-    Node* max = nullptr;
-
-    void recursive(Node* root) {
+    void inorder(Node* root, Node*& prev, Node*& next) {
         if (root == nullptr) {
             return;
         }
 
-        recursive(root->left);
-        
-        if (max != nullptr) {
-            max->right = root;
-            root->left = max;
+        inorder(root->left, prev, next);
+
+        if (next != nullptr) {
+            next->right = root;
+            root->left = next;
         } else {
-            min = root;
+            prev = root;
         }
 
-        max = root;
+        next = root;
+        inorder(root->right, prev, next);
 
-        recursive(root->right);
+    }
+    Node* by_inorder(Node* root) {
+        if (root == nullptr) {
+            return root;
+        }
+
+        Node* prev = nullptr;
+        Node* next = nullptr;
+        inorder(root, prev, next);
+        prev->left = next;
+        next->right = prev;
+
+        return prev;
+    }
+public:
+    Node* treeToDoublyList(Node* root) {
+        return by_inorder(root);
     }
 };

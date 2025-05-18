@@ -43,39 +43,50 @@ Constraints:
 
 class Twitter {
 private:
-    std::unordered_set<int> user[501];  //this is an unordered_set array!!
-    std::vector<std::pair<int, int>> tweet;
+    std::unordered_map<int, std::vector<std::pair<int, int>>> user_tweets;
+    std::unordered_map<int, std::unordered_set<int>> followed;
+    int time{ 0 };
 public:
     Twitter() {
         
     }
     
     void postTweet(int userId, int tweetId) {
-        tweet.push_back({tweetId, userId});
+        user_tweets[userId].push_back({time++, tweetId});
     }
     
     vector<int> getNewsFeed(int userId) {
-        std::vector<int> feed;
+        std::priority_queue<std::pair<int, int>> pq;
+        for (auto& p : user_tweets[userId]) {
+            pq.push(p);
+        }
 
-        for (int i = tweet.size() - 1; i >= 0 && feed.size() < 10; --i) {
-            if (tweet[i].second == userId || user[userId].find(tweet[i].second) != user[userId].end()) {
-                feed.push_back(tweet[i].first);
+        for (auto& f : followed[userId]) {
+            for (auto& p : user_tweets[f]) {
+                pq.push(p);
             }
         }
 
-        return feed;
+        std::vector<int> ans;
+        for (int i = 0; i < 10; ++i) {
+            if (pq.empty()) {
+                break;
+            }
+
+            ans.push_back(pq.top().second);
+            pq.pop();
+        }
+
+        return ans;
     }
     
     void follow(int followerId, int followeeId) {
-        user[followerId].insert(followeeId);
+        followed[followerId].insert(followeeId);
     }
     
     void unfollow(int followerId, int followeeId) {
-        if (user[followerId].find(followeeId) != user[followerId].end()) {
-            user[followerId].erase(followeeId);
-        }
+        followed[followerId].erase(followeeId);
     }
-
 };
 
 /**

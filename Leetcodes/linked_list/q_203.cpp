@@ -42,33 +42,20 @@ Constraints:
 class Solution {
 public:
     ListNode* removeElements(ListNode* head, int val) {
-        ListNode* now = head;
-        ListNode* prev;
-        ListNode* abandon;
-        
-        while(now != NULL) {
-            
-            if (now->val == val && now == head) {
-                head = now->next;
-                prev = head;
-                abandon = now;
-                delete abandon;
-                now = head;
-                
-            } else if (now->val == val && now != head) {
-                prev->next = now->next;
-                abandon = now;
-                delete abandon;
-                now = prev->next;
-                
+        ListNode* dummy = new ListNode(-1, head);
+        ListNode* prev = dummy;
+        ListNode* curr = head;
+
+        while (curr != nullptr) {
+
+            if (curr->val == val) {
+                prev->next = curr->next;
+                curr = prev->next;
             } else {
-                prev = now;
-                now = now->next;
+                prev = curr;
+                curr = curr->next;
             }
-            
         }
-        
-        
-        return head;
+        return dummy->next;
     }
 };

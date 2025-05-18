@@ -57,75 +57,125 @@ Constraints:
 
 class LFUCache {
 private:
-    //key: frequency, val: a list of original key-value pair
-    std::unordered_map<int, std::list<std::pair<int, int>>> freqs;
-    //key: original key, val: {freq, the freq's iterator}
-    std::unordered_map<int, std::pair<int, std::list<std::pair<int, int>>::iterator>> cache;
-    int capacity;
-    int min_freq;
+    struct Node {
+        int key;
+        int val;
+        int freq;
+        Node* prev;
+        Node* next;
 
-    void update_two_map(int key, int freq, int val) {
-        freqs[freq].push_back({key, val});
-        cache[key] = {freq, --freqs[freq].end()};
+        Node(int k, int v) : key{ k }, val{ v }, freq{ 1 }, prev{ nullptr }, next{ nullptr } { 
+
+        }
+    };
+
+    int curr_len;
+    int cap;
+    int min_freq;
+    std::unordered_map<int, Node*> key_to_last;
+    std::unordered_map<int, std::pair<Node*, Node*>> freq_to_headTail;
+
+    void add_to_freq_map(int freq, Node* node) {
+        Node* head = nullptr;
+        Node* tail = nullptr;
+
+        //if the freq did not exist in freq_to_headTail, we need to initialize the list
+        if (freq_to_headTail.find(freq) == freq_to_headTail.end()) {
+            head = new Node(-1, -1);
+            tail = new Node(-1, -1);
+            head->next = tail;
+            tail->prev = head;
+            freq_to_headTail[freq] = { head, tail };
+
+        } else {
+            head = freq_to_headTail[freq].first;
+            tail = freq_to_headTail[freq].second;
+        }
+
+        //connect this node at beginning
+        head->next->prev = node;
+        node->next = head->next;
+        head->next = node;
+        node->prev = head;
     }
+
 public:
     LFUCache(int capacity) {
-        this->capacity = capacity;
-        min_freq = 0;
+        min_freq = 1;
+        curr_len = 0;
+        cap = capacity;
     }
     
     int get(int key) {
-        const auto it = cache.find(key);
-        if (it == cache.end()) {
+        if (key_to_last.find(key) == key_to_last.end() || key_to_last[key] == nullptr) {
             return -1;
         }
 
-        const int freq = it->second.first;
-        const auto freq_it = it->second.second;
-        const std::pair<int, int> key_val = *freq_it;
+        Node* last = key_to_last[key];
+        last->prev->next = last->next;
+        last->next->prev = last->prev;
 
-        freqs[freq].erase(freq_it); //erase this key_val pair in this freq list
+        int old_freq = last->freq;
+        last->freq += 1;    //update this freq
 
-        if (freqs[freq].empty()) {
-            freqs.erase(freq);
-
-            if (min_freq == freq) {
-                ++min_freq;
-            }
+        //for corner case: a new list, update min_freq
+        if (min_freq == old_freq && freq_to_headTail[min_freq].first->next == freq_to_headTail[min_freq].second) {
+            ++min_freq;
         }
 
-        update_two_map(key, freq + 1, key_val.second);
+        add_to_freq_map(last->freq, last);
 
-        return key_val.second;
+        return last->val;
     }
     
     void put(int key, int value) {
-        if (capacity <= 0) {
+        if (cap == 0) {
             return;
         }
 
-        const auto it = cache.find(key);
-        //exist in cache
-        if (it != cache.end()) {
-            it->second.second->second = value;
-            get(key);
+        //not exist or empty list
+        if (key_to_last.find(key) == key_to_last.end() || key_to_last[key] == nullptr) {
 
-            return;
-        }
+            if (curr_len < cap) {
+                ++curr_len;
 
-        //not exist in cache
-        //check capacity first
-        if (capacity == cache.size()) {
-            cache.erase(freqs[min_freq].front().first);
-            freqs[min_freq].pop_front();
+            } else {
 
-            if (freqs[min_freq].empty()) {
-                freqs.erase(min_freq);
+                // under the condition curr_len >= cap, we need a space
+                // remove the last node from the min_freq list
+                // this part is the LFU cache that removing the least frequent one
+                Node* tail = freq_to_headTail[min_freq].second;
+                Node* last = tail->prev;
+                last->prev->next = tail;
+                tail->prev = last->prev;
+                key_to_last[last->key] = nullptr;   //remove this node in key map
+                delete last;
             }
-        }
 
-        min_freq = 1;
-        update_two_map(key, 1, value);
+            //this is the new node to add
+            Node* new_node = new Node(key, value);
+            key_to_last[key] = new_node;
+            min_freq = 1;
+            add_to_freq_map(1, new_node);
+
+        } else {
+            Node* last = key_to_last[key];
+            //remove this node from the original list
+            last->prev->next = last->next;
+            last->next->prev = last->prev;
+
+            last->val = value;  //update its value
+
+            int old_freq = last->freq;
+            last->freq += 1;
+
+            //for corner case: a new list, update min_freq
+            if (min_freq == old_freq && freq_to_headTail[min_freq].first->next == freq_to_headTail[min_freq].second) {
+                ++min_freq;
+            }
+
+            add_to_freq_map(last->freq, last);
+        }
     }
 };
 

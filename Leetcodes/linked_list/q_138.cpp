@@ -59,117 +59,87 @@ public:
 };
 */
 
+/*
+// Definition for a Node.
+class Node {
+public:
+    int val;
+    Node* next;
+    Node* random;
+    
+    Node(int _val) {
+        val = _val;
+        next = NULL;
+        random = NULL;
+    }
+};
+*/
+
 class Solution {
+private:
+    Node* by_iterative(Node* head) {
+        if (head == nullptr) {
+            return head;
+        }
+
+        std::unordered_map<Node*, Node*> visited;
+
+        std::function<Node*(Node*)> get_clone = [&visited](Node* node) -> Node* {
+
+            if (node != nullptr) {
+                if (visited.find(node) == visited.end()) {
+                    visited[node] = new Node(node->val);
+                }
+
+                return visited[node];
+            }
+
+            return node;
+        };
+
+        Node* now = head;
+        Node* copy = new Node(now->val);
+        visited[now] = copy;
+
+        while (now != nullptr) {
+            copy->next = get_clone(now->next);
+            copy->random = get_clone(now->random);
+
+            now = now->next;
+            copy = copy->next;
+        }
+
+        return visited[head];
+    }
+
+    Node* recursive(Node* head, std::unordered_map<Node*, Node*>& mem) {
+        if (head == nullptr) {
+            return head;
+        }
+
+        if (mem.find(head) != mem.end()) {
+            return mem[head];
+        }
+
+        Node* now = new Node(head->val);
+        mem[head] = now;
+
+        now->next = recursive(head->next, mem);
+        now->random = recursive(head->random, mem);
+
+        return now;
+    }
+    Node* by_recursive(Node* head) {
+        if (head == nullptr) {
+            return head;
+        }
+        std::unordered_map<Node*, Node*> mem;
+
+        return recursive(head, mem);
+    }
 public:
     Node* copyRandomList(Node* head) {
-
-        
-        //return recursive(head);
-        //return iterative(head);
-        return iterative02(head);
-    }
-    
-private:
-    std::unordered_map<Node*, Node*> visited;
-    
-    Node* recursive(Node* now) {
-        if (now == NULL) {
-            return NULL;
-        }
-        
-        if (visited.find(now) != visited.end()) {
-            return visited[now];
-        }
-        
-        Node* node = new Node(now->val);
-        visited[now] = node;
-        
-        node->next = recursive(now->next);
-        node->random = recursive(now->random);
-        
-        return node;
-    }
-    
-    Node* iterative(Node* now) {
-        if (now == NULL) {
-            return NULL;
-        }
-        
-        Node* old = now;
-        
-        //copying head node
-        Node* cloneNode = new Node(old->val);
-        visited[now] = cloneNode;
-        
-        while(old != NULL) {
-            cloneNode->random = getCloneNode(old->random);
-            cloneNode->next = getCloneNode(old->next);
-            
-            old = old->next;
-            cloneNode = cloneNode->next;
-        }
-        
-        
-        return visited[now];
-    }
-    
-    Node* getCloneNode(Node* now) {
-        if (now == NULL) {
-            return NULL;
-        }
-        
-        if (visited.find(now) != visited.end()) {
-            return visited[now];
-        }
-        
-        Node* node = new Node(now->val);
-        visited[now] = node;
-        
-        return visited[now];
-    }
-    
-    //this one only had O(1) space complexity
-    Node* iterative02(Node* now) {
-        if (now == NULL) {
-            return NULL;
-        }
-        
-        Node* ptr = now;
-        
-        //interleaving the cloning node
-        while(ptr != NULL) {
-            Node* newNode = new Node(ptr->val);
-            
-            newNode->next = ptr->next;
-            ptr->next = newNode;
-            
-            //move on to next original node
-            ptr = newNode->next;
-        }
-        
-        //rewind to original head
-        ptr = now;
-        
-        while(ptr != NULL) {
-            ptr->next->random = (ptr->random != NULL) ? ptr->random->next : NULL;
-            ptr = ptr->next->next;
-        }
-        
-        
-        //separate into original list and clone list
-        Node* oldPtr = now;
-        Node* clonePtr = now->next;
-        Node* headNew = now->next;
-        while(oldPtr != NULL) {
-            oldPtr->next = oldPtr->next->next;
-            clonePtr->next = (clonePtr->next != NULL) ? clonePtr->next->next : NULL;
-            
-            
-            //MOVE ON
-            oldPtr = oldPtr->next;
-            clonePtr = clonePtr->next;
-        }
-        
-        return headNew;
+        //return by_recursive(head);
+        return by_iterative(head);
     }
 };

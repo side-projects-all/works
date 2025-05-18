@@ -29,49 +29,30 @@ Constraints:
 
 class Solution {
 private:
-    void onePass(vector<int>& nums) {
-        int p0 = 0;
+    void by_two_ptr(vector<int>& nums) {
+        int n = nums.size();
+        int red = 0;
+        int blue = n - 1;
         int curr = 0;
-        int p2 = nums.size() - 1;
 
-        while (curr <= p2) {
+        while (curr <= blue) {
+
             if (nums[curr] == 0) {
-                std::swap(nums[curr], nums[p0]);
+                std::swap(nums[red], nums[curr]);
+                ++red;
                 ++curr;
-                ++p0;
 
             } else if (nums[curr] == 2) {
-                std::swap(nums[curr], nums[p2]);
-                --p2;
+                std::swap(nums[blue], nums[curr]);
+                --blue;
+
             } else {
                 ++curr;
-            }
-        }
-
-    }
-    void byCounting(vector<int>& nums) {
-        int arr[3]{ 0, 0, 0 };
-        for (int n : nums) {
-            ++arr[n];
-        }
-
-        int index = 0;
-        for (int i = 0; i < nums.size();) {
-
-            if (arr[index] == 0) {
-                ++index;
-                continue;
-            } else {
-                --arr[index];
-                nums[i] = index;
-                ++i;
             }
         }
     }
 public:
     void sortColors(vector<int>& nums) {
-
-        //byCounting(nums);
-        onePass(nums);
+        by_two_ptr(nums);
     }
 };

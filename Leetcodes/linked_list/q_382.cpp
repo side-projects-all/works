@@ -46,41 +46,24 @@ Constraints:
  * };
  */
 class Solution {
+private:
+    std::vector<int> list;
+
 public:
     Solution(ListNode* head) {
-        
-        while (head != nullptr) {
-            list.push_back(head->val);
-            head = head->next;
-        }
-        
+        ListNode* now = head;
 
-        //this->head = head;
+        while (now != nullptr) {
+            list.push_back(now->val);
+            now = now->next;
+        }
     }
     
     int getRandom() {
-        
-        int n = std::rand() % list.size();
-        
-        return list[n];
-        
+        int i = std::rand() % list.size();
 
-        /*
-        int res = -1;
-        int i = 1;
-
-        for (ListNode* curr = head; curr != nullptr; curr = curr->next, ++i) {
-            if (std::rand() % i == 0) {
-                res = curr->val;
-            }
-        }
-        
-        return res;
-        */
+        return list[i];
     }
-private:
-    std::vector<int> list;
-    //ListNode* head;
 };
 
 /**

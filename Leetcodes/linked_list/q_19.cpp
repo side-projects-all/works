@@ -44,7 +44,6 @@ public:
     ListNode* removeNthFromEnd(ListNode* head, int n) {
         ListNode* dummy = new ListNode();
         dummy->next = head;
-
         ListNode* fast = dummy;
         ListNode* slow = dummy;
 
@@ -57,11 +56,10 @@ public:
             slow = slow->next;
         }
 
-        ListNode* remove = slow->next;
-        slow->next = slow->next->next;
-
-        delete remove;
-
+        ListNode* tmp = slow->next;
+        slow->next = tmp->next;
+        delete tmp;
+        
         return dummy->next;
     }
 };

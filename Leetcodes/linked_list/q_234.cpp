@@ -34,33 +34,28 @@ Follow up: Could you do it in O(n) time and O(1) space?
  * };
  */
 class Solution {
+private:
+    ListNode* from_left;
+    bool recursive(ListNode* curr) {
+        if (curr == nullptr) {
+            return true;
+        }
+
+        if (recursive(curr->next) == false) {
+            return false;
+        }
+
+        if (curr->val != from_left->val) {
+            return false;
+        }
+
+        from_left = from_left->next;
+        return true;
+    }
 public:
     bool isPalindrome(ListNode* head) {
-        if (head->next == nullptr) {
-            return true;
-        }
+        from_left = head;
 
-        left_pole = head;
         return recursive(head);
-    }
-
-private:
-    ListNode* left_pole;
-    bool recursive(ListNode* right_pole) {
-        if (right_pole == nullptr) {
-            return true;
-        }
-
-        if (!recursive(right_pole->next)) {
-            return false;
-        }
-
-        if (right_pole->val != left_pole->val) {
-            return false;
-        }
-
-        left_pole = left_pole->next;
-
-        return true;
     }
 };

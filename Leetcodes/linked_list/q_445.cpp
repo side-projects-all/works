@@ -42,112 +42,62 @@ Constraints:
  */
 class Solution {
 private:
-    //assume len of v1 is alwasy shorter or equal to v2
-    ListNode* sumTwo(std::vector<int>& v1, std::vector<int>& v2) {
-        int len = v1.size();
-
-        ListNode* now = nullptr;
+    ListNode* reverse_list(ListNode* head) {
+        ListNode* now = head;
         ListNode* prev = nullptr;
-        int carry = 0;
-        int i = 0;
 
-        for (i = 0; i < len; ++i) {
-            prev = now;
-
-            int val = v1[i] + v2[i] + carry;
-            int res = val % 10;
-            carry = val / 10;
-
-            now = new ListNode(res);
+        while (now != nullptr) {
+            ListNode* tmp = now->next;
             now->next = prev;
+            prev = now;
+            now = tmp;
         }
 
-        for (i = i; i < v2.size(); ++i) {
-            prev = now;
-
-            int val = v2[i] + carry;
-            int res = val % 10;
-            carry = val / 10;
-
-            now = new ListNode(res);
-            now->next = prev;
-        }
-
-        if (carry > 0) {
-            prev = now;
-            now = new ListNode(carry);
-            now->next = prev;
-        }
-
-        return now;
+        return prev;
     }
 public:
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        ListNode* r1 = reverse_list(l1);
+        ListNode* r2 = reverse_list(l2);
 
-        //using stack
-        std::stack<int> s1;
-        std::stack<int> s2;
-        ListNode* ptr = l1;
-        while (ptr != nullptr) {
-            s1.push(ptr->val);
-            ptr = ptr->next;
-        }
+        ListNode* merged = new ListNode(0);
+        ListNode* curr = merged;
 
-        ptr = l2;
-        while (ptr != nullptr) {
-            s2.push(ptr->val);
-            ptr = ptr->next;
-        }
-
-        int sum = 0;
         int carry = 0;
-        ListNode* now = new ListNode(0);
-        while (!s1.empty() || !s2.empty()) {
-            if (!s1.empty()) {
-                sum += s1.top();
-                s1.pop();
+
+        while (true) {
+            int sum = carry;
+
+            if (r1 != nullptr) {
+                sum += r1->val;
             }
 
-            if (!s2.empty()) {
-                sum += s2.top();
-                s2.pop();
+            if (r2 != nullptr) {
+                sum += r2->val;
             }
 
-            now->val = sum % 10;
             carry = sum / 10;
-            ListNode* newN = new ListNode(carry);
-            newN->next = now;
-            now = newN;
-            sum = carry;
+            sum %= 10;
+
+            curr->val = sum;
+
+            if (r1 != nullptr) {
+                r1 = r1->next;
+            }
+
+            if (r2 != nullptr) {
+                r2 = r2->next;
+            }
+
+            if (r1 == nullptr && r2 == nullptr && carry == 0) {
+                break;
+            }
+
+            curr->next = new ListNode();
+            curr = curr->next;
         }
 
-        return carry == 0 ? now->next : now;
-
-        //naive way
-        /*
-        std::vector<int> v1;
-        std::vector<int> v2;
-
-        ListNode* ptr = l1;
-        while (ptr != nullptr) {
-            v1.push_back(ptr->val);
-            ptr = ptr->next;
-        }
-
-        ptr = l2;
-        while (ptr != nullptr) {
-            v2.push_back(ptr->val);
-            ptr = ptr->next;
-        }
-
-        std::reverse(v1.begin(), v1.end());
-        std::reverse(v2.begin(), v2.end());
-
-        if (v1.size() > v2.size()) {
-            return sumTwo(v2, v1);
-        } else {
-            return sumTwo(v1, v2);
-        }
-        */
+        ListNode* rev = reverse_list(merged);
+        return rev;
     }
 };

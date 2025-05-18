@@ -49,40 +49,38 @@ Constraints:
  */
 class Solution {
 private:
-    TreeNode* inorder(ListNode* head) {
-        //find size first
-        ListNode* h = head;
-        int len = 0;
-        while (h != nullptr) {
-            ++len;
-            h = h->next;
+    //TreeNode* recursion(int l, int r, ListNode*& head) {
+    TreeNode* recursion(int l, int r, ListNode*&& head) {
+        if (l > r) {
+            return nullptr;
         }
 
-        ListNode* list_now = head;
-        std::function<TreeNode*(int, int)> in = [&](int l, int r) -> TreeNode* {
-            if (l > r) {
-                return nullptr;
-            }
+        int mid = l + (r - l) / 2;
+        //TreeNode* left = recursion(l, mid - 1, head);
+        TreeNode* left = recursion(l, mid - 1, std::move(head));
 
-            int mid = l + (r - l) / 2;
+        TreeNode* now = new TreeNode(head->val);
+        now->left = left;
 
-            TreeNode* left = in(l, mid - 1);
+        head = head->next;
+        //now->right = recursion(mid + 1, r, head);
+        now->right = recursion(mid + 1, r, std::move(head));
 
-            TreeNode* now = new TreeNode(list_now->val);
-            now->left = left;
-            //the most important part is here
-            //the position now in the list move when we move to another header in inorder order
-            list_now = list_now->next;  
+        return now;
+    }
+    TreeNode* by_recursion(ListNode* head) {
+        int len = 0;
+        ListNode* tmp = head;
+        while (tmp != nullptr) {
+            tmp = tmp->next;
+            ++len;
+        }
 
-            now->right = in(mid + 1, r);
-
-            return now;
-        };
-
-        return in(0, len - 1);
+        //return recursion(0, len - 1, head);
+        return recursion(0, len - 1, std::move(head));
     }
 public:
     TreeNode* sortedListToBST(ListNode* head) {
-        return inorder(head);
+        return by_recursion(head);
     }
 };

@@ -55,25 +55,9 @@ Constraints:
 class Solution {
 public:
     void deleteNode(ListNode* node) {
-        
-        //just break through
-        ListNode* nextN = node->next;
-        node->val = nextN->val;
-        node->next = nextN->next;
-        nextN->next = nullptr;
-        delete nextN;
-
-        /* naive idea
-        ListNode* prev = node;
-        node = node->next;
-        while (node->next != nullptr) {
-            prev->val = node->val;
-            prev = node;
-            node = node->next;
-        }
-
-        prev->val = node->val;
-        prev->next = nullptr;
-        */
+        ListNode* next_node = node->next;
+        node->val = next_node->val;
+        node->next = next_node->next;
+        delete next_node;
     }
 };

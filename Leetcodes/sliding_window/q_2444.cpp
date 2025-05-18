@@ -36,34 +36,38 @@ Constraints:
 
 class Solution {
 private:
-    long long slidingWindow(vector<int>& nums, int minK, int maxK) {
+    long long by_sliding_window(vector<int>& nums, int minK, int maxK) {
+        int n = nums.size();
+        if (n == 1) {
+            return nums[0] == minK == maxK;
+        }
+
+        int b = -1;
+        int e = 0;
+        int min_pos = -1;
+        int max_pos = -1;
         long long cnt = 0;
-        int minPos = -1;
-        int maxPos = -1;
-        int left = -1;
-
-        //how many valid subarrays end at i
-        for (int i = 0; i < nums.size(); ++i) {
-
-            if (nums[i] < minK || nums[i] > maxK) {
-                left = i;
+        while (e < n) {
+            if (nums[e] > maxK || nums[e] < minK) {
+                b = e;
             }
 
-            if (nums[i] == minK) {
-                minPos = i;
+            if (nums[e] == maxK) {
+                max_pos = e;
             }
 
-            if (nums[i] == maxK) {
-                maxPos = i;
+            if (nums[e] == minK) {
+                min_pos = e;
             }
 
-            cnt += std::max(0, std::min(maxPos, minPos) - left);
+            cnt += std::max(0, std::min(max_pos, min_pos) - b);
+            ++e;
         }
 
         return cnt;
     }
 public:
     long long countSubarrays(vector<int>& nums, int minK, int maxK) {
-        return slidingWindow(nums, minK, maxK);
+        return by_sliding_window(nums, minK, maxK);
     }
 };

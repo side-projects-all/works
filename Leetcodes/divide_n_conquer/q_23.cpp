@@ -54,54 +54,58 @@ Constraints:
  */
 class Solution {
 private:
-    ListNode* byMerge(vector<ListNode*>& lists) {
-        int N = lists.size();
+    ListNode* merge_2_lists(ListNode* list1, ListNode* list2) {
+        ListNode* l1 = list1;
+        ListNode* l2 = list2;
+        ListNode* dummy = new ListNode();
+        ListNode* b = dummy;
 
-        if (N == 0) {
+        while (l1 != nullptr && l2 != nullptr) {
+
+            if (l1->val <= l2->val) {
+                b->next = l1;
+                l1 = l1->next;
+
+            } else {
+                b->next = l2;
+                l2 = l2->next;
+            }
+
+            b = b->next;
+        }
+
+        if (l1 != nullptr) {
+            b->next = l1;
+        } else {
+            b->next = l2;
+        }
+
+        return dummy->next;
+    }
+public:
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        int n = lists.size();
+        if (n == 0) {
             return nullptr;
+        }
+        if (n == 1) {
+            return lists[0];
         }
 
         int interval = 1;
 
-        std::function<ListNode*(ListNode*, ListNode*)> mergeTwoList = [&](ListNode* h1, ListNode* h2) -> ListNode* {
-            ListNode* head = new ListNode();
-            ListNode* ptr = head;
+        while (interval < n) {
 
-            while (h1 != nullptr && h2 != nullptr) {
+            for (int i = 0; i < n; i += interval * 2) {
 
-                if (h1->val <= h2->val) {
-                    ptr->next = h1;
-                    h1 = h1->next;
-                } else {
-                    ptr->next = h2;
-                    h2 = h1;
-                    h1 = ptr->next->next;
+                if (i + interval < n) {
+                    lists[i] = merge_2_lists(lists[i], lists[i + interval]);
                 }
-
-                ptr = ptr->next;
-            }
-
-            if (h1 == nullptr) {
-                ptr->next = h2;
-            } else {
-                ptr->next = h1;
-            }
-
-            return head->next;
-        };
-
-        while (interval < N) {
-            for (int i = 0; i < N - interval; i += interval * 2) {
-                lists[i] = mergeTwoList(lists[i], lists[i + interval]);
             }
 
             interval *= 2;
         }
-
+        
         return lists[0];
-    }
-public:
-    ListNode* mergeKLists(vector<ListNode*>& lists) {
-        return byMerge(lists);
     }
 };

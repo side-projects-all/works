@@ -80,42 +80,35 @@ public:
 */
 
 class Solution {
-public:
-    Node* flatten(Node* head) {
-        if (head == NULL) {
-            return head;
-        }
-        
-        Node* tmpHead = new Node(0, NULL, head, NULL);
-        
-        flatternDFS(tmpHead, head);
-        
-        tmpHead->next->prev = NULL;
-        
-        return tmpHead->next;
-    }
-
 private:
-    
-    Node* flatternDFS(Node* prev, Node* curr) {
-        if (curr == NULL) {
+    Node* recursion(Node* prev, Node* curr) {
+        if (curr == nullptr) {
             return prev;
         }
-        
-        //double link prev and curr
+
         curr->prev = prev;
         prev->next = curr;
-        
-        //cache the curr->next because it will be changed in recursion
-        Node* tmpNext = curr->next;
-        
-        //get child list, it's left subtree
-        Node* tail = flatternDFS(curr, curr->child);
-        
-        //nullify this unnecessary link
-        curr->child = NULL;
-        
-        //get right subtree
-        return flatternDFS(tail, tmpNext);
+
+        Node* tmp = curr->next;
+        Node* child_end = recursion(curr, curr->child);
+
+        curr->child = nullptr;
+
+        return recursion(child_end, tmp);
+    }
+    Node* by_recursion(Node* head) {
+        if (head == nullptr) {
+            return head;
+        }
+
+        Node* dummy = new Node(-1, nullptr, head, nullptr);
+        recursion(dummy, head);
+        dummy->next->prev = nullptr;
+
+        return dummy->next;
+    }
+public:
+    Node* flatten(Node* head) {
+        return by_recursion(head);
     }
 };

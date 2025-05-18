@@ -35,8 +35,8 @@ Constraints:
 */
 
 
-// Definition for a Node.
 /*
+// Definition for a Node.
 class Node {
 public:
     int val;
@@ -54,69 +54,48 @@ public:
 */
 
 class Solution {
-public:
-    Node* connect(Node* root) {
-        if (root == NULL) {
-            return NULL;
-        }
-
-        if (root->left == NULL && root->right == NULL) {
+private:
+    Node* by_bfs(Node* root) {
+        if (root == nullptr || (root->left == nullptr && root->right == nullptr)) {
             return root;
         }
 
-        return byNext(root);
-    }
+        Node* parent = root;
+        Node* prev = nullptr;
+        Node* now = root;
+        std::function<void(Node*)> do_child = [&parent, &prev](Node* child) {
 
-private:
-    Node* p_root;
-    Node* prev;
-    Node* leftMost;
+            if (child != nullptr) {
 
-    void processChild(Node* child) {
-        if (child != NULL) {
-            if (prev != NULL) {
-                prev->next = child;
-            } else {
-                //this is for the condition we find first child
-                leftMost = child;
+                if (prev != nullptr) {
+                    prev->next = child;
+
+                } else {
+                    parent = child;
+                }
+
+                prev = child;
             }
+        };
+        
+        while (parent != nullptr) {
+            now = parent;
+            prev = nullptr;
+            parent = nullptr;
 
-            prev = child;
-        }
-    }
+            while (now != nullptr) {
 
-    //using the idea of linked list
-    Node* byNext(Node* now) {
-        p_root = now;
-
-        leftMost = p_root;
-        Node* curr = leftMost;
-
-        //while moving to leaf level, we finished
-        while(leftMost != NULL) {
-            
-            //for the latest node on the "next" level
-            prev = NULL;
-
-            //head for the latest node on current level 
-            curr = leftMost;
-
-            //reset the leftMost
-            leftMost = NULL;
-
-            //iterate the linked list
-            while (curr != NULL) {
+                do_child(now->left);
+                do_child(now->right);
                 
-                processChild(curr->left);
-                processChild(curr->right);
-
-                //to the sibling
-                curr = curr->next;
+                now = now->next;
             }
-
         }
 
-        return p_root;
+        return root;
     }
-
+public:
+    Node* connect(Node* root) {
+        return by_bfs(root);
+    }
 };

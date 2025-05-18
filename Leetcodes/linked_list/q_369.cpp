@@ -38,42 +38,30 @@ Constraints:
  */
 class Solution {
 private:
-    ListNode* byStack(ListNode* head) {
-
-        int carry = 0;
-        bool reverseNow = false;
-        std::stack<ListNode*> s;
-        s.push(head);
-
-        while (!s.empty()) {
-            ListNode* n = s.top();
-
-            if (n->next != nullptr && !reverseNow) {
-                s.push(n->next);
-                continue;
-            }
-
-            s.pop();
-            reverseNow = true;
-
-            int val = (n->next == nullptr) ? n->val + 1 : n->val + carry;
-
-            carry = val / 10;
-            val = val % 10;
-            
-            n->val = val;
+    int recursion(ListNode* now) {
+        if (now == nullptr) {
+            return 1;
         }
 
-        if (carry == 1) {
-            ListNode* n = head;
-            head = new ListNode(1, head);
+        int val = now->val + recursion(now->next);
+        now->val = val % 10;
+
+        return val / 10;
+    }
+    ListNode* by_recursion(ListNode* head) {
+        ListNode* now = head;
+
+        int final_carray = recursion(now);
+        if (final_carray) {
+            ListNode* new_head = new ListNode(1, head);
+
+            return new_head;
         }
 
         return head;
     }
 public:
     ListNode* plusOne(ListNode* head) {
-        return byStack(head);
-
+        return by_recursion(head);
     }
 };

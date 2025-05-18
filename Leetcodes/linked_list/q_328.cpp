@@ -43,23 +43,64 @@ Constraints:
 class Solution {
 public:
     ListNode* oddEvenList(ListNode* head) {
-        if (head == NULL || head->next == NULL) {
+        if (head == nullptr || head->next == nullptr) {
             return head;
         }
-        
-        ListNode* oddNow = head;
-        ListNode* evenHead = head->next;
-        ListNode* evenNow = evenHead;
-        
-        while(evenNow != NULL && evenNow->next != NULL) {
-            oddNow->next = evenNow->next;
-            oddNow = oddNow->next;
-            evenNow->next = oddNow->next;
-            evenNow = evenNow->next;
+
+        ListNode* odd_head = head;
+        ListNode* odd = head;
+        ListNode* even_head = head->next;
+        ListNode* even = head->next;
+
+        while (odd != nullptr && odd->next != nullptr && even != nullptr && even->next != nullptr) {
+            ListNode* odd_next = even->next;
+            ListNode* even_next = even->next->next;
+
+            odd->next = odd_next;
+            even->next = even_next;
+
+            odd = odd->next;
+            even = even->next;
         }
-        
-        oddNow->next = evenHead;
-        
+
+        odd->next = even_head;
+
+        return head;
+    }
+};/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* oddEvenList(ListNode* head) {
+        if (head == nullptr || head->next == nullptr) {
+            return head;
+        }
+
+        ListNode* odd = head;
+        ListNode* even_head = head->next;
+        ListNode* even = head->next;
+
+        while (odd != nullptr && odd->next != nullptr && even != nullptr && even->next != nullptr) {
+            ListNode* odd_next = even->next;
+            ListNode* even_next = even->next->next;
+
+            odd->next = odd_next;
+            even->next = even_next;
+
+            odd = odd->next;
+            even = even->next;
+        }
+
+        odd->next = even_head;
+
         return head;
     }
 };

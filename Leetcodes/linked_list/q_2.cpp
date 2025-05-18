@@ -46,101 +46,87 @@ Constraints:
 class Solution {
 public:
     ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
-        bool isAddOne = false;
-        ListNode* now = new ListNode();
-        ListNode* pre = now;
-        ListNode* newHead = now;
-        int val01 = 0;
-        int val02 = 0;
-        int newVal = 0;
         
-        while (l1 != NULL && l2 != NULL) {
-            val01 = l1->val;
-            val02 = l2->val;
-            newVal = val01 + val02;
-            
-            if (isAddOne) {
-                ++newVal;
+        ListNode* dummy = new ListNode();
+        ListNode* now = dummy;
+        bool carry = false;
+
+        while (l1 != nullptr && l2 != nullptr) {
+
+            now->next = new ListNode();
+
+            int val = l1->val + l2->val;
+            if (carry) {
+                ++val;
             }
-            
-            if (newVal > 9) {
-                isAddOne = true;
-                newVal -= 10;
+
+            if (val > 9) {
+                carry = true;
+                val -= 10;
+
             } else {
-                isAddOne = false;
+                carry = false;
             }
-            
-            now->val = newVal;
-            if (l1->next != NULL || l2->next != NULL) {
-                now = new ListNode();
-            
-                pre->next = now;
-                pre = now;
-            }
-            
-            
+
+            now->next->val = val;
+            now = now->next;
+
             l1 = l1->next;
             l2 = l2->next;
         }
-        
-        while (l1 != NULL) {
-            val01 = l1->val;
-            newVal = val01;
-            
-            if (isAddOne) {
-                ++newVal;
+
+        while (l1 != nullptr) {
+
+            now->next = new ListNode();
+
+            int val = l1->val;
+            if (carry) {
+                ++val;
             }
-            
-            if (newVal > 9) {
-                isAddOne = true;
-                newVal -= 10;
+
+            if (val > 9) {
+                carry = true;
+                val -= 10;
+
             } else {
-                isAddOne = false;
+                carry = false;
             }
+
+            now->next->val = val;
             
-            now->val = newVal;
-            if (l1->next != NULL) {
-                now = new ListNode();
-            
-                pre->next = now;
-                pre = now;
-            }
-            
+            now = now->next;
+
             l1 = l1->next;
         }
-        
-        while (l2 != NULL) {
-            val02 = l2->val;
-            newVal = val02;
-            
-            if (isAddOne) {
-                ++newVal;
+
+        while (l2 != nullptr) {
+
+            now->next = new ListNode();
+
+            int val = l2->val;
+            if (carry) {
+                ++val;
             }
-            
-            if (newVal > 9) {
-                isAddOne = true;
-                newVal -= 10;
+
+            if (val > 9) {
+                carry = true;
+                val -= 10;
+
             } else {
-                isAddOne = false;
+                carry = false;
             }
-            
-            now->val = newVal;
-            if (l2->next != NULL) {
-                now = new ListNode();
-            
-                pre->next = now;
-                pre = now;
-            }           
-            
+
+            now->next->val = val;
+            now = now->next;
+
             l2 = l2->next;
         }
-        
-        if (isAddOne) {
-            now = new ListNode();
-            now->val = 1;
-            pre->next = now;
+
+        if (carry) {
+            now->next = new ListNode();
+            now->next->val = 1;
         }
-        
-        return newHead;
+
+        return dummy->next;
     }
 };
