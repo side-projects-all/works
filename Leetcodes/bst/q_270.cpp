@@ -36,30 +36,38 @@ Constraints:
  * };
  */
 class Solution {
-    int search(TreeNode* root, double& target, double& minDistance, int& minVal) {
+private:
+    void dfs(TreeNode* root, double& target, double& min_diff, int& closest) {
         if (root == nullptr) {
-            return minVal;
+            return;
         }
 
-        double distance = std::abs(root->val - target);
-        if (distance < minDistance) {
-           minVal = root->val;
-           minDistance = distance;
-        } else if (distance == minDistance && minVal > root->val) {
-            minVal = root->val;
+        double diff = std::abs(root->val - target);
+        if (diff < min_diff) {
+            min_diff = diff;
+            closest = root->val;
+
+        } else if (diff == min_diff) {
+
+            closest = std::min(closest, root->val);
         }
 
         if (target < root->val) {
-            return search(root->left, target, minDistance, minVal);
-        }
+            dfs(root->left, target, min_diff, closest);
 
-        return search(root->right, target, minDistance, minVal);
+        } else if (target > root->val) {
+            dfs(root->right, target, min_diff, closest);
+        }
+    }
+    int by_dfs(TreeNode* root, double& target) {
+        double min_diff = INT_MAX;
+        int closest = INT_MAX;
+        dfs(root, target, min_diff, closest);
+
+        return closest;
     }
 public:
     int closestValue(TreeNode* root, double target) {
-        double min = 10001;
-        int minVal = root->val;
-
-        return search(root, target, min, minVal);
+        return by_dfs(root, target);
     }
 };

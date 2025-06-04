@@ -1,7 +1,7 @@
 /*
 Given the root of a binary tree, check whether it is a mirror of itself (i.e., symmetric around its center).
 
- 
+ 
 
 Example 1:
 
@@ -13,13 +13,15 @@ Example 2:
 Input: root = [1,2,2,null,3,null,3]
 Output: false
 
- 
+ 
 
 Constraints:
 
     The number of nodes in the tree is in the range [1, 1000].
     -100 <= Node.val <= 100
 
+ 
+Follow up: Could you solve it both recursively and iteratively?
 */
 
 /**
@@ -34,26 +36,28 @@ Constraints:
  * };
  */
 class Solution {
-public:
-    bool isSymmetric(TreeNode* root) {
-        
-        return isMirror(root, root);
-    }
-
 private:
-    bool isMirror(TreeNode* left, TreeNode* right) {
-        if (left == NULL && right == NULL) {
+    bool dfs(TreeNode* left, TreeNode* right) {
+        if (left == nullptr && right == nullptr) {
             return true;
         }
 
-        if (left == NULL || right == NULL) {
+        if (left == nullptr || right == nullptr) {
             return false;
         }
 
-        return (left->val == right->val) && 
-                isMirror(left->left, right->right) && 
-                isMirror(left->right, right->left);
-    }
+        if (left->val == right->val) {
+            return dfs(left->left, right->right) && dfs(left->right, right->left);
+        }
 
+        return false;
+    }
+    bool by_dfs(TreeNode* root) {
+        return dfs(root, root);
+    }
+public:
+    bool isSymmetric(TreeNode* root) {
+        return by_dfs(root);
+    }
 };
 

@@ -51,19 +51,20 @@ Constraints:
  */
 class Solution {
 private:
-    void rotate(TreeNode* now, TreeNode* now_left, TreeNode* now_right) {
-        if (now == nullptr || now_left == nullptr) {
+    void dfs(TreeNode* root, TreeNode* curr_left, TreeNode* curr_right) {
+        if (root == nullptr || curr_left == nullptr) {
             return;
         }
 
-        TreeNode* next_left = now_left->left;
-        TreeNode* next_right = now_left->right;
-        now_left->right = now;
-        now_left->left = now_right;
-        rotate(now_left, next_left, next_right);
+        TreeNode* next_left = curr_left->left;
+        TreeNode* next_right = curr_left->right;
+
+        curr_left->left = curr_right;
+        curr_left->right = root;
+
+        dfs(curr_left, next_left, next_right);
     }
-public:
-    TreeNode* upsideDownBinaryTree(TreeNode* root) {
+    TreeNode* by_dfs(TreeNode* root) {
         if (root == nullptr || (root->left == nullptr && root->right == nullptr)) {
             return root;
         }
@@ -73,12 +74,17 @@ public:
             new_root = new_root->left;
         }
 
-        TreeNode* now_left = root->left;
-        TreeNode* now_right = root->right;
+        TreeNode* left = root->left;
+        TreeNode* right = root->right;
         root->left = nullptr;
         root->right = nullptr;
-        rotate(root, now_left, now_right);
+        
+        dfs(root, left, right);
 
         return new_root;
+    }
+public:
+    TreeNode* upsideDownBinaryTree(TreeNode* root) {
+        return by_dfs(root);
     }
 };

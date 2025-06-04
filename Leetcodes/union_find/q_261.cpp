@@ -31,14 +31,41 @@ Constraints:
 
 class Solution {
 private:
-    std::vector<int> parent;
-    std::vector<int> rank;
+    void dfs(std::vector<std::vector<int>>& adj, std::unordered_set<int>& visited, int node) {
+        if (visited.find(node) != visited.end()) {
+            return;
+        }
+
+        visited.insert(node);
+        for (int& n : adj[node]) {
+            dfs(adj, visited, n);
+        }
+    }
+    bool by_dfs(int& n, vector<vector<int>>& edges) {
+        if (edges.size() != n - 1) {
+            return false;
+        }
+
+        std::unordered_set<int> visited;
+        std::vector<std::vector<int>> adj(n);
+        for (auto& e : edges) {
+            adj[e[0]].push_back(e[1]);
+            adj[e[1]].push_back(e[0]);
+        }
+
+        dfs(adj, visited, 0);
+        
+        return visited.size() == n;
+    }
+
+    std::vector<int> parents;
+    std::vector<int> ranks;
     int find(int x) {
-        if (parent[x] == -1) {
+        if (parents[x] == -1) {
             return x;
         }
 
-        return parent[x] = find(parent[x]);
+        return parents[x] = find(parents[x]);
     }
 
     bool union_set(int x, int y) {
@@ -49,35 +76,37 @@ private:
             return false;
         }
 
-        if (rank[rx] > rank[ry]) {
-            parent[ry] = rx;
-            rank[rx] += rank[ry];
+        if (ranks[rx] > ranks[ry]) {
+            parents[ry] = rx;
+            ranks[rx] += 1;
 
         } else {
-            parent[rx] = ry;
-            rank[ry] += rank[rx];
+            parents[rx] = ry;
+            ranks[ry] += 1;
         }
 
         return true;
     }
+
     bool by_union_find(int& n, vector<vector<int>>& edges) {
-        parent.resize(n, -1);
-        rank.resize(n, 1);
+        parents.resize(n, -1);
+        ranks.resize(n, 1);
 
         if (edges.size() != n - 1) {
             return false;
         }
 
-        for (int i = 0; i < edges.size(); ++i) {
-            if (!union_set(edges[i][0], edges[i][1])) {
+        for (auto& e : edges) {
+            if (!union_set(e[0], e[1])) {
                 return false;
             }
         }
-        
+
         return true;
     }
 public:
     bool validTree(int n, vector<vector<int>>& edges) {
-        return by_union_find(n, edges);
+        //return by_union_find(n, edges);
+        return by_dfs(n, edges);
     }
 };

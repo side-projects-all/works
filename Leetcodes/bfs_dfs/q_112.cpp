@@ -49,45 +49,35 @@ Constraints:
  * };
  */
 class Solution {
+private:
+    void dfs(TreeNode* root, int& targetSum, int curr, bool& is_equal) {
+        if (root == nullptr) {
+            return;
+        }
+
+        if (root->left != nullptr) {
+            dfs(root->left, targetSum, curr + root->val, is_equal);
+        }
+
+        if (root->right != nullptr) {
+            dfs(root->right, targetSum, curr + root->val, is_equal);
+        }
+
+        if (root->left == nullptr && root->right == nullptr) {
+            is_equal |= (curr + root->val == targetSum);
+        }
+    }
+    bool by_dfs(TreeNode* root, int& targetSum) {
+        if (root == nullptr) {
+            return false;
+        }
+
+        bool is_equal = false;
+        dfs(root, targetSum, 0, is_equal);
+        return is_equal;
+    }
 public:
     bool hasPathSum(TreeNode* root, int targetSum) {
-        p_root = root;
-        p_sum = targetSum;
-        path_sum = 0;
-        isTheSame = false;
-
-        isTheSum(p_root);
-        return isTheSame;
-    }
-private:
-    TreeNode* p_root;
-    int p_sum;
-    int path_sum;
-    bool isTheSame;
-
-    void isTheSum(TreeNode* now) {
-        
-        if (isTheSame || now == NULL) {
-            return;
-        }
-
-        path_sum += now->val;
-        if (now->left == NULL && now->right == NULL) {
-            if (p_sum == path_sum) {
-                isTheSame = true;
-            }
-            path_sum -= now->val;
-
-            return;
-        }
-
-        if (now->left != NULL) {
-            isTheSum(now->left);
-        }
-        
-        if (now->right != NULL) {
-            isTheSum(now->right);
-        }   
-        path_sum -= now->val;
+        return by_dfs(root, targetSum);
     }
 };

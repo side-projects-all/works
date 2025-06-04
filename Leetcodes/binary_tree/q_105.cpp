@@ -40,43 +40,39 @@ Constraints:
  * };
  */
 class Solution {
-public:
-    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
-        pre = preorder;
-        in = inorder;
-        now = 0;
-
-        int index = 0;
-        for (auto val : inorder) {
-            inMap.insert(std::make_pair(val, index));
-            ++index;
-        }
-
-        return reform(now, inorder.size() - 1);
-    }
-
 private:
-    std::vector<int> pre;
-    std::vector<int> in;
-    int now;
-    std::unordered_map<int, int> inMap;
-
-    TreeNode* reform(int left, int right) {
-        
+    TreeNode* recursive(std::vector<int>& preorder, int& now, std::unordered_map<int, int>& inorder_rev, int left, int right) {
         if (left > right) {
-            return NULL;
+            return nullptr;
         }
 
-        int val = pre[now];
+        int val = preorder[now];
         TreeNode* root = new TreeNode(val);
-
-        int index = inMap[val];
+        int i = inorder_rev[val];
         ++now;
 
-        //the only difference betwwen preorder and postorder
-        root->left = reform(left, index - 1);
-        root->right = reform(index + 1, right);
+        root->left = recursive(preorder, now, inorder_rev, left, i - 1);
+        root->right = recursive(preorder, now, inorder_rev, i + 1, right);
 
         return root;
+    }
+    TreeNode* by_recursive(std::vector<int>& preorder, std::vector<int>& inorder) {
+        int n = inorder.size();
+        if (n == 1) {
+            return new TreeNode(preorder[0]);
+        }
+
+        std::unordered_map<int, int> inorder_rev;
+        
+        for (int i = 0; i < n; ++i) {
+            inorder_rev[inorder[i]] = i;
+        }
+
+        int index = 0;
+        return recursive(preorder, index, inorder_rev, 0, n - 1);
+    }
+public:
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        return by_recursive(preorder, inorder);
     }
 };

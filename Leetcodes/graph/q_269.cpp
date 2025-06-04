@@ -40,67 +40,53 @@ Constraints:
 
 class Solution {
 private:
-    std::string byTopologicalSort(vector<string>& words) {
-        std::unordered_map<char, std::vector<char>> nodeNeighbors;
+    std::string by_topological_sort(vector<string>& words) {
+        std::unordered_map<char, std::vector<char>> adj;
         std::unordered_map<char, int> indegree;
+        int n = words.size();
 
-        
-        //build basic structure to store data
-        for (const std::string &word : words) {
-            for (char c : word) {
-                indegree.insert(std::make_pair(c, 0));
-                nodeNeighbors.insert(std::make_pair(c, std::vector<char>()));
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < words[i].size(); ++j) {
+                indegree[words[i][j]] = 0;
             }
         }
-        
 
-        //find all edges
-        for (int i = 0; i < words.size() - 1; ++i) {
+        for (int i = 0; i < n - 1; ++i) {
+
             std::string w1 = words[i];
             std::string w2 = words[i + 1];
 
-            //check prefix, check if find from beginning
-            if ((w1.size() > w2.size()) && (w1.find(w2) == 0)) {
+            if (w1.size() > w2.size() && w1.find(w2) == 0) {
                 return "";
             }
 
-            //find the first not match and insert the corresponding relation, 
-            //rest letters did not affect the order, so we just break the inner loop
-            int len = std::min(w1.size(), w2.size());
-            for (int j = 0; j < len; ++j) {
-                if (w1[j] != w2[j]) {
-                    //std::vector<char> neighbors = nodeNeighbors[w1[j]];
-                    //neighbors.push_back(w2[j]);
-                    //nodeNeighbors[w1[j]] = neighbors;
-                    nodeNeighbors[w1[j]].push_back(w2[j]);
-                    
-                    //int count = indegree[w2[j]] + 1;
-                    //indegree[w2[j]] = count;
-                    
-                    ++indegree[w2[j]];
+            int sz = std::min(w1.size(), w2.size());
+            for (int j = 0; j < sz; ++j) {
 
+                if (w1[j] != w2[j]) {
+                    adj[w1[j]].push_back(w2[j]);
+                    ++indegree[w2[j]];
                     break;
                 }
             }
         }
-
-        //bfs like topological sort, queue indegree 0 first
-        std::string result = "";
+        
         std::queue<char> q;
-        for (const auto& [c, ind] : indegree) {
-            if (ind == 0) {
-                q.push(c);
+        for (auto& p : indegree) {
+            if (p.second == 0) {
+                q.push(p.first);
             }
         }
-        //loop queue
+
+        std::string ans;
         while (!q.empty()) {
             char c = q.front();
             q.pop();
-            result += c;
 
-            for (const char next : nodeNeighbors[c]) {
-                int count = indegree[next] - 1;
-                indegree[next] = count;
+            ans += c;
+
+            for (const char next : adj[c]) {
+                --indegree[next];
 
                 if (indegree[next] == 0) {
                     q.push(next);
@@ -108,10 +94,10 @@ private:
             }
         }
 
-        return result.size() < indegree.size() ? "" : result;
+        return ans.size() == indegree.size() ? ans : "";
     }
 public:
     string alienOrder(vector<string>& words) {
-        return byTopologicalSort(words);
+        return by_topological_sort(words);
     }
 };

@@ -37,68 +37,98 @@ Constraints:
 */
 
 class Solution {
-public:
-    int extendQueue(std::unordered_map<std::string, int>& currentSteps, 
-                    std::unordered_map<std::string, int>& oppositeSteps, 
-                    std::queue<std::string>& currentQueue, 
-                    std::unordered_set<std::string>& words) {
-      
-        for (int i = currentQueue.size(); i > 0; --i) {
-            std::string word = currentQueue.front();
-            int step = currentSteps[word];
-            currentQueue.pop();
+private:
+    int by_two_direction_bfs(std::string& beginWord, std::string& endWord, std::vector<std::string>& wordList) {
+        int n = beginWord.size();
+        std::unordered_set<std::string> set(wordList.begin(), wordList.end());
 
-            // Try to transform each position in the word
-            for (int j = 0; j < word.size(); ++j) {
-                char originalChar = word[j];
+        if (set.find(endWord) == set.end()) {
+            return 0;
+        }
 
-                // Replace the current character with all possible characters
-                for (char c = 'a'; c <= 'z'; ++c) {
-                    word[j] = c;
-                    // Continue if the transformed word is the same or not in the word set
-                    if (!words.count(word) || currentSteps.count(word)) continue;
-                    // If the transformed word is in the opposite steps, a connection is found
-                    if (oppositeSteps.count(word)) return step + oppositeSteps[word];
+        std::unordered_set<std::string> visited;
+        std::unordered_set<std::string> from_begin;
+        std::unordered_set<std::string> from_end;
 
-                    // Otherwise, add the transformed word into the current steps and queue
-                    currentSteps[word] = step + 1;
-                    currentQueue.push(word);
+        int steps = 1;
+        from_begin.insert(beginWord);
+        from_end.insert(endWord);
+
+        while (!from_begin.empty() && !from_end.empty()) {
+
+            //choose smaller for better time complexity
+            if (from_begin.size() > from_end.size()) {
+                std::swap(from_begin, from_end);
+            }
+
+            std::unordered_set<std::string> next_level;
+            for (std::string word : from_begin) {
+
+                for (int i = 0; i < n; ++i) {
+                    char old = word[i];
+
+                    for (char c = 'a'; c <= 'z'; ++c) {
+                        word[i] = c;
+
+                        if (from_end.find(word) != from_end.end()) {
+                            return steps + 1;
+                        }
+
+                        if (set.find(word) != set.end() && visited.find(word) == visited.end()) {
+                            next_level.insert(word);
+                            visited.insert(word);
+                        }
+                    }
+
+                    word[i] = old;
                 }
+            }
 
-                // Change back to the original character before trying the next position
-                word[j] = originalChar;
+            ++steps;
+            from_begin = std::move(next_level);
+        }
+
+        return 0;
+    }
+    int by_one_direction_bfs(std::string& beginWord, std::string& endWord, std::vector<std::string>& wordList) {
+        std::unordered_set<std::string> set(wordList.begin(), wordList.end());
+        if (set.find(endWord) == set.end()) {
+            return 0;
+        }
+
+        std::queue<std::pair<std::string, int>> q;
+        q.push({beginWord,  1});
+        set.erase(beginWord);
+
+        while (!q.empty()) {
+            auto [word, steps] = q.front();
+            q.pop();
+
+            if (word == endWord) {
+                return steps;
+            }
+
+            for (int i = 0; i < word.size(); ++i) {
+                char ch = word[i];
+
+                for (char c = 'a'; c <= 'z'; ++c) {
+                    word[i] = c;
+
+                    if (set.find(word) != set.end()) {
+                        set.erase(word);
+                        q.push({word, steps + 1});
+                    }
+                }
+                word[i] = ch;
             }
         }
-        return -1;
+
+        return 0;
     }
+public:
     int ladderLength(string beginWord, string endWord, vector<string>& wordList) {
-        // Initialize a set with the words for fast lookup
-        std::unordered_set<std::string> words(wordList.begin(), wordList.end());
-        // If the end word is not in the set, no transformation sequence exists
-        if (!words.count(endWord)) return 0;
-
-        // Two queues for the bidirectional BFS
-        std::queue<std::string> queueBegin{{beginWord}};
-        std::queue<std::string> queueEnd{{endWord}};
-
-        // Mapping from word to its number of steps from the begin word or end word
-        std::unordered_map<std::string, int> stepsFromBegin;
-        std::unordered_map<std::string, int> stepsFromEnd;
-
-        // Initial steps counts for beginWord and endWord
-        stepsFromBegin[beginWord] = 1;
-        stepsFromEnd[endWord] = 1;
-
-        // Bidirectional BFS
-        while (!queueBegin.empty() && !queueEnd.empty()) {
-            // Choose the direction with the smaller frontier for extension
-            int result = queueBegin.size() <= queueEnd.size()
-                ? extendQueue(stepsFromBegin, stepsFromEnd, queueBegin, words)
-                : extendQueue(stepsFromEnd, stepsFromBegin, queueEnd, words);
-
-            if (result != -1) return result; // If paths meet, return the result
-        }
-        return 0; // If no path is found, return 0
+        //return by_one_direction_bfs(beginWord, endWord, wordList);
+        return by_two_direction_bfs(beginWord, endWord, wordList);
     }
 };
 

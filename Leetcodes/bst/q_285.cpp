@@ -39,25 +39,34 @@ Constraints:
  */
 class Solution {
 private:
-    
+    void dfs(TreeNode* root, TreeNode* p, TreeNode*& suc, bool& found) {
+        if (root == nullptr) {
+            return;
+        }
+
+        dfs(root->left, p, suc, found);
+
+        if (found) {
+            suc = root;
+            found = false;
+            return;
+        }
+
+        if (root == p) {
+            found = true;
+        }
+
+        dfs(root->right, p, suc, found);
+    }
+    TreeNode* by_dfs(TreeNode* root, TreeNode* p) {
+        TreeNode* suc = nullptr;
+        bool found = false;
+
+        dfs(root, p, suc, found);
+        return suc;
+    }
 public:
     TreeNode* inorderSuccessor(TreeNode* root, TreeNode* p) {
-        if (root == nullptr) {
-            return nullptr;
-        }
-
-        TreeNode* successor = nullptr;
-
-        while (root != nullptr) {
-            if (p->val >= root->val) {
-                root = root->right;
-                
-            } else {
-                successor = root;
-                root = root->left;
-            }
-        }
-        
-        return successor;
+        return by_dfs(root, p);
     }
 };

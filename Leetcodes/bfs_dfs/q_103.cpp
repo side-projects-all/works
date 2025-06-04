@@ -40,56 +40,46 @@ Constraints:
  * };
  */
 class Solution {
-public:
-    vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
-        std::vector<std::vector<int>> ans;
-        //corner case
+private:
+    vector<vector<int>> by_bfs(TreeNode* root) {
         if (root == nullptr) {
-            return ans;
+            return {};
         }
 
-        ans.push_back({root->val});
-        if (root->left == nullptr && root->right == nullptr) {
-            return ans;
-        }
-
-
+        std::vector<std::vector<int>> ans;
+        bool left_to_right = true;
         std::queue<TreeNode*> q;
-        if (root->left != nullptr) {
-            q.push(root->left);
-        }
-        if (root->right != nullptr) {
-            q.push(root->right);
-        }
-        
-        bool l_to_r = false;
+        q.push(root);
 
         while (!q.empty()) {
+
+            std::vector<int> tmp;
             int len = q.size();
-
-            std::vector<int> tmp(len, 0);
             for (int i = 0; i < len; ++i) {
-                TreeNode* n = q.front();
-                tmp[i] = n->val;
+                tmp.push_back(q.front()->val);
+
+                if (q.front()->left != nullptr) {
+                    q.push(q.front()->left);
+                }
+                if (q.front()->right != nullptr) {
+                    q.push(q.front()->right);
+                }
+            
                 q.pop();
-
-                if (n->left != nullptr) {
-                    q.push(n->left);
-                }
-
-                if (n->right != nullptr) {
-                    q.push(n->right);
-                }
             }
 
-            if (!l_to_r) {
+            if (!left_to_right) {
                 std::reverse(tmp.begin(), tmp.end());
             }
-
-            l_to_r = !l_to_r;
+            
+            left_to_right = !left_to_right;
             ans.push_back(tmp);
         }
 
         return ans;
+    }
+public:
+    vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
+        return by_bfs(root);
     }
 };

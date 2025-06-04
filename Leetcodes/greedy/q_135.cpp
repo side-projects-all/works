@@ -35,25 +35,70 @@ Constraints:
 */
 
 class Solution {
-public:
-    int candy(vector<int>& ratings) {
-        std::vector<int> candies(ratings.size(), 1);
+private:
+    int by_greedy_one_array(vector<int>& ratings) {
+        int n = ratings.size();
+        if (n == 1) {
+            return 1;
+        }
 
-        for (int i = 1; i < ratings.size(); ++i) {
+        std::vector<int> candies(n, 1);
+        int sum = 0;
+
+        //left to right
+        for (int i = 1; i < n; ++i) {
+
             if (ratings[i] > ratings[i - 1]) {
                 candies[i] = candies[i - 1] + 1;
             }
         }
 
-        int ans = candies.back();
-        for (int i = candies.size() - 2; i > -1 ; --i) {
-
+        sum += candies[n - 1];
+        //right to left 
+        for (int i = n - 2; i >= 0; --i) {
             if (ratings[i] > ratings[i + 1]) {
                 candies[i] = std::max(candies[i], candies[i + 1] + 1);
             }
-            ans += candies[i];
+
+            sum += candies[i];
         }
 
-        return ans;
+        return sum;
+    }
+    int by_greedy_two_array(vector<int>& ratings) {
+        int n = ratings.size();
+        if (n == 1) {
+            return 1;
+        }
+
+        std::vector<int> left_to_right(n, 1);
+        std::vector<int> right_to_left(n, 1);
+
+        //left to right
+        for (int i = 1; i < n; ++i) {
+
+            if (ratings[i] > ratings[i - 1]) {
+                left_to_right[i] = left_to_right[i - 1] + 1;
+            }
+        }
+        //right to left 
+        for (int i = n - 2; i >= 0; --i) {
+            if (ratings[i] > ratings[i + 1]) {
+                right_to_left[i] = right_to_left[i + 1] + 1;
+            }
+        }
+
+        int sum = 0;
+        //get max
+        for (int i = 0; i < n; ++i) {
+            sum += std::max(left_to_right[i], right_to_left[i]);
+        }
+
+        return sum;
+    }
+public:
+    int candy(vector<int>& ratings) {
+        //return by_greedy_two_array(ratings);
+        return by_greedy_one_array(ratings);
     }
 };

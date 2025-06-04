@@ -40,44 +40,37 @@ Constraints:
  * };
  */
 class Solution {
-public:
-    TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
-        pOrder = postorder;
-        iOrder = inorder;
-
-        now = pOrder.size() - 1;
-
-        int i = 0;
-        for (auto val : iOrder) {
-            iOrderMap.insert(std::make_pair(val, i));
-            ++i;
-        }
-
-        return reform(0, now);
-    }
-
 private:
-    int now;
-    std::vector<int> pOrder;
-    std::vector<int> iOrder;
-    std::unordered_map<int, int> iOrderMap;
-
-    TreeNode* reform(int left, int right) {
+    TreeNode* recursive(std::vector<int>& postorder, int& now, std::unordered_map<int, int>& inorder_rev, int left, int right) {
         if (left > right) {
-            return NULL;
+            return nullptr;
         }
 
-        int root_val = pOrder[now];
-        TreeNode* root = new TreeNode(root_val);
-
-        int index = iOrderMap[root_val];
-
+        int val = postorder[now];
+        TreeNode* root = new TreeNode(val);
+        int i = inorder_rev[val];
         --now;
 
-        root->right = reform(index + 1, right);
-        root->left = reform(left, index - 1);
-
+        root->right = recursive(postorder, now, inorder_rev, i + 1, right);
+        root->left = recursive(postorder, now, inorder_rev, left, i - 1);
+        
         return root;
     }
+    TreeNode* by_recursive(std::vector<int>& inorder, std::vector<int>& postorder) {
+        int n = inorder.size();
+        if (n == 1) {
+            return new TreeNode(inorder[0]);
+        }
 
+        std::unordered_map<int, int> inorder_rev;
+        for (int i = 0; i < n; ++i) {
+            inorder_rev[inorder[i]] = i;
+        }
+        int index = n - 1;
+        return recursive(postorder, index, inorder_rev, 0, n - 1);
+    }
+public:
+    TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
+        return by_recursive(inorder, postorder);
+    }
 };

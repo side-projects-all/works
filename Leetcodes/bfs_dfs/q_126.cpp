@@ -41,77 +41,103 @@ Constraints:
 
 class Solution {
 private:
-    std::unordered_map<std::string, int> word_steps;
-    std::vector<std::vector<std::string>> ans;
-    std::string begin;
+    void back_tracking(const std::string& word, const std::string& beginWord, 
+                        std::unordered_map<std::string, std::vector<std::string>>& parents, 
+                            std::vector<std::string>& path, std::vector<std::vector<std::string>>& ans) {
 
-    void backtracking(std::vector<std::string>& curr_shortest, std::string word_now) {
-        if (word_now == begin) {
-            std::reverse(curr_shortest.begin(), curr_shortest.end());
-            ans.push_back(curr_shortest);
-            std::reverse(curr_shortest.begin(), curr_shortest.end());
+        if (word == beginWord) {
+            std::vector<std::string> tmp = path;
+            std::reverse(tmp.begin(), tmp.end());
+            ans.push_back(tmp);
+
             return;
         }
 
-        for (int i = 0; i < word_now.size(); ++i) {
-            char old = word_now[i];
-            int steps = word_steps[word_now];
+        for (const std::string& p : parents[word]) {
+            path.push_back(p);
 
-            for (char c = 'a'; c <= 'z'; ++c) {
-                word_now[i] = c;
-
-                if (word_steps.count(word_now) && word_steps[word_now] + 1 == steps) {
-                    curr_shortest.push_back(word_now);
-                    backtracking(curr_shortest, word_now);   
-                    curr_shortest.pop_back();
-                }
-            }
-
-            word_now[i] = old;
+            back_tracking(p, beginWord, parents, path, ans);
+            
+            path.pop_back();
         }
     }
-public:
-    vector<vector<string>> findLadders(string beginWord, string endWord, vector<string>& wordList) {
-        std::unordered_set<std::string> words(wordList.begin(), wordList.end());
-        std::queue<std::string> q({beginWord});
-        word_steps[beginWord] = 1;
-        words.erase(beginWord);
-        begin = beginWord;
+    vector<vector<string>> by_bfs_and_back_tracking(string& beginWord, string& endWord, vector<string>& wordList) {
 
-        while (!q.empty()) {
-            std::string now = q.front();
-            q.pop();
+        std::unordered_set<std::string> word_set(wordList.begin(), wordList.end());
+        std::vector<std::vector<std::string>> ans;
 
-            if (now == endWord) {
-                break;
+        if (word_set.find(endWord) == word_set.end()) {
+            return ans;
+        }
+
+        std::unordered_map<std::string, std::vector<std::string>> parents;
+        std::unordered_map<std::string, int> depth;
+        std::queue<std::string> q;
+
+        q.push(beginWord);
+        depth[beginWord] = 0;
+        int level = 0;
+        bool found = false;     //for earlier break out of loop when reach end word 
+
+        while (!q.empty() && !found) {
+            
+            int sz = q.size();
+            ++level;
+            std::unordered_set<std::string> visited_in_this_level;
+
+            for (int i = 0; i < sz; ++i) {
+                
+                std::string word = q.front();
+                q.pop();
+                std::string original = word;
+
+                for (int j = 0; j < word.size(); ++j) {
+                    char old = word[j];
+
+                    for (char c = 'a'; c <= 'z'; ++c) {
+                        word[j] = c;
+
+                        if (word == original) {
+                            continue;
+                        }
+
+                        if (word_set.find(word) != word_set.end()) {
+
+                            if (depth.find(word) == depth.end()) {
+                                depth[word] = level;
+                                q.push(word);
+                                visited_in_this_level.insert(word);
+                                parents[word].push_back(original);
+
+                            } else if (depth[word] == level) {
+
+                                parents[word].push_back(original);
+                            }
+
+                            if (word == endWord) {
+                                found = true;
+                            }
+                        }
+                    }
+
+                    word[j] = old;
+                }
             }
 
-            for (int i = 0; i < now.size(); ++i) {
-                char old = now[i];
-                int steps = word_steps[now];
-
-                for (char c = 'a'; c <= 'z'; ++c) {
-                    now[i] = c;
-
-                    if (words.find(now) != words.end()) {
-                        word_steps[now] = steps + 1;
-                        words.erase(now);   //erase visited!!
-                        q.push(now);
-                    }
-                }
-
-                now[i] = old;
+            for (const std::string& w : visited_in_this_level) {
+                word_set.erase(w);
             }
         }
 
-        if (word_steps.count(endWord)) {
-            std::vector<std::string> curr;
-            curr.push_back(endWord);
-
-            //doing backtracking to find all shortest path
-            backtracking(curr, endWord);
+        if (found) {
+            std::vector<std::string> path = { endWord };
+            back_tracking(endWord, beginWord, parents, path, ans);
         }
 
         return ans;
+    }
+public:
+    vector<vector<string>> findLadders(string beginWord, string endWord, vector<string>& wordList) {
+        return by_bfs_and_back_tracking(beginWord, endWord, wordList);
     }
 };

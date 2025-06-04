@@ -34,22 +34,26 @@ Constraints:
 */
 
 class Solution {
-public:
-    vector<int> singleNumber(vector<int>& nums) {
-        long bm = 0;
-        for (long num : nums) {
-            bm ^= num;
+private:
+    vector<int> by_bit_mask(vector<int>& nums) {
+        unsigned int bit_mask = 0;
+        for (int n : nums) {
+            bit_mask ^= n;
         }
 
-        long diff = bm & (-bm);
-        
-        long x = 0;
-        for (long num : nums) {
-            if ((num & diff) != 0) {
-                x ^= num;
+        unsigned int diff = bit_mask & (-bit_mask);  //keep right most bit
+
+        int x = 0;
+        for (int n : nums) {
+            if ((n & diff) != 0) {
+                x ^= n;
             }
         }
 
-        return vector<int>{(int)x, (int)(bm^x)};
+        return {x, (int)bit_mask ^ x};
+    }
+public:
+    vector<int> singleNumber(vector<int>& nums) {
+        return by_bit_mask(nums);
     }
 };

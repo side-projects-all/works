@@ -46,22 +46,20 @@ Constraints:
  */
 class Solution {
 private:
-    bool recursion(TreeNode* curr, TreeNode* p, TreeNode* q, TreeNode*& ans) {
-        if (curr == NULL) {
+    bool dfs(TreeNode* root, TreeNode* p, TreeNode* q, TreeNode*& ans) {
+        if (root == nullptr) {
             return false;
         }
 
-        //find p or q left, right child, and itself
-        int left = recursion(curr->left, p, q, ans) ? 1 : 0;
-        int right = recursion(curr->right, p, q, ans) ? 1 : 0;
-        int now = (curr == p || curr == q) ? 1 : 0;
+        int left = dfs(root->left, p, q, ans);
+        int right = dfs(root->right, p, q, ans);
+        int curr = (root == p || root == q);
 
-        if (now + left + right >= 2) {
-            ans = curr;
+        if (curr + left + right >= 2) {
+            ans = root;
         }
 
-        //return if finding one of p or q
-        return (now + left + right > 0);
+        return curr + left + right >= 1;
     }
     
     TreeNode* iterative(TreeNode* root, TreeNode* p, TreeNode* q) {
@@ -102,7 +100,7 @@ public:
     TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
         
         TreeNode* ans = nullptr;
-        recursion(root, p, q, ans);
+        dfs(root, p, q, ans);
         return ans;
         //return iterative(root, p, q);
     }

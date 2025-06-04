@@ -35,25 +35,62 @@ Constraints:
 */
 
 class Solution {
-public:
-    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+private:
+    bool is_cycle(std::vector<std::vector<int>>& adj, std::vector<int>& visited, int node) {
+        if (visited[node] == 2) {
+            return false;
+        }
+
+        if (visited[node] == 1) {
+            return true;
+        }
+
+        visited[node] = 1;
+        for (int nei : adj[node]) {
+            if (is_cycle(adj, visited, nei)) {
+                return true;
+            }
+        }
+
+        visited[node] = 2;
+        return false;
+    }
+    bool by_dfs(int& numCourses, vector<vector<int>>& prerequisites) {
+        if (numCourses == 1) {
+            return true;
+        }
 
         std::vector<std::vector<int>> adj(numCourses);
-        std::vector<int> indegree(numCourses, 0);
+        std::vector<int> visited(numCourses);   //0: unvisit, 1: visiting, 2: visited
 
-        //build adjcency list
-        for (auto& v : prerequisites) {
-            //int src = v[1];
-            //int dest = v[0];
+        for (int i = 0; i < prerequisites.size(); ++i) {
+            adj[prerequisites[i][1]].push_back(prerequisites[i][0]);
+        }
 
-            adj[v[1]].push_back(v[0]);
-            indegree[v[0]] += 1;
+        for (int i = 0; i < numCourses; ++i) {
+            if (is_cycle(adj, visited, i)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+    bool by_topological_sort(int& numCourses, vector<vector<int>>& prerequisites) {
+        if (numCourses == 1) {
+            return true;
+        }
+
+        std::vector<std::vector<int>> adj(numCourses);
+        std::vector<int> indegree(numCourses);
+        int n = prerequisites.size();
+
+        for (int i = 0; i < n; ++i) {
+            adj[prerequisites[i][1]].push_back(prerequisites[i][0]);
+            ++indegree[prerequisites[i][0]];
         }
 
         std::queue<int> q;
-
-        //find 0-indegree node as start point
-        for (int i = 0; i < indegree.size(); ++i) {
+        for (int i = 0; i < numCourses; ++i) {
             if (indegree[i] == 0) {
                 q.push(i);
             }
@@ -61,20 +98,25 @@ public:
 
         int visited = 0;
         while (!q.empty()) {
-            int node = q.front();
+            int c = q.front();
             q.pop();
 
             ++visited;
 
-            for (int neighbor : adj[node]) {
-                --indegree[neighbor];
+            for (int nei : adj[c]) {
+                --indegree[nei];
 
-                if (indegree[neighbor] == 0) {
-                    q.push(neighbor);
+                if (indegree[nei] == 0) {
+                    q.push(nei);
                 }
             }
         }
 
         return visited == numCourses;
+    }
+public:
+    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+        //return by_topological_sort(numCourses, prerequisites);
+        return by_dfs(numCourses, prerequisites);
     }
 };
