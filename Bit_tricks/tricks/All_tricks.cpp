@@ -1,6 +1,6 @@
-#include "All_tricks.h"
-#include <bitset>
-
+//#include "All_tricks.h"
+//#include <bitset>
+/*
 void All_tricks::Compute_the_sign_of_an_integer() {
   int v = -14;
   int sign;
@@ -33,3 +33,4 @@ void All_tricks::Compute_the_integer_absolute_value_without_branching() {
   r = (v ^ mask) - mask;  //二進位減法是將被減數取二的補數，再相加
   std::cout << "r2: " << r << "\n";
 }
+*/

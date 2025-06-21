@@ -3,28 +3,16 @@
 #include <fstream>
 #include <algorithm>
 #include <vector>
+#include "All_tricks.h"
+#include "Solution.h"
 
 
 int main(int argc, char *argv[]) {
 
-	int w = 0;
-	std::cin >> w;
-
-	int first = w / 2;
-	int sec = w - first;
-	
-	while (first > 0 && sec > 0 ) {
-
-		if (first % 2 == 0 && sec % 2 == 0) {
-			std::cout << "YES";
-			return 0;
-		}
-
-		++first;
-		--sec;
-	}
-
-	std::cout << "NO";
-
+	//All_tricks all;
+	//all.invert_endian();
+	Solution sol;
+	long long val = sol.countGoodArrays(5, 10, 2);
+	std::cout << val << "\n";
 	return 0;
 }

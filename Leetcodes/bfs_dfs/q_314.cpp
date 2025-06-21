@@ -43,46 +43,47 @@ Constraints:
  */
 class Solution {
 private:
-    vector<vector<int>> byBFS(TreeNode* root) {
-        std::vector<std::vector<int>> result;
+    vector<vector<int>> by_bfs(TreeNode* root) {
         if (root == nullptr) {
-            return result;
+            return {};
         }
 
-        std::unordered_map<int, std::vector<int>> m;
-        std::queue<std::pair<TreeNode*, int>> q;
-        int col = 0;
-        q.push({root, col});
+        if (root->left == nullptr && root->right == nullptr) {
+            return {{root->val}};
+        }
 
-        int minCol = 0;
-        int maxCol = 0;
+        std::unordered_map<int, std::vector<int>> col_nodes;
+        std::queue<std::pair<TreeNode*, int>> q;    //Node, col
+        q.push({root, 0});
+        int min_col = INT_MAX;
+        int max_col = INT_MIN;
 
         while (!q.empty()) {
-            std::pair<TreeNode*, int> p = q.front();
+            auto[n, col] = q.front();
             q.pop();
+            col_nodes[col].push_back(n->val);
+            
+            min_col = std::min(min_col, col);
+            max_col = std::max(max_col, col);
 
-            TreeNode* n = p.first;
-            int col_now = p.second;
+            if (n->left != nullptr) {
+                q.push({n->left, col - 1});
+            }
 
-            if (n != nullptr) {
-
-                m[col_now].push_back(n->val);
-                minCol = std::min(minCol, col_now);
-                maxCol = std::max(maxCol, col_now);
-
-                q.push({n->left, col_now - 1});
-                q.push({n->right, col_now + 1});
+            if (n->right != nullptr) {
+                q.push({n->right, col + 1});
             }
         }
-        
-        for (int i = minCol; i < maxCol + 1; ++i) {
-            result.push_back(m[i]);
+
+        std::vector<std::vector<int>> ans(max_col - min_col + 1);
+        for (int i = min_col, j = 0; i <= max_col; ++i, ++j) {
+            ans[j] = std::move(col_nodes[i]);
         }
 
-        return result;
+        return ans;
     }
 public:
     vector<vector<int>> verticalOrder(TreeNode* root) {
-        return byBFS(root);
+        return by_bfs(root);
     }
 };

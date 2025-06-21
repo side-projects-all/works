@@ -29,12 +29,24 @@ Follow Up: Can you do it in O(n) time and/or in-place with O(1) extra space?
 */
 
 class Solution {
-public:
-    void wiggleSort(vector<int>& nums) {
-        //by_default_sort(nums);
-        by_counting_sort(nums);
-    }
 private:
+    void by_sort(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return;
+        }
+
+        std::vector<int> sorted{ nums.begin(), nums.end() };
+        std::sort(sorted.begin(), sorted.end());
+
+        int left = (n - 1) / 2;
+        int right = n - 1;
+
+        for (int i = 0; i < n; ++i) {
+            nums[i] = (i % 2 == 0) ? sorted[left--] : sorted[right--];
+        }
+    }
+
     void by_counting_sort(vector<int>& nums) {
         int max_e = *std::max_element(nums.begin(), nums.end());
         std::vector<int> sorted(max_e + 1);
@@ -62,21 +74,9 @@ private:
             --sorted[j];
         }
     }
-
-    void by_default_sort(vector<int>& nums) {
-        std::vector<int> sorted(nums);
-        std::sort(sorted.begin(), sorted.end());
-
-        int mid = (nums.size() + 1) / 2;
-        int j = mid - 1;
-        int k = nums.size() - 1;
-
-        for (int i = 0; i < nums.size(); i++) {
-            if (i % 2 == 0) {
-                nums[i] = sorted[j--];
-            } else {
-                nums[i] = sorted[k--];
-            }
-        }
+public:
+    void wiggleSort(vector<int>& nums) {
+        //by_sort(nums);
+        by_counting_sort(nums);
     }
 };

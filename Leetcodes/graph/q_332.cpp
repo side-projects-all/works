@@ -36,109 +36,37 @@ Constraints:
 
 
 class Solution {
+private:
+    void dfs(const std::string& b, std::unordered_map<std::string, std::deque<std::string>>& adj, std::vector<std::string>& ans) {
+
+        while (!adj[b].empty()) {
+            std::string e = adj[b].front();
+            adj[b].pop_front();
+
+            dfs(e, adj, ans);
+        }
+
+        ans.push_back(b);
+    }
+    vector<string> by_dfs(vector<vector<string>>& tickets) {
+
+        std::unordered_map<std::string, std::deque<std::string>> adj;
+        for (const std::vector<std::string>& t : tickets) {
+            adj[t[0]].push_back(t[1]);
+        }
+
+        for (auto& [src, dest] : adj) {
+            std::sort(dest.begin(), dest.end());
+        }
+
+        std::vector<std::string> ans;
+        dfs("JFK", adj, ans);
+        std::reverse(ans.begin(), ans.end());
+
+        return ans;
+    }
 public:
     vector<string> findItinerary(vector<vector<string>>& tickets) {
-        //flight_size = 0;
-
-
-        //build the graph, and make it sorted
-        for (auto entry : tickets) {
-            std::string origin = entry[0];
-            std::string dest = entry[1];
-
-            if (flights.find(origin) != flights.end()) {
-                flights[origin].push_back(dest);
-                //sort here
-                std::sort(flights[origin].begin(), flights[origin].end());
-
-            } else {
-                std::vector<std::string> destList = std::vector<std::string>();
-                destList.push_back(dest);
-                flights[origin] = destList;
-            }
-        }
-        
-
-        applyHierholzerAlgorithm("JFK");
-        
-        
-        
-        
-        //initialize the visited
-        /*
-        for (auto entry : flights) {
-            std::size_t len = entry.second.size();
-            std::string key = entry.first;
-            visited.insert(std::make_pair(key, std::vector<bool>(len, false)));
-        }
-        flight_size = tickets.size();
-        std::vector<std::string> route;
-        route.push_back("JFK");
-
-        backtracking("JFK", route);
-        */
-        
-        return result;
-
+        return by_dfs(tickets);
     }
-
-private:
-    
-    std::unordered_map<std::string, std::vector<std::string>> flights;
-    std::vector<std::string> result;
-    
-    void applyHierholzerAlgorithm(std::string origin) {
-
-        if (flights.find(origin) != flights.end()) {
-          
-
-          while(!flights[origin].empty()) {
-            std::string nextTo = flights[origin][0];
-            flights[origin].erase(flights[origin].begin());
-
-            applyHierholzerAlgorithm(nextTo);
-          }
-        }
-
-        result.insert(result.begin(), origin);
-    }
-    
-
-    /*
-    std::unordered_map<std::string, std::vector<bool>> visited;
-    std::size_t flight_size;
-    
-    bool backtracking(std::string origin, std::vector<std::string> route) {
-        if (route.size() == flight_size + 1) {
-            result = route;
-            return true;
-        }
-
-        if (flights.find(origin) == flights.end()) {
-            return false;
-        }
-
-        std::vector<std::string> destinations = flights[origin];
-        for (int i = 0; i < destinations.size(); ++i) {
-
-            if (!visited[origin][i]) {
-
-                visited[origin][i] = true;
-                std::string startFrom = destinations[i];
-                route.push_back(startFrom);
-
-                bool rtnResult = backtracking(startFrom, route);
-                route.pop_back();
-                visited[origin][i] = false;
-
-                if (rtnResult)
-                    return true;
-
-            }
-        }
-
-        return false;
-    }
-    */
-
 };

@@ -16,7 +16,7 @@ add_executable(main main.cpp)
 target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/tricks)
 target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/LC_test)
 #target_link_libraries(main PRIVATE All_tricks Lc_questions)
-target_link_libraries(main PRIVATE All_tricks)
+#target_link_libraries(main PRIVATE All_tricks)
 
 
 

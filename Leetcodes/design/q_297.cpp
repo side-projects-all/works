@@ -38,18 +38,28 @@ Constraints:
  */
 class Codec {
 private:
-    void append(TreeNode* node, std::string& s) {
-        if (node == nullptr) {
-            s.push_back('N');
+    void append(TreeNode* root, std::string& s) {
+        std::queue<TreeNode*> q;
+        q.push(root);
 
-        } else {
-            s += std::to_string(node->val);
+        while (!q.empty()) {
+            TreeNode* n = q.front();
+            q.pop();
+
+            if (n == nullptr) {
+                s.push_back('N');
+
+            } else {
+                s += std::to_string(n->val);    //it might be negative or several digits
+                q.push(n->left);
+                q.push(n->right);
+            }
+
+            s.push_back('>');
         }
-
-        s.push_back('>');
     }
 
-    TreeNode* find_next(std::string& s, int& i) {
+    TreeNode* get_node(std::string& s, int& i) {
         if (i >= s.size() || s[i] == 'N') {
             i += 2;
             return nullptr;
@@ -61,67 +71,51 @@ private:
             ++i;
         }
 
-        int num = 0;
+        int val = 0;
         while (s[i] != '>') {
-            int d = s[i] - '0';
+            val = val * 10 + (s[i] - '0');
             ++i;
-
-            num = num * 10 + d;
         }
 
-        num *= sign;
-
-        TreeNode* ans = new TreeNode(num);
+        val *= sign;
         ++i;
 
-        return ans;
+        return new TreeNode(val);
     }
 public:
+
     // Encodes a tree to a single string.
     string serialize(TreeNode* root) {
-        std::string ans;
-        std::queue<TreeNode*> q;
-        q.push(root);
+        std::string s{""};
+        append(root, s);
 
-        while (!q.empty()) {
-            TreeNode* curr = q.front();
-            q.pop();
-
-            append(curr, ans);
-
-            if (curr != nullptr) {
-                q.push(curr->left);
-                q.push(curr->right);
-            }
-        }
-
-        return ans;
+        return s;
     }
+
     // Decodes your encoded data to tree.
     TreeNode* deserialize(string data) {
         int i = 0;
-        TreeNode* root = find_next(data, i);
-
+        TreeNode* root = get_node(data, i);
         if (root == nullptr) {
-            return nullptr;
+            return root;
         }
 
         std::queue<TreeNode*> q;
         q.push(root);
 
         while (!q.empty()) {
-            TreeNode* curr = q.front();
+            TreeNode* n = q.front();
             q.pop();
 
-            curr->left = find_next(data, i);
-            curr->right = find_next(data, i);
+            n->left = get_node(data, i); 
+            n->right = get_node(data, i);
 
-            if (curr->left != nullptr) {
-                q.push(curr->left);
+            if (n->left != nullptr) {
+                q.push(n->left);
             }
 
-            if (curr->right != nullptr) {
-                q.push(curr->right);
+            if (n->right != nullptr) {
+                q.push(n->right);
             }
         }
 
@@ -129,95 +123,6 @@ public:
     }
 };
 
-// Your Codec object will be instantiated and called as such:
-// Codec ser, deser;
-// TreeNode* ans = deser.deserialize(ser.serialize(root));
-
-
-/**
- * Definition for a binary tree node.
- * struct TreeNode {
- *     int val;
- *     TreeNode *left;
- *     TreeNode *right;
- *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
- * };
- */
-/*
-class Codec {
-public:
-
-    // Encodes a tree to a single string.
-    string serialize(TreeNode* root) {
-
-        std::string str = "";
-        serializeTree(root, str);
-        return str;
-    }
-
-    // Decodes your encoded data to tree.
-    TreeNode* deserialize(string data) {
-        std::queue<std::string> splited = split(data, ",");
-        
-        return deserializeString(splited);
-    }
-
-private:
-    void serializeTree(TreeNode* root, std::string &str) {
-        
-        if (root == NULL) {
-            str += "null,";
-            return;
-
-        } else {
-            str += std::to_string(root->val) + ",";
-            serializeTree(root->left, str);
-            serializeTree(root->right, str);
-        }
-    }
-
-    TreeNode* deserializeString(std::queue<std::string> &splited) {
-        
-        std::string first = splited.front();
-        splited.pop();
-        //empty
-        if (first.compare("null") == 0) {
-            return NULL;
-        }
-
-        TreeNode* root = new TreeNode(std::stoi(first));
-        root->left = deserializeString(splited);
-        root->right = deserializeString(splited);
-
-        return root;
-    }
-
-    std::queue<std::string> split(const std::string &str, const std::string& pattern) {
-        std::queue<std::string> result;
-
-        std::string::size_type begin;
-        std::string::size_type end;
-
-        end = str.find(pattern);
-        begin = 0;
-
-        while (end != std::string::npos) {
-          if (end - begin != 0) {
-            result.push(str.substr(begin, end - begin)); 
-          }    
-
-          begin = end + pattern.size();
-          end = str.find(pattern, begin);
-        }
-
-        if (begin != str.length()) {
-          result.push(str.substr(begin));
-        }
-
-        return result;
-    }
-};
-*/
 // Your Codec object will be instantiated and called as such:
 // Codec ser, deser;
 // TreeNode* ans = deser.deserialize(ser.serialize(root));

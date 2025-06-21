@@ -17,8 +17,8 @@ Output: false
 
 Constraints:
 
-    1 <= preorder.length <= 104
-    1 <= preorder[i] <= 104
+    1 <= preorder.length <= 10^4
+    1 <= preorder[i] <= 10^4
     All the elements of preorder are unique.
 
 */
@@ -27,7 +27,7 @@ class Solution {
 public:
     bool verifyPreorder(vector<int>& preorder) {
         int minLimit = -1;
-        std::stack<int> s;
+        std::stack<int> s;  //monotonic stack, decreasing order
 
         for (int num : preorder) {
             while (!s.empty() && s.top() < num) {

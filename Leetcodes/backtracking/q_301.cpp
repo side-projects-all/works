@@ -33,30 +33,21 @@ Constraints:
 
 class Solution {
 private:
-    std::vector<std::string> ans;
-    const std::vector<char> para{'(', ')'};
-public:
-    std::vector<std::string> removeInvalidParentheses(std::string s) {
-        backtracking(s, 0, 0, para);
-        return ans;
-        
-    }
-
-    void backtracking(std::string s, int left, int right, const std::vector<char>& para){
+    void back_tracking(string s, std::vector<std::string>& ans, const std::string& parentheses, int left, int right) {
+        int cnt = 0;    // cnt > 1: too many left, cnt < 1: too many, cnt == 0: balanced
         int n = s.size();
-        int cnt = 0;
-        
         while (right < n) {
-            char ch= s[right];
+            char ch = s[right];
 
-            if (ch == para[0]) {
+            if (ch == parentheses[0]) {
                 ++cnt;
-            } else if (ch == para[1]) {
+
+            } else if (ch == parentheses[1]) {
                 --cnt;
             }
 
             if (cnt < 0) {
-                break;
+                break;      //too many right
             }
 
             ++right;
@@ -64,25 +55,36 @@ public:
 
         if (cnt < 0) {
             while (left <= right) {
-                char ch = s[left];
-                if (ch != para[1] || (left > 0 && s[left] == s[left - 1])) {
+
+                char c = s[left];
+                if (c != parentheses[1] || (left > 0 && s[left] == s[left - 1])) {
                     ++left;
                     continue;
                 }
-                
+
                 s.erase(left, 1);
-                backtracking(s, left, right, para);
-                s.insert(s.begin() + left, para[1]);
+                back_tracking(s, ans, parentheses, left, right);
+                s.insert(s.begin() + left, parentheses[1]);
 
                 ++left;
             }
 
-        } else if (cnt > 0) { 
-            std::reverse(s.begin(),s.end());
-            backtracking(s, 0, 0, {')', '('});
+        } else if (cnt > 0) {
+            std::reverse(s.begin(), s.end());   //because we want to do upper while loop like left is right
+            back_tracking(s, ans, ")(", 0, 0);
 
         } else {
-            ans.push_back(para[0] == '('? s : string(s.rbegin(), s.rend()));
+            ans.push_back((parentheses[0] == '(') ? s : std::string(s.rbegin(), s.rend()));
         }
+    }
+    vector<string> by_back_tracking(string& s) {
+        std::vector<std::string> ans;
+
+        back_tracking(s, ans, "()", 0, 0);
+        return ans;
+    }
+public:
+    vector<string> removeInvalidParentheses(string s) {
+        return by_back_tracking(s);
     }
 };

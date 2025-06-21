@@ -49,23 +49,24 @@ Constraints:
 class Solution {
 private:
     std::string last_sub(string& s) {
-        int i = 0;
-        int j = 1;
+        int i = 0;  //first string pos
+        int j = 1;  //second string pos
         int n = s.size();
 
         while (j < n) {
             int k = 0;
-            while (j + k < n && s[i + k] == s[j + k]) {
+            //move forward if they had same letters, this is for the range to skip
+            while (j + k < n && s[i + k] == s[j + k]) {     
                 ++k;
             }
 
             if (j + k < n && s[i + k] < s[j + k]) {
-                int t = i;
-                i = j;
-                j = std::max(j + 1, t + k + 1);
+                int old_i = i;
+                i = j;  //update i to new position
+                j = std::max(j + 1, old_i + k + 1); //find a new j to compare
 
             } else {
-                j = j + k + 1;
+                j = j + k + 1;  //j skip those same letters
             }
         }
 

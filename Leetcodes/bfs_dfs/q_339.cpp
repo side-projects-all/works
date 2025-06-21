@@ -66,24 +66,27 @@ Constraints:
  * };
  */
 class Solution {
-public:
-    int depthSum(vector<NestedInteger>& nestedList) {
-        return recursive(nestedList, 1);
-    }
-
 private:
-    int recursive(vector<NestedInteger>& nestedList, int depth) {
+    int dfs(vector<NestedInteger>& nestedList, int depth) {
 
+        int n = nestedList.size();
         int sum = 0;
-        for (int i = 0; i < nestedList.size(); ++i) {
+        for (int i = 0; i < n; ++i) {
 
             if (nestedList[i].isInteger()) {
                 sum += nestedList[i].getInteger() * depth;
             } else {
-                sum += recursive(nestedList[i].getList(), depth + 1);
+                sum += dfs(nestedList[i].getList(), depth + 1);
             }
         }
 
         return sum;
+    }
+    int by_dfs(vector<NestedInteger>& nestedList) {
+        return dfs(nestedList, 1);
+    }
+public:
+    int depthSum(vector<NestedInteger>& nestedList) {
+        return by_dfs(nestedList);
     }
 };
