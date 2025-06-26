@@ -40,6 +40,33 @@ Constraints:
  */
 class Solution {
 private:
+    void dfs(TreeNode* root, bool is_left, int& sum) {
+        if (root == nullptr) {
+            return;
+        }
+
+        if (root->left == nullptr && root->right == nullptr && is_left) {
+            sum += root->val;
+            return;
+        }
+
+        dfs(root->left, true, sum);
+        dfs(root->right, false, sum);
+    }
+    int by_dfs(TreeNode* root) {
+        int sum = 0;
+        dfs(root, false, sum);
+        return sum;
+    }
+public:
+    int sumOfLeftLeaves(TreeNode* root) {
+        return by_dfs(root);
+    }
+};
+
+/*
+class Solution {
+private:
     bool isLeaf(TreeNode* now) {
         if (now->right == NULL && now->left == NULL) {
             return true;
@@ -82,3 +109,4 @@ public:
         return sum;
     }
 };
+*/

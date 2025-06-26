@@ -31,13 +31,6 @@ Follow up: Could you do it in one-pass, using only O(1) extra memory and without
 */
 
 class Solution {
-public:
-    int countBattleships(vector<vector<char>>& board) {
-        return naive(board);
-        
-        //return better(board);
-    }
-
 private:
     int better(vector<vector<char>>& board) {
         const int rows = board.size();
@@ -45,51 +38,26 @@ private:
         int cnt = 0;
         for (int r = 0; r < rows; ++r) {
             for (int c = 0; c < cols; ++c) {
-                if (board[r][c] == 'X') {
-                    if ((r == 0) || (board[r - 1][c]) == '.') {
-                        if ((c == 0) || (board[r][c - 1]) == '.') {
-                            ++cnt;
-                        }
-                    }
-                }
-            }
-        }
-        return cnt;
-    }
-    int naive(vector<vector<char>>& board) {
-        int cnt = 0;
-        int dir[4][2] = { {1, 0}, {-1, 0}, {0, 1}, {0, -1} };   //r, c; up, down, right, left
-        int rows = board.size();
-        int cols = board[0].size();
-        for (int r = 0; r < rows; ++r) {
-            for (int c = 0; c < cols; ++c) {
 
                 if (board[r][c] == 'X') {
-                    int i = 0;
-                    board[r][c] = 'B';
-                    int next_r = 0;
-                    int next_c = 0;
 
-                    for (; i < 4; ++i) {
-                        next_r = r + dir[i][0];
-                        next_c = c + dir[i][1];
-
-                        if (next_r >= 0 && next_r < rows && next_c >= 0 && next_c < cols && board[next_r][next_c] == 'X') {
-                            break;
-                        }
+                    if ((r - 1 >= 0) && (board[r - 1][c]) == 'X') {
+                        continue;
                     }
 
-                    while (next_r >= 0 && next_r < rows && next_c >= 0 && next_c < cols && board[next_r][next_c] == 'X') {
-                        board[next_r][next_c] = 'B';
-                        next_r += dir[i][0];
-                        next_c += dir[i][1];
+                    if ((c - 1 >= 0) && (board[r][c - 1]) == 'X') {
+                        continue;
                     }
 
                     ++cnt;
                 }
             }
         }
-
         return cnt;
+    }
+public:
+    int countBattleships(vector<vector<char>>& board) {
+        
+        return better(board);
     }
 };

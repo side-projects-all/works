@@ -53,46 +53,57 @@ Constraints:
 
 */
 
-const int MOD = 1e9 + 7;
-const int MX = 1e5;
-
-long long fact[MX];
-long long inv_fact[MX];
+const int mod = 1e9 + 7;
+const int mx = 1e5;
+long long factorial[mx];    //declare out of class affects performance a lot
+long long inv_fact[mx];     //declare out of class affects performance a lot
 
 class Solution {
-    long long qpow(long long x, int n) {
-        long long res = 1;
-        while (n) {
-            if (n & 1) {
-                res = res * x % MOD;
-            }
-            x = x * x % MOD;
-            n >>= 1;
-        }
-        return res;
-    }
-
-    long long comb(int n, int m) {
-        return fact[n] * inv_fact[m] % MOD * inv_fact[n - m] % MOD;
-    }
+private:
     void init() {
-        if (fact[0]) {
+        //this if affects performance a lot
+        if (factorial[0]) {
             return;
         }
-        fact[0] = 1;
-        for (int i = 1; i < MX; ++i) {
-            fact[i] = fact[i - 1] * i % MOD;
+
+        factorial[0] = 1;
+        for (int i = 1; i < mx; ++i) {
+            factorial[i] = i * factorial[i - 1] % mod;
         }
 
-        inv_fact[MX - 1] = qpow(fact[MX - 1], MOD - 2);
-        for (int i = MX - 1; i >= 1; --i) {
-            inv_fact[i - 1] = inv_fact[i] * i % MOD;
+        inv_fact[mx - 1] = binary_exponential(factorial[mx - 1], mod - 2);
+        for (int i = mx - 1; i >= 1; --i) {
+            inv_fact[i - 1] = inv_fact[i] * i % mod;
         }
     }
 
+    long long binary_exponential(long long val, int exp) {
+        long long mul = 1;
+
+        while (exp > 0) {
+
+            if ((exp & 1) == 1) {
+                //--exp;  //unnecessary operation 
+                mul = mul * val % mod;
+            }
+            val = val * val % mod;
+            exp >>= 1;
+        }
+
+        return mul;
+    }
+
+    long long combination(int n, int k) {
+        return factorial[n] * inv_fact[k] % mod * inv_fact[n - k] % mod;
+    }
+
+    int by_combinatoric(int& n, int& m, int& k) {
+        init();
+
+        return m * binary_exponential(m - 1, n - k - 1) % mod * combination(n - 1, k) % mod;
+    }
 public:
     int countGoodArrays(int n, int m, int k) {
-        init();
-        return comb(n - 1, k) * m % MOD * qpow(m - 1, n - k - 1) % MOD;
+        return by_combinatoric(n, m, k);
     }
 };

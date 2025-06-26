@@ -58,36 +58,37 @@ public:
 
 class Solution {
 private:
-    void inorder(Node* root, Node*& prev, Node*& next) {
+    void inorder(Node* root, Node *&prev, Node *&first) {
         if (root == nullptr) {
             return;
         }
 
-        inorder(root->left, prev, next);
+        inorder(root->left, prev, first);
 
-        if (next != nullptr) {
-            next->right = root;
-            root->left = next;
+        if (prev != nullptr) {
+            prev->right = root;
+            root->left = prev;
         } else {
-            prev = root;
+            first = root;
         }
 
-        next = root;
-        inorder(root->right, prev, next);
+        prev = root;
 
+        inorder(root->right, prev, first);
     }
     Node* by_inorder(Node* root) {
         if (root == nullptr) {
             return root;
         }
 
-        Node* prev = nullptr;
-        Node* next = nullptr;
-        inorder(root, prev, next);
-        prev->left = next;
-        next->right = prev;
+        Node* first = nullptr;
+        Node* last = nullptr;
+        inorder(root, last, first);
 
-        return prev;
+        last->right = first;
+        first->left = last;
+        
+        return first;
     }
 public:
     Node* treeToDoublyList(Node* root) {

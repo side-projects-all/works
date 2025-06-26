@@ -64,83 +64,58 @@ Constraints:
  * };
  */
 class Solution {
-public:
-    NestedInteger deserialize(string s) {
-        //return by_stack(s);
-        int pos = 0;
-        return recursive(s, pos);
-    }
-
 private:
-    NestedInteger recursive(const string& s, int& pos) {
+    int get_int(const string& s, int& i) {
+        int sign = 1;
+        if (s[i] == '-') {
+            ++i;
+            sign = -1;
+        }
+
+        int val = 0;
+        while (i < s.size() && std::isdigit(s[i])) {
+            val = val * 10 + s[i] - '0';
+            ++i;
+        }
+
+        return val * sign;
+    }
+    NestedInteger dfs(const string& s, int& pos) {
         if (s[pos] == '[') {
-            if (s[pos + 1] == ']') {
-                pos += 2;
-                return NestedInteger();
-            }
-
-            NestedInteger ans;
-            while (s[pos] != ']') {
-                ++pos;
-                ans.add(recursive(s, pos));
-            }
-
             ++pos;
-            return ans;
+            NestedInteger ni;
+
+            if (s[pos] == ']') {
+                ++pos;
+                return ni;
+            }
+
+            while (true) {
+                ni.add(dfs(s, pos));
+
+                if (s[pos] == ']') {
+                    ++pos;
+                    break;
+                } else if (s[pos] == ',') {
+                    ++pos;
+                }
+            }
+
+            return ni;
 
         } else {
-
-            int value = 0;
-            int mul = 1;
-
-            if (s[pos] == '-') {
-                mul = -1;
-                ++pos;
-            }
-
-            while (pos < s.length() && s[pos] >= '0' && s[pos] <= '9') {
-                value *= 10;
-                value += (s[pos] - '0');
-                ++pos;
-            }
-
-            return NestedInteger(value * mul);
-        }
+            
+            return NestedInteger(get_int(s, pos));
+        }   
     }
+    NestedInteger by_dfs(const string& s) {
+        int pos = 0;
+        NestedInteger ni = dfs(s, pos);
 
-    NestedInteger by_stack(string& s) {
-        std::function<bool(char)> is_num = [](char c) { 
-            return (c == '-') || std::isdigit(c);
-        };
-
-        std::stack<NestedInteger> stack;
-        stack.push(NestedInteger());
-
-        for (auto it = s.begin(); it != s.end();) {
-            const char& c = *it;
-
-            if (is_num(c)) {
-                auto it2 = std::find_if_not(it, s.end(), is_num);
-                int val = std::stoi(std::string(it, it2));
-
-                stack.top().add(NestedInteger(val));
-                it = it2;
-
-            } else {
-                if (c == '[') {
-                    stack.push(NestedInteger());
-
-                } else if (c == ']') {
-                    NestedInteger ni = stack.top();
-                    stack.pop();
-
-                    stack.top().add(ni);
-                }
-
-                ++it;
-            }
-        }
-
-        return stack.top().getList().front();
+        return ni;
+    }   
+public:
+    NestedInteger deserialize(string s) {
+        return by_dfs(s);
     }
 };

@@ -47,6 +47,59 @@ Constraints:
 
 class Solution {
 private:
+    double dfs(std::unordered_map<std::string, std::vector<std::pair<std::string, double>>>& adj, std::string& curr, std::string& dest, double curr_val, std::unordered_set<std::string>& visited) {
+        if (curr == dest) {
+            return curr_val;
+        }
+
+        visited.insert(curr);
+        for (auto& [nei, weight] : adj[curr]) {
+            
+            double val = -1;
+            if (!visited.contains(nei)) {
+                val = dfs(adj, nei, dest, curr_val * weight, visited);
+
+                if (val != -1) {
+                    return val;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    vector<double> by_dfs(vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries) {
+
+        std::unordered_map<std::string, std::vector<std::pair<std::string, double>>> adj;
+        int i = 0;
+        for (std::vector<std::string> &e : equations) {
+            adj[e[0]].push_back({e[1], values[i]});
+            adj[e[1]].push_back({e[0], (double)1 / values[i]});
+            ++i;
+        }
+
+        std::vector<double> ans;
+        for (auto &q : queries) {
+            std::unordered_set<std::string> visited;
+            if (adj.contains(q[0]) && adj.contains(q[1])) {
+                ans.push_back(dfs(adj, q[0], q[1], 1, visited));
+
+            } else {
+                ans.push_back(-1);
+            }
+        }
+
+        return ans;
+    }
+public:
+    vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries) {
+        return by_dfs(equations, values, queries);
+    }
+};
+
+/*
+class Solution {
+private:
     //like the parent array in union find
     std::unordered_map<std::string, std::pair<std::string, double>> groups;
 
@@ -114,3 +167,4 @@ public:
         return ans;
     }   
 };
+*/

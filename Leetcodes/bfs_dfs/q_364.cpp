@@ -65,6 +65,42 @@ Constraints:
  */
 class Solution {
 private:
+    void dfs(vector<NestedInteger>& nestedList, int& max_depth, std::vector<int>& vals, std::vector<int>& depth, int curr_depth) {
+        for (int i = 0; i < nestedList.size(); ++i) {
+            if (nestedList[i].isInteger()) {
+                vals.push_back(nestedList[i].getInteger());
+                depth.push_back(curr_depth);
+
+            } else {
+                dfs(nestedList[i].getList(), max_depth, vals, depth, curr_depth + 1);
+            }
+        }
+
+        max_depth = std::max(max_depth, curr_depth);
+    }
+    int by_dfs(vector<NestedInteger>& nestedList) {
+        std::vector<int> vals;
+        std::vector<int> depth;
+        int max_depth = 1;
+        
+        dfs(nestedList, max_depth, vals, depth, 1);
+
+        int sum = 0;
+        for (int i = 0; i < vals.size(); ++i) {
+            sum += vals[i] * (max_depth - depth[i] + 1);
+        }
+
+        return sum;
+    }
+public:
+    int depthSumInverse(vector<NestedInteger>& nestedList) {
+        return by_dfs(nestedList);
+    }
+};
+
+/*
+class Solution {
+private:
     void find_max_depth(vector<NestedInteger> nestedList, int& max_depth, int depth_now) {
 
         for (int i = 0; i < nestedList.size(); ++i) {
@@ -100,3 +136,4 @@ public:
         return sum;
     }
 };
+*/

@@ -26,8 +26,8 @@ solution.pick(3); // It should return either index 2, 3, or 4 randomly. Each ind
 
 Constraints:
 
-    1 <= nums.length <= 2 * 104
-    -231 <= nums[i] <= 231 - 1
+    1 <= nums.length <= 2 * 10^4
+    -2^31 <= nums[i] <= 2^31 - 1
     target is an integer from nums.
     At most 104 calls will be made to pick.
 
@@ -35,22 +35,29 @@ Constraints:
 */
 
 class Solution {
-public:
-    Solution(vector<int>& nums) {
-        this->nums = nums;
-        for (int i = 0; i < nums.size(); ++i) {
-            nums_to_index[nums[i]].push_back(i);
-        }
-    }
-    
-    int pick(int target) {
-        int i = std::rand() % nums_to_index[target].size();
-
-        return nums_to_index[target][i];
-    }
-private:
-    std::unordered_map<int, std::vector<int>> nums_to_index;
     std::vector<int> nums;
+
+public:
+    Solution(std::vector<int>& nums) {
+        this->nums = nums;
+    }
+
+    int pick(int target) {
+        int result = -1;
+        int count = 0;
+
+        for (int i = 0; i < nums.size(); ++i) {
+            if (nums[i] == target) {
+                count++;
+
+                if (std::rand() % count == 0) {
+                    result = i;
+                }
+            }
+        }
+
+        return result;
+    }
 };
 
 /**

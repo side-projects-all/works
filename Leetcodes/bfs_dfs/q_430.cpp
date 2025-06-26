@@ -81,34 +81,54 @@ public:
 
 class Solution {
 private:
-    Node* recursion(Node* prev, Node* curr) {
-        if (curr == nullptr) {
-            return prev;
-        }
-
-        curr->prev = prev;
-        prev->next = curr;
-
-        Node* tmp = curr->next;
-        Node* child_end = recursion(curr, curr->child);
-
-        curr->child = nullptr;
-
-        return recursion(child_end, tmp);
-    }
-    Node* by_recursion(Node* head) {
+    Node* dfs(Node *head) {
         if (head == nullptr) {
-            return head;
+            return nullptr;
         }
 
-        Node* dummy = new Node(-1, nullptr, head, nullptr);
-        recursion(dummy, head);
-        dummy->next->prev = nullptr;
+        Node *curr = head;
 
-        return dummy->next;
+        while (curr != nullptr) {
+
+            if (curr->child == nullptr) {
+                curr = curr->next;
+
+            } else {
+                Node *next_node = curr->next;
+                Node *child_head = dfs(curr->child);
+
+                curr->next = child_head;
+                child_head->prev = curr;
+
+                curr->child = nullptr;
+                Node *tail = child_head;
+                while (tail->next != nullptr) {
+                    tail = tail->next;
+                }
+
+                tail->next = next_node;
+                if (next_node != nullptr) {
+                    next_node->prev = tail;
+                }
+
+                curr = next_node;
+            }
+        }
+        
+        return head;
+    }
+    Node* by_dfs(Node *head) {
+        if (head == nullptr) {
+            return nullptr;
+        }
+
+        Node *curr = head;
+        dfs(head);
+
+        return head;
     }
 public:
     Node* flatten(Node* head) {
-        return by_recursion(head);
+        return by_dfs(head);
     }
 };
