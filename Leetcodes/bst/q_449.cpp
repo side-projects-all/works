@@ -22,7 +22,7 @@ Output: []
 Constraints:
 
     The number of nodes in the tree is in the range [0, 10^4].
-    0 <= Node.val <= 104
+    0 <= Node.val <= 10^4
     The input tree is guaranteed to be a binary search tree.
 
 
@@ -39,30 +39,31 @@ Constraints:
  */
 class Codec {
 private:
-    void post_order(std::string& s, TreeNode* root) {
+    void dfs_encode(TreeNode* root, std::string& s) {
         if (root == nullptr) {
             return;
         }
 
-        post_order(s, root->left);
-        post_order(s, root->right);
+        dfs_encode(root->left, s);
+        dfs_encode(root->right, s);
+
         s += std::to_string(root->val) + ",";
     }
 
-    TreeNode* de_helper(std::vector<int>& int_data, int lower, int upper) {
-        if (int_data.empty()) {
+    TreeNode* dfs_decode(std::vector<int>& vals, int left, int right) {
+        if (vals.empty()) {
             return nullptr;
         }
 
-        int val = int_data.back();
-        if (val < lower || val > upper) {
+        int val = vals.back();
+        if (val < left || val > right) {
             return nullptr;
         }
 
-        int_data.pop_back();
+        vals.pop_back();
         TreeNode* root = new TreeNode(val);
-        root->right = de_helper(int_data, val, upper);
-        root->left = de_helper(int_data, lower, val);
+        root->right = dfs_decode(vals, val, right);
+        root->left = dfs_decode(vals, left, val);
 
         return root;
     }
@@ -70,25 +71,30 @@ public:
 
     // Encodes a tree to a single string.
     string serialize(TreeNode* root) {
-        std::string s;
-        post_order(s, root);
-        
-        if (!s.empty() && s.back() == ',') {
-            s.pop_back();
+        if (root == nullptr) {
+            return "";
         }
+
+        std::string s;
+        dfs_encode(root, s);
+
         return s;
     }
 
     // Decodes your encoded data to tree.
     TreeNode* deserialize(string data) {
-        std::vector<int> int_data;
-        std::stringstream ss(data);
-        std::string str;
-        while (std::getline(ss, str, ',')) {
-            int_data.push_back(std::stoi(str));
+        if (data.empty()) {
+            return nullptr;
         }
 
-        return de_helper(int_data, INT_MIN, INT_MAX);
+        std::vector<int> vals;
+        std::string tmp;
+        std::istringstream iss(data);
+        while (std::getline(iss, tmp, ',')) {
+            vals.push_back(std::stoi(tmp));
+        }
+
+        return dfs_decode(vals, INT_MIN, INT_MAX);
     }
 };
 
