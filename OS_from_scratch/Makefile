@@ -1,3 +1,4 @@
+#m
 ASM=nasm
 
 SRC_DIR=src
