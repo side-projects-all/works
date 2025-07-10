@@ -17,7 +17,7 @@ section .text
 _start:
 
 .change_termios:
-	mov rax, 0x001a
+	mov rax, 0x1a
 	mov rdi, 0
 	mov rsi, old_termios
 	syscall
@@ -27,17 +27,22 @@ _start:
 	mov rsi, old_termios
 	mov rdi, raw_termios
 	rep movsb
-
-	; set raw mode, clear ECHO, ICANON flag
+	
 	mov rbx, raw_termios
+	; set raw mode, clear ECHO, ICANON flag
 	add rbx, 12
 	mov eax, [rbx]
 	and eax, ~(1<<3)
 	and eax, ~(1<<1)
 	mov [rbx], eax
+	
+	; set VMIN/VTIME	(to non-blocking)
+	sub rbx, 12
+	mov byte [rbx+17], 0
+	mov byte [rbx+16], 0
 
 	; start raw mode
-	mov rax, 0x001b
+	mov rax, 0x1b
 	mov rdi, 0
 	mov rsi, 0
 	mov rdx, raw_termios
@@ -92,7 +97,7 @@ _start:
 
 .restore_mode:
 	;restore mode
-	mov rax, 0x001b
+	mov rax, 0x1b
 	mov rdi, 0
 	mov rsi, 0
 	mov rdx, old_termios
