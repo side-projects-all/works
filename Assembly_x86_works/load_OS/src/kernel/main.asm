@@ -1,13 +1,16 @@
-ORG 0x7C00
+ORG 0x0
 BITS 16
 	
-main:
-	mov ax, 0
-	mov ds, ax
-	mov es, ax
-	mov ss, ax
+;main:
+	;mov ax, 0
+	;mov ax, 0x2000
+	;mov ds, ax
+	;mov es, ax
+	;mov ss, ax
 
-	mov sp, 0X7C00
+	;mov sp, 0X7C00
+start:
+	;mov ax, 0x2000
 	mov si, os_boot_msg
 	call print
 	HLT
@@ -39,5 +42,5 @@ done_print:
 	
 os_boot_msg: db 'first OS has booted!', 13, 10, 0
 
-TIMES 510-($-$$) DB 0
-DW 0AA55h
+;TIMES 510-($-$$) DB 0
+;DW 0AA55h
