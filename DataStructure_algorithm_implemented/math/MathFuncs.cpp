@@ -55,7 +55,7 @@ int MathFuncs::gcd_it(int a, int b) {
   do {
     r = a % b;
     a = b;
-    b= r;
+    b = r;
 
   } while (b != 0);
 

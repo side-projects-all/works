@@ -49,87 +49,87 @@ Constraints:
 
 */
 
+struct State {
+    int dist;
+    std::string path;
+    int r;
+    int c;
+
+    State(int d, std::string p, int i, int j) : dist{d}, path{p}, r{i}, c{j} {}
+
+    bool operator<(const State& s2) const {
+        if (dist == s2.dist) {
+            return path > s2.path;
+        }
+
+        return dist > s2.dist;
+    }
+};
+
 class Solution {
 private:
-    struct State {
-        int row;
-        int col;
-        int dist;
-        std::string path;
-    };
-
-    struct My_comparator {
-
-        bool operator() (const State& s1, const State& s2) {
-            if (s1.dist == s2.dist) {
-                return s1.path > s2.path;
-            }
-
-            return s1.dist > s2.dist;
-        }
-    };
-
-    std::string byDijkstra(vector<vector<int>>& maze, vector<int>& ball, vector<int>& hole) {
-        std::vector<std::vector<int>> dir{ {0, -1},  {-1, 0}, {0, 1}, {1, 0} };
-        std::vector<std::string> textDir{ "l", "u", "r", "d" };
-
+    std::string by_dijkstra(vector<vector<int>>& maze, vector<int>& ball, vector<int>& hole) {
         int rows = maze.size();
         int cols = maze[0].size();
+        std::vector<std::vector<int>> dist(rows, std::vector<int>(cols, INT_MAX));
+        std::vector<std::vector<std::string>> path(rows, std::vector<std::string>(cols, ""));
 
-        std::vector<std::vector<bool>> visited(rows, std::vector<bool>(cols));
-        std::priority_queue<State, std::vector<State>, My_comparator> pq;
+        std::priority_queue<State> pq;
+        pq.emplace(0, "", ball[0], ball[1]);
+        dist[ball[0]][ball[1]] = 0;
 
-        pq.push({ball[0], ball[1], 0, ""});
+        int dir[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; //u, d, l, r
+        char dir_ch[4] = {'u', 'd', 'l', 'r'};
 
         while (!pq.empty()) {
-            State s = pq.top();
+            State curr = pq.top();
             pq.pop();
-            int r_now = s.row;
-            int c_now = s.col;
 
-            if (visited[r_now][c_now]) {
+            if (curr.r == hole[0] && curr.c == hole[1]) {
+                return curr.path;
+            }
+
+            if (curr.dist > dist[curr.r][curr.c] || 
+                    (curr.dist == dist[curr.r][curr.c] && curr.path > path[curr.r][curr.c])) {
                 continue;
             }
 
-            if (r_now == hole[0] && c_now == hole[1]) {
-                return s.path;
-            }
-
-            visited[r_now][c_now] = true;
-
             for (int i = 0; i < 4; ++i) {
+                int next_r = curr.r;
+                int next_c = curr.c;
+                int steps = 0;
 
-                int next_r = r_now + dir[i][0];
-                int next_c = c_now + dir[i][1];
-                std::string txt_dir = textDir[i];
-
-                int dist = 0;
-
-                while (next_r >= 0 && next_r < rows && next_c >= 0 && next_c < cols && maze[next_r][next_c] == 0) {
-                    
-                    if (next_r == hole[0] && next_c == hole[1]) {
-                        break;
-                    }
+                while (next_r + dir[i][0] >= 0 && next_r + dir[i][0] < rows && 
+                        next_c + dir[i][1] >= 0 && next_c + dir[i][1] < cols && 
+                                maze[next_r + dir[i][0]][next_c + dir[i][1]] == 0) {
 
                     next_r += dir[i][0];
                     next_c += dir[i][1];
-                    ++dist;
+                    ++steps;
+
+                    if (next_r == hole[0] && next_c == hole[1]) {
+                        break;
+                    }
                 }
 
-                if (next_r != hole[0] || next_c != hole[1]) {
-                    next_r -= dir[i][0];
-                    next_c -= dir[i][1];
+                int next_dist = curr.dist + steps;
+                std::string next_path = curr.path + dir_ch[i];
+
+                if (next_dist < dist[next_r][next_c] || 
+                    (next_dist == dist[next_r][next_c] && next_path < path[next_r][next_c])) {
+
+                    dist[next_r][next_c] = next_dist;
+                    path[next_r][next_c] = next_path;
+
+                    pq.emplace(next_dist, next_path, next_r, next_c);
                 }
-                
-                pq.push({next_r, next_c, s.dist + dist, s.path + txt_dir});
             }
-
         }
 
         return "impossible";
     }
 public:
     string findShortestWay(vector<vector<int>>& maze, vector<int>& ball, vector<int>& hole) {
-        return byDijkstra(maze, ball, hole);
+        return by_dijkstra(maze, ball, hole);
     }
 };

@@ -31,38 +31,33 @@ Constraints:
 */
 
 class Solution {
-public:
-    vector<string> letterCombinations(string digits) {
-        if (digits.size() == 0) {
+private:
+    void backtracking(string& digits, std::unordered_map<char, std::string>& m, 
+                        std::vector<std::string>& ans, std::string& curr, int i) {
+        if (curr.size() == digits.size()) {
+            ans.push_back(curr);
+        }
+
+        for (char c : m[digits[i]]) {
+            curr.push_back(c);
+            backtracking(digits, m, ans, curr, i + 1);
+            curr.pop_back();
+        }
+    }
+    vector<string> by_backtracking(string& digits) {
+        if (digits.empty()) {
             return {};
         }
+        std::vector<std::string> ans;
+        std::unordered_map<char, std::string> m{{'2', "abc"}, {'3', "def"}, {'4', "ghi"}, {'5', "jkl"}, 
+                                                        {'6', "mno"}, {'7', "pqrs"}, {'8', "tuv"}, {'9', "wxyz"}};
 
-        std::vector<std::string> result;
-        std::string curr = "";
-        backtrack(0, curr, digits, result);
-
-        return result;
+        std::string curr{""};
+        backtracking(digits, m, ans, curr, 0); 
+        return ans;
     }
-
-private:
-    std::unordered_map<char, std::string> letters = {{'2', "abc"}, {'3', "def"}, {'4', "ghi"}, 
-                                                        {'5', "jkl"}, {'6', "mno"}, {'7', "pqrs"}, 
-                                                        {'8', "tuv"}, {'9', "wxyz"}};
-
-    void backtrack(int index, std::string& curr, std::string& digits, std::vector<std::string>& result) {
-        if (curr.size() == digits.size()) {
-            result.push_back(curr);
-            return;
-        }
-
-        char key = digits[index];
-        std::string candidates = letters[key];
-
-        for (char str : candidates) {
-            curr += str;
-            backtrack(index + 1, curr, digits, result);
-            curr.erase(curr.size() - 1, 1);
-        }
+public:
+    vector<string> letterCombinations(string digits) {
+        return by_backtracking(digits);
     }
-
 };

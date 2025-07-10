@@ -24,30 +24,36 @@ Constraints:
 
 class Solution {
 private:
-    void back_tracking(std::vector<std::string>& ans, int left, int right, int& n, std::string& curr) {
+    void backtracking(int& n, std::vector<std::string>& ans, std::string& curr, int left, int right) {
         if (curr.size() == 2 * n) {
             ans.push_back(curr);
-            return;
         }
 
         if (left < n) {
-            curr += "(";
-            back_tracking(ans, left + 1, right, n, curr);
+            curr.push_back('(');
+            backtracking(n, ans, curr, left + 1, right);
             curr.pop_back();
         }
 
         if (left > right) {
-            curr += ")";
-            back_tracking(ans, left, right + 1, n, curr);
+            curr.push_back(')');
+            backtracking(n, ans, curr, left, right + 1);
             curr.pop_back();
         }
     }
-public:
-    vector<string> generateParenthesis(int n) {
+    vector<string> by_backtracking(int& n) {
+        if (n == 1) {
+            return {"()"};
+        }
+
         std::vector<std::string> ans;
         std::string curr;
-        back_tracking(ans, 0, 0, n, curr);
+        backtracking(n, ans, curr, 0, 0);
 
         return ans;
+    }
+public:
+    vector<string> generateParenthesis(int n) {
+        return by_backtracking(n);
     }
 };

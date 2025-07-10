@@ -97,7 +97,17 @@ public:
     r = (v ^ mask) - mask;  //二進位減法是將被減數取二的補數，再相加
     std::cout << "r2: " << r << "\n";
   }
+  void Compute_the_min_or_max_of_two_int_without_branching() {
+    int x = -99;
+    int y = 0;
+    int r;
 
+    r = y ^ ((x ^ y) & -(x < y)); //min
+    std::cout << "min: " << r << "\n";
+
+    r = x ^ ((x ^ y) & -(x < y)); //max
+    std::cout << "max: " << r << "\n";
+  }
   /*
   void Compute_the_sign_of_an_integer();
   void Compute_the_integer_absolute_value_without_branching();

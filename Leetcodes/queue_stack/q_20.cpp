@@ -38,39 +38,32 @@ Constraints:
 class Solution {
 public:
     bool isValid(string s) {
-        std::unordered_map<char, char> characters = { {'(', ')'}, 
-                                                      {'{', '}'}, 
-                                                      {'[', ']'},
-                                                      {')', ')'}, 
-                                                      {'}', '}'}, 
-                                                      {']', ']'} };
-        
-        std::vector<char> stack;
-        char key;
-        for (int i = s.length() - 1; i > -1 ; --i) {
-            
-            key = s[i];
-            //return if wrong character
-            if (characters.find(key) == characters.end()) {
-                return false;
-            }
-            //not need to compare if empty stack
-            if (stack.size() == 0) {
-                stack.push_back(s[i]);
-                continue;
-            }
-            //check with last element
-            if (stack.back() == characters[key] && stack.back() != key) {
-                stack.pop_back();
+        int n = s.size();
+        if (n % 2) {
+            return false;
+        }
+
+        std::stack<char> stack;
+
+        for (int i = 0; i < n; ++i) {
+            if (s[i] == '(' || s[i] == '[' || s[i] == '{') {
+                stack.push(s[i]);
+
             } else {
-                stack.push_back(s[i]);
+
+                if (stack.empty()) {
+                    return false;
+                }
+                
+                if ((s[i] == ')' && stack.top() != '(') || 
+                    (s[i] == ']' && stack.top() != '[') || (s[i] == '}' && stack.top() != '{')) {
+                    return false;
+                }
+
+                stack.pop();
             }
         }
-        
-        if (stack.empty()) {
-            return true;
-        }
-            
-        return false;
+
+        return stack.empty() ? true : false;
     }
 };
