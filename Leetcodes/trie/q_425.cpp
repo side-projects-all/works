@@ -34,105 +34,94 @@ Constraints:
 
 */
 
-class Solution {
-private:
-    struct Trie_node {
-        std::vector<int> str_indices;   //string index using this character
-        Trie_node* subs[26];
-        int links_cnt;
+struct Node {
+    Node* subs[26]{ nullptr };
+    std::vector<int> indices;   //at this level, index of words uses this alphbet
+    int link_cnt{ 0 };
 
-        Trie_node() : links_cnt{ 0 } {
-            for (int i = 0; i < 26; ++i) {
-                subs[i] = nullptr;
-            }
-        }
+    Node() {}
 
-        void put(char c, Trie_node* node) {
-            if (subs[c - 'a'] == nullptr) {
-                subs[c - 'a'] = node;
-                ++links_cnt;
-            }
-        }
-
-        bool contains(char c) {
-            return subs[c - 'a'] != nullptr;
-        }
-    };
-
-    struct Trie {
-        Trie_node* root;
-
-        Trie() {
-            root = new Trie_node();
-        }
-
-        void insert(vector<string>& words) {
-            Trie_node* now;
-
-            for (int i = 0; i < words.size(); ++i) {
-
-                now = root;
-                for (int j = 0; j < words[i].size(); ++j) {
-                    if (!now->contains(words[i][j])) {
-                        now->put(words[i][j], new Trie_node());
-                    }
-
-                    now = now->subs[words[i][j] - 'a'];
-                    now->str_indices.push_back(i);
-                }
-            }
-        }
-    };
-    void back_tracking(Trie_node* root, vector<string>& words, std::vector<std::vector<std::string>>& ans, 
-                                                    int col, std::vector<std::string>& sqr) {
-        if (col == words[0].size()) {
-            ans.push_back(sqr);
-            return;
-        }
-
-        std::string col_chars;
-        for (std::string& s : sqr) {
-            //when you at column 1, you will have 1 string; column 2, 2 strings, column 3, 3 strings
-            col_chars += s[col];    
-        }
-
-        //using the symmetry to compare in trie
-        Trie_node* now = root;
-        for (char c : col_chars) {
-            if (!now->contains(c)) {
-                now = nullptr;  //this is necessary!!!
-                break;
-            }
-
-            now = now->subs[c - 'a'];
-        }
-
-        std::vector<int> indices;
-        if (now != nullptr) {
-            indices = now->str_indices;
-        }
-
-        for (int i : indices) {
-            sqr.push_back(words[i]);
-            back_tracking(root, words, ans, col + 1, sqr);
-            sqr.pop_back();
+    void put(char c) {
+        if (subs[c - 'a'] == nullptr) {
+            subs[c - 'a'] = new Node();
+            ++link_cnt;
         }
     }
 
-    vector<vector<string>> by_trie_back_tracking(vector<string>& words) {
-        std::vector<std::vector<std::string>> ans;
-        Trie trie;
-        trie.insert(words);
-        
+    bool contain(char c) {
+        return subs[c - 'a'] != nullptr;
+    }
+};
+
+class Solution {
+private:
+    Node* root;
+    void init(vector<string>& words) {
+        root = new Node();
+
         for (int i = 0; i < words.size(); ++i) {
-            std::vector<std::string> sqr{ words[i] };
-            back_tracking(trie.root, words, ans, 1, sqr);
+
+            Node* curr = root;
+            for (int j = 0; j < words[i].size(); ++j) {
+
+                if (!curr->contain(words[i][j])) {
+                    curr->put(words[i][j]);
+                }
+
+                curr->indices.push_back(i);
+                curr = curr->subs[words[i][j] - 'a'];
+            }
+        }
+    }
+    void backtracking(vector<string>& words, std::vector<std::vector<std::string>>& ans, 
+        std::vector<std::string>& curr, int col) {
+        
+        if (col == words[0].size()) {
+            ans.push_back(curr);
+            return;
+        }
+
+        std::string col_word;
+        for (std::string& s : curr) {
+            col_word.push_back(s[col]);
+        }
+
+        Node* trie_node = root;
+        for (char c : col_word) {
+            if (!trie_node->contain(c)) {
+                trie_node = nullptr;
+                break;
+            }
+
+            trie_node = trie_node->subs[c - 'a'];
+        }
+
+        if (trie_node == nullptr) {
+            return;
+        }
+
+        std::vector<int> indices = trie_node->indices;
+        for (int i : indices) {
+            curr.push_back(words[i]);
+            backtracking(words, ans, curr, col + 1);
+            curr.pop_back();
+        }
+
+    }
+    vector<vector<string>> by_backtracking(vector<string>& words) {
+        init(words);
+        std::vector<std::vector<std::string>> ans;
+
+        for (int i = 0; i < words.size(); ++i) {
+            std::vector<std::string> curr{ words[i] };
+
+            backtracking(words, ans, curr, 1);
         }
 
         return ans;
     }
 public:
     vector<vector<string>> wordSquares(vector<string>& words) {
-        return by_trie_back_tracking(words);
+        return by_backtracking(words);
     }
 };
