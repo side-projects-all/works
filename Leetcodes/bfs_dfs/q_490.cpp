@@ -84,11 +84,12 @@ private:
 
         return false;
     }
-    bool dfs(std::vector<std::vector<int>>& maze, int& rows, int& cols, std::vector<int>& dest, std::vector<std::vector<bool>>& visited, int (*dir)[2], int r, int c) {
+    bool dfs(vector<vector<int>>& maze, int& rows, int& cols, vector<int>& dest, 
+            std::vector<std::vector<bool>>& visited, int (*dir)[2], int r, int c) {
         if (visited[r][c]) {
             return false;
         }
-
+        
         if (r == dest[0] && c == dest[1]) {
             return true;
         }
@@ -97,26 +98,34 @@ private:
         for (int i = 0; i < 4; ++i) {
             int next_r = r;
             int next_c = c;
-
-            while (next_r >= 0 && next_r < rows && next_c >= 0 && next_c < cols && maze[next_r][next_c] == 0) {
+            while (next_r + dir[i][0] >= 0 && next_r + dir[i][0] < rows && next_c + dir[i][1] >= 0 && 
+                        next_c + dir[i][1] < cols && maze[next_r + dir[i][0]][next_c + dir[i][1]] == 0) {
                 next_r += dir[i][0];
                 next_c += dir[i][1];
+
+                /*  ball would not stop at destination unless a wall after the destination, 
+                    therefore, we do not need this condition 
+                    
+                if (next_r == dest[0] && next_c == dest[1]) {
+                    return true;
+                }*/
             }
 
-            if (dfs(maze, rows, cols, dest, visited, dir, next_r - dir[i][0], next_c - dir[i][1])) {
+            if (dfs(maze, rows, cols, dest, visited, dir, next_r, next_c)) {
                 return true;
             }
         }
-
+        
         return false;
     }
-    bool by_dfs(vector<vector<int>>& maze, vector<int>& start, vector<int>& dest) {
+    bool by_dfs(vector<vector<int>>& maze, vector<int>& start, vector<int>& destination) {
         int rows = maze.size();
         int cols = maze[0].size();
-        int dir[4][2] = { {0, 1}, {0, -1}, {1, 0}, {-1, 0} };
-        std::vector<std::vector<bool>> visited(rows, std::vector<bool>(cols));
 
-        return dfs(maze, rows, cols, dest, visited, dir, start[0], start[1]);
+        std::vector<std::vector<bool>> visited(rows, std::vector<bool>(cols));
+        int dir[4][2]{ {-1, 0}, {1, 0}, {0, -1}, {0, 1} };
+
+        return dfs(maze, rows, cols, destination, visited, dir, start[0], start[1]);
     }
 public:
     bool hasPath(vector<vector<int>>& maze, vector<int>& start, vector<int>& destination) {
