@@ -10,7 +10,7 @@
 int main(int argc, char *argv[]) {
 
 	All_tricks all;
-	all.Compute_the_min_or_max_of_two_int_without_branching();
+	all.if_an_int_is_a_pow_of_2();
 
 	/*
 	Solution sol;

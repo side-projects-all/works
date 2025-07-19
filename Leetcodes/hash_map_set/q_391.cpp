@@ -37,8 +37,34 @@ Constraints:
 
 class Solution {
 private:
-public:
-    bool isRectangleCover(vector<vector<int>>& rectangles) {
+    bool by_map(vector<vector<int>>& rectangles) {
+        std::unordered_map<long long, int> pos;
+
+        const long long begin = 100000;
+        for (std::vector<int>& x : rectangles) {
+            int bottom_left_col = x[0];
+            int bottom_left_row = x[1];
+            int top_right_col = x[2];
+            int top_right_row = x[3];
+
+            ++pos[bottom_left_col * begin + bottom_left_row];   //for same bottom left col, different row
+            --pos[bottom_left_col * begin + top_right_row];     //for same bottom left col, inner point
+            --pos[top_right_col * begin + bottom_left_row];     //for same top right col, inner point
+            ++pos[top_right_col * begin + top_right_row];       //for same top right col, different row
+        }
+
+        int corners = 0;
+        for (auto it : pos) {
+            if (it.second != 0) {
+                if (std::abs(it.second) != 1) return false;
+
+                ++corners;
+            }
+        }
+
+        return corners == 4;
+    }
+    bool by_set(vector<vector<int>>& rectangles) {
         std::set<std::pair<int, int>> corners;
         long area = 0;
 
@@ -64,5 +90,10 @@ public:
         const auto& p3 = *rbegin(corners);  
 
         return area == (long)(p3.first - p1.first) * (long)(p3.second - p1.second);
+    }
+public:
+    bool isRectangleCover(vector<vector<int>>& rectangles) {
+        return by_map(rectangles);
+        //return by_set(rectangles);
     }
 };

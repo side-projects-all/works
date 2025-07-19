@@ -28,43 +28,42 @@ Constraints:
 
 class Solution {
 private:
-    void back_tracking(int& len, std::unordered_map<int, int>& m, std::vector<std::vector<int>>& ans, std::vector<int>&& curr) {
-        if (curr.size() == len) {
+    void backtracking(std::unordered_map<int, int>& cnts, int& n, std::vector<std::vector<int>>& ans, 
+        vector<int>&& curr) {
+        if (curr.size() == n) {
             ans.push_back(curr);
             return;
         }
 
-        for (auto& p : m) {
+        for (auto& p : cnts) {
+            if (p.second == 0) continue;
 
-            if (p.second == 0) {
-                continue;
-            }
-            
+            --cnts[p.first];
             curr.push_back(p.first);
-            --m[p.first];
-
-            back_tracking(len, m, ans, std::move(curr));
-
+            backtracking(cnts, n, ans, std::move(curr));
             curr.pop_back();
-            ++m[p.first];
+            ++cnts[p.first];
         }
     }
-    vector<vector<int>> by_back_tracking(vector<int>& nums) {
-        std::vector<std::vector<int>> ans;
-        std::unordered_map<int, int> m;
 
-        for (int& v : nums) {
-            ++m[v];
+    vector<vector<int>> by_backtracking(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 1) {
+            return { nums };
         }
 
-        int len = nums.size();
-        back_tracking(len, m, ans, std::vector<int>());
+        std::unordered_map<int, int> cnts;
+        for (int i = 0; i < n; ++i) {
+            ++cnts[nums[i]];
+        }
 
+        std::vector<std::vector<int>> ans;
+        backtracking(cnts, n, ans, {});
         return ans;
     }
 public:
     vector<vector<int>> permuteUnique(vector<int>& nums) {
-        return by_back_tracking(nums);
+        return by_backtracking(nums);
     }
 };
 

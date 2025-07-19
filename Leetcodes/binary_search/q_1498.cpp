@@ -42,80 +42,79 @@ Constraints:
 
 class Solution {
 private:
-    int byTwoPointer(vector<int>& nums, int target) {
-        int MOD = 1'000'000'007;
-        int N = nums.size();
-        std::sort(nums.begin(), nums.end());
-
-        std::vector<int> possibility(N);
-        possibility[0] = 1;
-        for (int i = 1; i < N; ++i) {
-            possibility[i] = (possibility[i - 1] * 2) % MOD;
+    int by_ptr(vector<int>& nums, int& target) {
+        int n = nums.size();
+        if (n == 1) {
+            return nums[0] * 2 <= target;
         }
 
-        int ans = 0;
-        int left  = 0;
-        int right = N - 1;
-        while (left <= right) {
-            if (nums[left] + nums[right] <= target) {
-                ans += possibility[right - left];
-                ans %= MOD;
-                ++left;
+        std::sort(nums.begin(), nums.end());
+        std::vector<int> possibility(n);
+        possibility[0] = 1;
+        for (int i = 1; i < n; ++i) {
+            possibility[i] = (possibility[i - 1] * 2) % 1'000'000'007;
+        }
+
+        int cnt = 0;
+        int b = 0;
+        int e = n - 1;
+        while (b <= e) {
+
+            if (nums[b] + nums[e] <= target) {
+                cnt = (cnt + possibility[e - b]) % 1'000'000'007;
+                ++b;
 
             } else {
-                --right;
+                --e;
             }
         }
 
-        return ans;
+        return cnt;
     }
-    int byBS(vector<int>& nums, int target) {
-        
-        int MOD = 1'000'000'007;
-        int N = nums.size();
-        std::sort(nums.begin(), nums.end());
-
-        std::vector<int> possibility(N);
-        possibility[0] = 1;
-        for (int i = 1; i < N; ++i) {
-            possibility[i] = (possibility[i - 1] * 2) % MOD;
+    int by_bs(vector<int>& nums, int target) {
+        int n = nums.size();
+        if (n == 1) {
+            return nums[0] * 2 <= target;
         }
 
-        int ans = 0;
-        for (int i = 0; i < N; ++i) {
-            int rest = target - nums[i];
-            int left = i;
-            int right = N - 1;
+        std::sort(nums.begin(), nums.end());
+        std::vector<int> possibility(n);
+        possibility[0] = 1;
+        for (int i = 1; i < n; ++i) {
+            possibility[i] = (possibility[i - 1] * 2) % 1'000'000'007;
+        }
 
-            //search the element that is smaller than or equal to rest
-            while (left <= right) {
-                int mid = left + (right - left) / 2;
+        int cnt = 0;
+        for (int i = 0; i < n; ++i) {
+
+            if (target < nums[i]) {
+                break;
+            }
+            int b = 0;
+            int e = n - 1;
+            int rest = target - nums[i];
+
+            while (b <= e) {
+                int mid = b + (e - b) / 2;
 
                 if (nums[mid] <= rest) {
-                    left = mid + 1;
+                    b = mid + 1;
                 } else {
-                    right = mid - 1;
+                    e = mid - 1;
                 }
             }
 
-            right = left - 1;
-
-            if (right >= i) {
-                ans += possibility[right - i];
-                ans %= MOD;
+            b -= 1;
+            if (b >= i) {
+                cnt = (cnt + possibility[b - i]) % 1'000'000'007;
             }
         }
 
-        return ans;
+        return cnt;
     }
 public:
     int numSubseq(vector<int>& nums, int target) {
-        //corner case
-        if (nums.size() == 1) {
-            return nums[0] * 2 <= target ? 1 : 0;
-        }
-
-        //return byBS(nums, target);
-        return byTwoPointer(nums, target);
+        //return by_bs(nums, target);
+        return by_ptr(nums, target);
     }
 };

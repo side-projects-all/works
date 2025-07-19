@@ -102,11 +102,24 @@ public:
     int y = 0;
     int r;
 
-    r = y ^ ((x ^ y) & -(x < y)); //min
+    //因為 -(x < y)的關係，x較小就變-1，2的補數，全1，and 前面的xor，再xor y，只剩x；
+    //相反 x較大就變0，and 0，即0，y ^ 0還是y
+    r = y ^ ((x ^ y) & -(x < y)); //min   
     std::cout << "min: " << r << "\n";
 
     r = x ^ ((x ^ y) & -(x < y)); //max
     std::cout << "max: " << r << "\n";
+  }
+
+  void if_an_int_is_a_pow_of_2() {
+    unsigned int v = 0;
+    bool f;
+
+    f = (v & (v - 1)) == 0; // 這個的 0 也是 power of 2
+    std::cout << "is pow of 2: " << f << "\n";
+
+    f = v && !(v & (v - 1));  // 這個的 0 就不視為 power of 2
+    std::cout << "is pow of 2: " << f << "\n";
   }
   /*
   void Compute_the_sign_of_an_integer();
