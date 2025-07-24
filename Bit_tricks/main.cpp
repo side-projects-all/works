@@ -9,8 +9,8 @@
 
 int main(int argc, char *argv[]) {
 
-	All_tricks all;
-	all.if_an_int_is_a_pow_of_2();
+	//All_tricks all;
+	//all.if_an_int_is_a_pow_of_2();
 
 	/*
 	Solution sol;
