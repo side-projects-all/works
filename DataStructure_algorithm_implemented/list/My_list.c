@@ -11,10 +11,10 @@ size_t size(List *l) {
     return k;
 }
 
-Node **find_node(List *l, int val) {
+Node **find_node(List *l, Node *target) {
 
     Node **curr = &l->head;
-    while (*curr != NULL && (*curr)->val != val) {
+    while (*curr != target) {
         curr = &(*curr)->next;
     }
 
@@ -46,7 +46,7 @@ void remove_better(List *l, Node *target) {
 
 void insert_before(List *l, Node *before, Node *target) {
 
-    Node **indirect = find_node(l, before->val);
+    Node **indirect = find_node(l, before);
     *indirect = target;
     target->next = before;
 }
@@ -61,11 +61,10 @@ void make_test() {
     l.head = NULL;
 
     for (size_t i = 0; i < 10; ++i) {
-        insert_before(&l, l.head, &nodes[i]);
+        //insert_before(&l, l.head, &nodes[i]);
+        insert_before(&l, NULL, &nodes[i]);
     }
     
-    //insert at the end of the list
-    insert_before(&l, NULL, &nodes[5]);
-
+    
     remove_better(&l, &nodes[7]);
 }

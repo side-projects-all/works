@@ -33,7 +33,7 @@ add_subdirectory(sorting)
 add_subdirectory(list)
 add_subdirectory(test)
 
-add_executable(main main.cpp list/My_list.c)
+add_executable(main main.cpp)
 
 target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/trees)
 target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/math)
