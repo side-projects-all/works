@@ -30,12 +30,15 @@ add_subdirectory(trees)
 add_subdirectory(graph)
 add_subdirectory(math)
 add_subdirectory(sorting)
+add_subdirectory(list)
 add_subdirectory(test)
-add_executable(main main.cpp)
+
+add_executable(main main.cpp list/My_list.c)
 
 target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/trees)
 target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/math)
 target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/sorting)
 target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/graph)
-target_link_libraries(main PRIVATE Shortest_path Trie MathFuncs Sortings)
+target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/list)
 
+target_link_libraries(main PRIVATE My_list Shortest_path Trie MathFuncs Sortings)
