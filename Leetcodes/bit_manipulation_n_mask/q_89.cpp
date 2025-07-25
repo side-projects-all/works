@@ -44,6 +44,20 @@ Constraints:
 class Solution {
 public:
     vector<int> grayCode(int n) {
+        int sz = 1 << n;
+        std::vector<int> ans(sz);
+        for (int i = 0; i < sz; ++i) {
+            ans[i] = i ^ (i >> 1);
+        }
+
+        return ans;
+    }
+};
+
+/*
+class Solution {
+public:
+    vector<int> grayCode(int n) {
         recursion(n);
 
         return result;
@@ -69,3 +83,4 @@ private:
     }
 
 };
+*/
