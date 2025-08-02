@@ -40,12 +40,13 @@ Constraints:
 class Solution {
 public:
     string decodeString(string s) {
+        int n = s.size();
         std::stack<std::string> str_stack;
         std::stack<int> cnt_stack;
-
-        std::string curr_str;
         int cnt = 0;
-        for (int i = 0; i < s.size(); ++i) {
+        std::string curr_str;
+
+        for (int i = 0; i < n; ++i) {
 
             if (std::isdigit(s[i])) {
                 cnt = cnt * 10 + s[i] - '0';
@@ -53,24 +54,24 @@ public:
             } else if (s[i] == '[') {
                 cnt_stack.push(cnt);
                 str_stack.push(curr_str);
-                curr_str = "";
+                curr_str.clear();
                 cnt = 0;
 
             } else if (s[i] == ']') {
                 std::string decode = str_stack.top();
                 str_stack.pop();
 
-                for (int i = cnt_stack.top(); i > 0; --i) {
+                int total = cnt_stack.top();
+                cnt_stack.pop();
+                for (int j = 0; j < total; ++j) {
                     decode += curr_str;
                 }
 
-                cnt_stack.pop();
-                curr_str = decode;
+                curr_str = std::move(decode);
 
             } else {
-                curr_str += s[i];
+                curr_str.push_back(s[i]);
             }
-
         }
 
         return curr_str;

@@ -42,29 +42,22 @@ Constraints:
 class Solution {
 public:
     int longestSubarray(vector<int>& nums) {
+        
         int n = nums.size();
-        if (n == 1) {
-            return 1;
-        }
-
-        int same = 1;
-        int max_len = 1;
-        int max_val = nums[0];
+        int max_val = *std::max_element(nums.begin(), nums.end());
+        int longest = 1;
+        int cnt = 1;
         for (int i = 1; i < n; ++i) {
-
-            if (nums[i] > max_val) {
-                max_val = nums[i];
-                same = 1;
-                max_len = 1;
-            } else if (max_val == nums[i]) {
-                ++same;
-                max_len = std::max(max_len, same);
+            if (nums[i] == nums[i - 1] && nums[i] == max_val) {
+                ++cnt;
 
             } else {
-                same = 0;
+                cnt = 1;
             }
+
+            longest = std::max(longest, cnt);
         }
 
-        return max_len;
+        return longest;
     }
 };

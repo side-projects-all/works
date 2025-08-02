@@ -10,12 +10,7 @@
 int main(int argc, char *argv[]) {
 
 	//All_tricks all;
-	//all.if_an_int_is_a_pow_of_2();
+	sign_extending_from_a_variable_bit_width_in_3_operations();
 
-	/*
-	Solution sol;
-	long long val = sol.countGoodArrays(5, 10, 2);
-	std::cout << val << "\n";
-	*/
 	return 0;
 }

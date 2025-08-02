@@ -47,27 +47,24 @@ Constraints:
 class Solution {
 public:
     string convert(string s, int numRows) {
-        int N = s.size();
-
-        if (numRows == 1 || numRows >= N) {
+        int n = s.size();
+        if (n <= numRows) {
             return s;
         }
-
-        std::vector<std::string> str_rows(numRows);
-
-        int currRow = 0;
+        std::vector<std::string> row_str(n);
         int step = 1;
+        int r = 0;
         for (char c : s) {
-            str_rows[currRow] += c;
+            row_str[r].push_back(c);
 
-            currRow += step;
-            if (currRow == 0 || currRow == numRows - 1) {
+            r += step;
+            if (r == 0 || r == numRows - 1) {
                 step = -step;
             }
         }
 
-        std::string ans = "";
-        for (auto& s : str_rows) {
+        std::string ans;
+        for (auto& s : row_str) {
             ans += s;
         }
 

@@ -72,67 +72,34 @@ Constraints:
 class Solution {
 public:
     int myAtoi(string s) {
-        
+        int n = s.size();
         int i = 0;
+        while (i < n && s[i] == ' ') {
+            ++i;
+        }
+        bool is_pos = true;
+        if (i < n && s[i] == '-') {     //for negative sign
+            is_pos = false;
+            ++i;
+        }
+        if (i < n && is_pos && s[i] == '+') {   //for positive sign
+            ++i;
+        }
         
-        int firstNumPosition = 0;
-        bool findFirstNum = false;
-        //find first number, then we stop
-        for (i = 0; i < s.size(); ++i) {
-            if (s[i] == ' ') {
-                continue;
+        long long ans = 0;
+        while (i < n && std::isdigit(s[i])) {
+
+            ans = ans * 10 + s[i] - '0';
+
+            if (is_pos && ans > INT_MAX) {
+                return INT_MAX;
+
+            } else if (!is_pos && ans > INT_MAX) {
+                return INT_MIN;
             }
-            
-            if(s[i] == '-' ||  s[i] == '+') {
-
-                //check multiple sign
-                if (i + 1 < s.size() && s[i + 1] >= 48 && s[i + 1] <= 57) {
-                    continue;
-                } else {
-                    return 0;
-                }
-                
-            }
-
-            //find first number
-            if (s[i] >= 48 && s[i] <= 57) {
-                firstNumPosition = i;
-                break;
-            } else {
-                return 0;
-            }
-        }
-
-        bool isNegative = false;
-        //before first number would be only '-', '+', or ' '
-        if (i > 0 && s[i - 1] == '-') {
-            isNegative = true;
-        } else if (i > 0 && !(s[i - 1] == ' ' ||  s[i - 1] == '+')) {
-            return 0;
-        }
-
-        int num = 0;
-        i = firstNumPosition;
-        while (i < s.size()) {
-            
-            if (!(s[i] >= 48 && s[i] <= 57)) {
-                break;
-            }
-            int val = (isNegative) ? -(s[i] - '0') : s[i] - '0';
-
-            if (!isNegative && num > (INT_MAX - val) / 10) {
-                num = INT_MAX;
-                break;
-            } else if (isNegative && num < (INT_MIN - val) / 10) {
-                num = INT_MIN;
-                break;
-            }
-
-            num = num * 10 + val;
-            
             ++i;
         }
 
-        return num;
+        return is_pos ? ans : -ans;
     }
 };

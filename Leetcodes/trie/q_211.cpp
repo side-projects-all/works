@@ -40,100 +40,72 @@ Constraints:
 
 */
 
+struct Node {
+    bool is_end{false};
+    Node* subs[26]{nullptr};
+    int link_cnt{0};
+    Node() {}
+
+    void put(char c) {
+        if (subs[c - 'a'] == nullptr) {
+            subs[c - 'a'] = new Node();
+            ++link_cnt;
+        }
+    }
+
+    bool contain(char c) {
+        return subs[c - 'a'] != nullptr;
+    }
+};
+
+static inline bool find_word(string &word, int pos, Node *curr) {
+    int n = word.size();
+
+    for (int i = pos; i < n; ++i) {
+        if (word[i] == '.') {
+
+            for (char c = 'a'; c <= 'z'; ++c) {
+                if (curr->subs[c - 'a'] != nullptr && find_word(word, i + 1, curr->subs[c - 'a'])) {
+                    return true;
+                }
+            }
+            return false;
+
+        } else {
+
+            if (!curr->contain(word[i])) return false;
+
+            curr = curr->subs[word[i] - 'a'];
+        }
+    }
+
+    return curr->is_end;
+}
+
 class WordDictionary {
 private:
-    struct Trie_node {
-        bool is_end;
-        int link_cnt;
-        Trie_node* subs[26];
-
-        Trie_node() : is_end{ false }, link_cnt{ 0 } {
-            for (int i = 0; i < 26; ++i) {
-                subs[i] = nullptr;
-            }
-        }
-
-        void put(char c, Trie_node* node) {
-            if (subs[c - 'a'] == nullptr) {
-                subs[c - 'a'] = node;
-                ++link_cnt;
-            }
-        }
-
-        bool contains(char c) {
-            return subs[c - 'a'] != nullptr;
-        }
-
-        int get_links_cnt() const {
-            return link_cnt;
-        }
-    };
-
-    struct Trie {
-        public:
-            Trie_node* root;
-
-            Trie() {
-                root = new Trie_node();
-            }
-
-            void insert(std::string& str) {
-                int n = str.size();
-                Trie_node* node = root;
-
-                for (int i = 0; i < n; ++i) {
-                    if (!node->contains(str[i])) {
-                        node->put(str[i], new Trie_node());
-                    }
-
-                    node = node->subs[str[i] - 'a'];
-                }
-
-                node->is_end = true;
-            }
-
-            bool has_word(std::string& str, Trie_node* now) {
-                int n = str.size();
-                Trie_node* node = now;
-
-                for (int i = 0; i < n; ++i) {
-                    if (str[i] == '.') {
-
-                        std::string rest = str.substr(i + 1);
-                        for (int j = 0; j < 26; ++j) {
-                            if (node->subs[j] != nullptr && has_word(rest, node->subs[j])) {
-                                return true;
-                            }
-                        }
-
-                        return false;
-
-                    } else {
-                        if (!node->contains(str[i])) {
-                            return false;
-
-                        } else {
-                            node = node->subs[str[i] - 'a'];
-                        }
-                    }
-                }
-
-                return node->is_end;
-            }
-    };
-
-    Trie trie;
+    Node *root;
 public:
     WordDictionary() {
-        
+        root = new Node();
     }
     
     void addWord(string word) {
-        trie.insert(word);
+        Node *curr = root;
+        int n = word.size();
+        for (int i = 0; i < n; ++i) {
+            if (!curr->contain(word[i])) {
+                curr->put(word[i]);
+            }
+
+            curr = curr->subs[word[i] - 'a'];
+        }
+
+        curr->is_end = true;
     }
     
     bool search(string word) {
-        return trie.has_word(word, trie.root);
+        return find_word(word, 0, root);
     }
 };
 

@@ -39,29 +39,29 @@ Constraints:
 class Solution {
 public:
     ListNode* partition(ListNode* head, int x) {
-        ListNode* less = new ListNode();
-        ListNode* bigger = new ListNode();
-
-        ListNode* less_now = less;
-        ListNode* big_now = bigger;
-        ListNode* now = head;
-
-        while (now != nullptr) {
-            if (now->val < x) {
-                less_now->next = now;
-                less_now = less_now->next;
-
+        ListNode* s = nullptr;
+        ListNode* b = nullptr;
+        ListNode** b_now = &b;
+        ListNode** s_now = &s;
+        ListNode*** ptr;
+        while (head) {
+            ptr = (head->val < x) ? &s_now : &b_now;
+            **ptr = head;
+            *ptr = &(**ptr)->next;
+            /*
+            if (head->val < x) {
+                *s_now = head;
+                s_now = &(*s_now)->next;
             } else {
-                big_now->next = now;
-                big_now = big_now->next;
+                *b_now = head;
+                b_now = &(*b_now)->next;
             }
-
-            now = now->next;
+            */
+            head = head->next;
         }
 
-        less_now->next = bigger->next;
-        big_now->next = nullptr;
-
-        return less->next;
+        *s_now = b;
+        *b_now = nullptr;
+        return s;
     }
 };

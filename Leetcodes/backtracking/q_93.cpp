@@ -55,7 +55,7 @@ private:
             for (int len = 1; len <= 3; ++len) {
                 //pass if over the size of s
                 if (now + len > s.size()) {
-                    continue;
+                    break;
                 }
                 std::string tmp = s.substr(now, len);
                 //no leading zero
