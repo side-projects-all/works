@@ -31,161 +31,60 @@ Constraints:
 
 */
 
+const static int HALF_INT_MIN = -1073741824;
+
 class Solution {
 private:
-    int HALF_INT_MIN = -1073741824;
-    int byBitsShift(int& dividend, int& divisor) {
-        int negative = 2;
+    int by_long_div_in_base2(int& dividend, int& divisor) {
+        //two corner cases!
+        if (dividend == INT_MIN && divisor == -1) {
+            return INT_MAX;
+        }
+
+        if (dividend == INT_MIN && divisor == 1) {
+            return INT_MIN;
+        }
+
+        //count the number of negative sign, to decide if we need to convert at the end, 
+        //all pos or neg, we need to convert at the end
+        int neg = 2;
         if (dividend > 0) {
-            --negative;
+            --neg;
             dividend = -dividend;
         }
         if (divisor > 0) {
-            --negative;
+            --neg;
             divisor = -divisor;
         }
 
-        int maxDouble = divisor;
-        int maxPowOfTwo = -1;
-        while (maxDouble >= HALF_INT_MIN && maxDouble + maxDouble >= dividend) {
-            maxPowOfTwo += maxPowOfTwo;
-            maxDouble += maxDouble;
-        }
-
-        int quotient = 0;
-        while (dividend <= divisor) {
-            if (dividend <= maxDouble) {
-                quotient += maxPowOfTwo;
-                dividend -= maxDouble;
-            }
-
-            maxPowOfTwo >>= 1;
-            maxDouble >>= 1;
-        }
-
-        if (negative != 1) {
-            return -quotient;
-        }
-
-        return quotient;
-    }
-
-    int byPowOfTwo(int& dividend, int& divisor) {
-        
-        int negative = 2;
-        if (dividend > 0) {
-            --negative;
-            dividend = -dividend;
-        }
-        if (divisor > 0) {
-            --negative;
-            divisor = -divisor;
-        }
-        
-        std::vector<int> doubles;
-        std::vector<int> powsOfTwo;
-
-        int powOfTwo = -1;
-        while (divisor >= dividend) {
-            doubles.push_back(divisor);
-            powsOfTwo.push_back(powOfTwo);
-
-            if (divisor < HALF_INT_MIN) {
-                break;
-            }
-
+        //max bits you can move left for divisor
+        int max_bits = 0;
+        while (divisor >= HALF_INT_MIN && divisor + divisor >= dividend) {
+            ++max_bits;
             divisor += divisor;
-            powOfTwo += powOfTwo;
-        }
+        } 
 
         int quotient = 0;
-        for (int i = doubles.size() - 1; i >= 0; --i) {
-            if (doubles[i] >= dividend) {
-                quotient += powsOfTwo[i];
-                dividend -= doubles[i];
-            }
-        }
+        for (int bit = max_bits; bit >= 0; --bit) {
 
-        if (negative != 1) {
-            return -quotient;
-        }
-
-        return quotient;
-    }
-    int byRepeatedExponential(int& dividend, int& divisor) {
-
-        int negative = 2;
-        if (dividend > 0) {
-            --negative;
-            dividend = -dividend;
-        }
-        if (divisor > 0) {
-            --negative;
-            divisor = -divisor;
-        }
-        
-        int quotient = 0;
-        while (divisor >= dividend) {
-
-            int powOfTwo = -1;
-            int val = divisor;
-
-            while (val >= HALF_INT_MIN && val + val >= dividend) {
-                val += val;
-                powOfTwo += powOfTwo;
+            //remember, it is under negative situation
+            if (divisor >= dividend) {
+                quotient -= (1 << bit);
+                dividend -= divisor;
             }
 
-            quotient += powOfTwo;
-            dividend -= val;
+            //possibly a odd divisor, so we add 1
+            divisor = (divisor + 1) >> 1;
         }
 
-        if (negative != 1) {
+        if (neg != 1) {
             quotient = -quotient;
         }
 
         return quotient;
     }
-    int bySubtraction(int& dividend, int& divisor) {
-        //corner case
-        if (divisor == 1) {
-            return dividend;
-        }
-        if (dividend == divisor) {
-            return 1;
-        }
-        
-        int negative = 2;
-        if (dividend > 0) {
-            --negative;
-            dividend = -dividend;
-        }
-        if (divisor > 0) {
-            --negative;
-            divisor = -divisor;
-        }
-        
-        int quotient = 0;
-        while (dividend - divisor <= 0) {
-            dividend -= divisor;
-            --quotient;
-        }
-
-        if (negative != 1) {
-            return -quotient;
-        }
-        return quotient;
-    }
-
 public:
     int divide(int dividend, int divisor) {
-
-        if (dividend == INT_MIN && divisor == -1) {
-            return INT_MAX;
-        }
-
-        //return bySubtraction(dividend, divisor);
-        //return byRepeatedExponential(dividend, divisor);
-        //return byPowOfTwo(dividend, divisor);
-        return byBitsShift(dividend, divisor);
+        return by_long_div_in_base2(dividend, divisor);
     }
 };

@@ -5,9 +5,10 @@
 #include <numeric>
 #include "Sortings.h"
 #include "Shortest_path.h"
+#include "My_list.h"
 
 int main() {
   
-  
+  make_test();
   return 0;
 }

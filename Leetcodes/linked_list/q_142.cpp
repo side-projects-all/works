@@ -47,58 +47,25 @@ Constraints:
 class Solution {
 public:
     ListNode *detectCycle(ListNode *head) {
-        if (head == NULL || head->next == NULL) {
-            return NULL;
-        }
-        
-        //return bySet(head);
-        return byFloydAlg(head);
-    }
+        if (head == nullptr || head->next == nullptr) return nullptr;
 
-
-private:
-    ListNode* bySet(ListNode *head) {
-        std::unordered_set<ListNode*> visited;
-        ListNode* now = head;
-        
-        std::unordered_set<ListNode*>::iterator it;
-        while(now != NULL) {
-            if(visited.find(now) != visited.end()) {
-                break;
-            }
-            
-            visited.insert(now);
-            now = now->next;
-        }
-        
-        return now;
-    }
-    
-    ListNode* byFloydAlg(ListNode *head) {
-        if (head == nullptr || head->next == nullptr) {
-            return nullptr;
-        }
-
-        ListNode* slow = head;
-        ListNode* fast = head;
-
-        while (fast != nullptr && fast->next != nullptr) {
-            slow = slow->next;
+        ListNode *fast = head;
+        ListNode *slow = head;
+        while (fast && fast->next) {
             fast = fast->next->next;
-            
-            if (slow == fast) {
+            slow = slow->next;
+
+            if (fast == slow) {
                 break;
             }
         }
 
-        if (fast == nullptr || fast->next == nullptr) {
-            return nullptr;
-        }
-
-        fast = head;
-        while (slow != fast) {
-            slow = slow->next;
+        if (!fast || !fast->next) return nullptr;
+            
+        slow = head;
+        while (fast != slow) {
             fast = fast->next;
+            slow = slow->next;
         }
 
         return slow;
