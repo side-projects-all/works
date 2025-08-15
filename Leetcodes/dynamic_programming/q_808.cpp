@@ -39,45 +39,61 @@ Constraints:
 
 class Solution {
 private:
-    int type[4][2] = { {100, 0}, {75, 25}, {50, 50}, {25, 75} };
+    double by_recursive_dp(int& n) {
+        // For large n the probability is within 1e-5 of 1.0
+        if (n >= 4800) return 1.0;
 
-    double recursive(int n) {
-        std::unordered_map<int, std::unordered_map<int, double>> mem;
-        int max_size = std::ceil(n / 25.0);
+        // Work in units of 25 mL
+        int m = (n + 24) / 25;  // ceil(n/25)
+        std::vector<std::vector<double>> dp(m + 1, std::vector<double>(m + 1, -1.0));
 
-        std::function<double(int, int)> recurr = [&](int a, int b) -> double {
-            if (a <= 0 && b <= 0) {
-                return 0.5;
-            }
-
-            if (a <= 0) {
-                return 1.0;
-            }
-
-            if (b <= 0) {
-                return 0.0;
-            }
-
-            if (mem[a].count(b) > 0) {
-                return mem[a][b];
-            }
-
-            mem[a][b] = (recurr(a - 4, b) + recurr(a - 3, b - 1) + 
-                            recurr(a - 2, b - 2) + recurr(a - 1, b - 3)) * 0.25;
-
-            return mem[a][b];
+        std::function<double(int,int)> f = [&](int a, int b) -> double {
+            if (a <= 0 && b <= 0) return 0.5; // both empty same turn
+            if (a <= 0) return 1.0;           // A empty first
+            if (b <= 0) return 0.0;           // B empty first
+            double &res = dp[a][b];
+            if (res >= 0.0) return res;
+            
+            res = 0.25 * (f(a - 4, b) + f(a - 3, b - 1) + f(a - 2, b - 2) + f(a - 1, b - 3));
+            return res;
         };
 
-        for (int k = 1; k <= max_size; ++k) {
-            if (recurr(k, k) > 1 - 1e-5) {
+        return f(m, m);
+    }
+    double by_iterative_dp(int& n) {
+        if (n > 4800) return 1.0;
+
+        int m = std::ceil(n / 25.0);
+        // it means how the maximum times after n divided by 25
+        // dp array means the output result
+        // (the expectation of the probability that A is used up before B, 
+        // and the probability that both soups are used up in the same turn)
+        std::vector<std::vector<double>> dp(m + 1, std::vector<double>(m + 1));   
+
+        dp[0][0] = 0.5;
+        //different combination of times after n divided by 25, max only 199, because rest are 1.0
+        for (int t1 = 1; t1 <= m; ++t1) {
+            dp[0][t1] = 1;
+            dp[t1][0] = 0;
+
+            for (int t2 = 1; t2 <= t1; ++t2) {
+                dp[t1][t2] = (dp[std::max(0, t1 - 4)][t2] + dp[std::max(0, t1 - 3)][t2 - 1] + 
+                            dp[std::max(0, t1 - 2)][std::max(0, t2 - 2)] + dp[t1 - 1][std::max(0, t2 - 3)]) / 4.0;
+
+                dp[t2][t1] = (dp[std::max(0, t2 - 4)][t1] + dp[std::max(0, t2 - 3)][t1 - 1] + 
+                            dp[std::max(0, t2 - 2)][std::max(0, t1 - 2)] + dp[t2 - 1][std::max(0, t1 - 3)]) / 4.0;
+            }
+
+            if (dp[t1][t1] > 1 - 1e-5) {
                 return 1.0;
             }
         }
 
-        return recurr(max_size, max_size);
+        return dp[m][m];
     }
 public:
     double soupServings(int n) {
-        return recursive(n);
+        return by_iterative_dp(n);
+        //return by_recursive_dp(n);
     }
 };

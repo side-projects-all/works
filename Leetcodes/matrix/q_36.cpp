@@ -55,42 +55,26 @@ Constraints:
 class Solution {
 public:
     bool isValidSudoku(vector<vector<char>>& board) {
-        std::vector<std::unordered_set<char>> rows(9);
-        std::vector<std::unordered_set<char>> cols(9);
-        std::vector<std::unordered_set<char>> boxes(9);
-        
-        char curr;
-        int index;
-        for (int r= 0; r < board.size(); ++r) {
-            
-            for (int c = 0; c < board[0].size(); ++c) {
-                curr = board[r][c];
-                
-                if (curr == '.') {
-                    continue;
+        int row[9]{0};
+        int col[9]{0};
+        int box[9]{0};
+
+        for (int r = 0; r < 9; ++r) {
+            for (int c = 0; c < 9; ++c) {
+                if (board[r][c] != '.') {
+                    int val = board[r][c] - '0';
+                    int mask = 1 << val;
+                    int box_index = (r / 3) * 3 + c / 3;
+
+                    if ((row[r] & mask) || (col[c] & mask) || (box[box_index] & mask)) return false;
+
+                    row[r] |= mask;
+                    col[c] |= mask;
+                    box[box_index] |= mask;
                 }
-                
-                //find in row's set
-                if (rows[r].find(curr) != rows[r].end()) {
-                    return false;
-                }
-                rows[r].insert(curr);
-                
-                //find in col's set
-                if (cols[c].find(curr) != cols[c].end()) {
-                    return false;
-                }
-                cols[c].insert(curr);
-                
-                //find in box's set
-                index = (r / 3) * 3 + (c / 3);
-                if (boxes[index].find(curr) != boxes[index].end()) {
-                    return false;
-                }
-                boxes[index].insert(curr);
             }
         }
-        
+
         return true;
     }
 };

@@ -5,10 +5,14 @@
 #include <numeric>
 #include "Sortings.h"
 #include "Shortest_path.h"
-#include "My_list.h"
+#include "sort_test.h"
 
 int main() {
-  
-  make_test();
+  //insertion_sort_test();
+  //quick_sort_rec_test();
+  //quick_sort_iter_test();
+  //merge_sort_rec_test();
+  //merge_test();
+  merge_sort_iter_test();
   return 0;
 }

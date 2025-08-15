@@ -31,74 +31,23 @@ Constraints:
 class Solution {
 public:
     int smallestCommonElement(vector<vector<int>>& mat) {
+        int m = mat.size();
+        int n = mat[0].size();
 
-        //by pointers
-        int rows = mat.size();
-        int cols = mat[0].size();
-        
-        //position of every row
-        /*
-        int curr_max = 0;
-        int cnt = 0;
-        std::vector<int> pos(rows, 0);
+        for (int i = 0; i < n; ++i) {
 
-        while (true) {
-            for (int i = 0; i < rows; ++i) {
-                while (pos[i] < cols && mat[i][pos[i]] < curr_max) {
-                    ++pos[i];
-                }
-
-                if (pos[i] >= cols) {
-                    return -1;
-                }
-
-                if (mat[i][pos[i]] != curr_max) {
-                    cnt = 1;
-                    curr_max = mat[i][pos[i]];
-
-                } else if ((++cnt) == rows) {
-                    return curr_max;
-                }
-            }
-        }
-        */
-
-
-        //by binary search
-        int cnt = 1;
-        //loop through every columns in row 0
-        for (int i = 0; i < cols; ++i) {
             int target = mat[0][i];
-            
-            //start from row 1 to do binary search in every row
-            for (int r = 1; r < rows; ++r) {
-                int left = 0;
-                int right = cols - 1;
+            bool find = true;
+            for (int r = 1; r < m; ++r) {
+                int i = std::lower_bound(mat[r].begin(), mat[r].end(), target) - mat[r].begin();
 
-                while (left <= right) {
-                    int mid = left + (right - left) / 2;
-
-                    if (mat[r][mid] > target) {
-                        right = mid - 1;
-                    } else if (mat[r][mid] < target) {
-                        left = mid + 1;
-                    } else {
-                        cnt += 1;
-                        break;
-                    }
-                }
-
-                if (left > right) {
+                if (i < 0 || i >= m || mat[r][i] != target) {
+                    find = false;
                     break;
                 }
-
             }
 
-            if (cnt == rows) {
-                return target;
-            }
-
-            cnt = 1;
+            if (find) return target;
         }
 
         return -1;

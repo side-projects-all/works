@@ -34,6 +34,29 @@ Constraints:
 
 */
 
+
+class Solution {
+private:
+    std::unordered_map<int, std::vector<int>> pos;  //val to index
+    std::mt19937 rng; 
+public:
+    Solution(vector<int>& nums) {
+        std::random_device rd;
+        rng.seed(rd());
+
+        for (int i = 0; i < nums.size(); ++i) {
+            pos[nums[i]].push_back(i);
+        }
+    }
+    
+    int pick(int target) {
+        auto &v = pos[target];
+        std::uniform_int_distribution<int> dist(0, (int)v.size() - 1);
+        return v[dist(rng)];
+    }
+};
+
+/*
 class Solution {
     std::vector<int> nums;
 
@@ -59,6 +82,7 @@ public:
         return result;
     }
 };
+*/
 
 /**
  * Your Solution object will be instantiated and called as such:
