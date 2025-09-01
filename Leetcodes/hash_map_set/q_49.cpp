@@ -34,28 +34,21 @@ Constraints:
 class Solution {
 public:
     vector<vector<string>> groupAnagrams(vector<string>& strs) {
-        std::vector<std::vector<std::string>> result = std::vector<std::vector<std::string>>();
         std::unordered_map<std::string, std::vector<std::string>> m;
-        
-        std::string key;
-        for (int i = 0; i < strs.size(); ++i) {
-            key = strs[i];
-            std::sort(key.begin(), key.end());
-            
-            if (m.find(key) == m.end()) {
-                m.insert(std::make_pair(key, std::vector<std::string>()));
-                m[key].push_back(strs[i]);
-                
-            } else {
-                m[key].push_back(strs[i]);
-            }
+        int n = strs.size();
+        for (int i = 0; i < n; ++i) {
+            std::string copy = strs[i];
+            std::sort(copy.begin(), copy.end());
+            m[copy].push_back(strs[i]);
         }
-        
-        for (auto i : m) {
-            result.push_back(i.second);
+
+        std::vector<std::vector<std::string>> ans(m.size());
+        int i = 0;
+        for (auto& p : m) {
+            ans[i] = p.second;
+            ++i;
         }
-        
-        return result;
-        
+
+        return ans;
     }
 };

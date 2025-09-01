@@ -42,22 +42,7 @@ Constraints:
 class Solution {
 public:
     string getPermutation(int n, int k) {
-        //because the permutation require an ascending order, 
-        //the number of permutation sequence is from 0 to (n! - 1), 
-        //and those numbers could be mapped by Factorial Number System Representation
-        //for example, n = 3, it means 3! = 3 * 2 * 1 = 6, 
-        //then the permutation number sequence is from 0 to 5, 
-        //and using actorial Number System Representation, 
-        //we will have 000, 010, 100, 110, 200, 210 to represent 0 to 5
-
-        //the question provides us n for n! but requires k-th permutation, 
-        //so all we need to do is k - 1 Factorial Number System Representation, 
-        //and then we reverse it back to decimal number!!
-
-        //important idea!!
-        //The coefficients in factorial representation are indexes of elements in the input array. 
-        //These are not direct indexes, but the indexes after the removal of already used elements. 
-        //That's a consequence of the fact that each element should be used in permutation only once.
+        
         std::vector<int> factorials(n);
         std::vector<int> nums(n);
         nums[0] = 1;;
@@ -69,20 +54,19 @@ public:
             nums[i] = i + 1;
         }
 
-        k -= 1;
+        k -= 1; //k is 1 start, not 0 start, so we minus 1
         std::string ans;
-        for (int i = n - 1; i > -1; --i) {
-            //why we use division here?
-            //because we eliminate larger part of factorial representation to 
-            //get the index in after the removal of already used elements!!
-            //in other words, we continues to delete the largest part of factorial representation
-            int index = k / factorials[i];  
-            k -= index * factorials[i];
+        for (int i = n - 1; i >= 0; --i) {
 
-            ans += std::to_string(nums[index]);
+            int index = k / factorials[i];  
+            //k -= index * factorials[i];
+            k %= factorials[i];
+
+            ans.push_back(nums[index] + '0');
             nums.erase(nums.begin() + index);
         }
 
         return ans;
+        
     }
 };

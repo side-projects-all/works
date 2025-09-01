@@ -1,29 +1,33 @@
 #include <iostream>
-#include <string>
 #include <vector>
-#include <queue>
-#include <unordered_map>
-#include <unordered_set>
-#include <algorithm>
+#include <array>
 
 class Solution {
 private:
+    
 public:
     Solution() {}
     ~Solution() {}
 
-    bool checkDivisibility(int n) {
-        int sum = 0;
-        int prod = 1;
-        int tmp = n;
-        while (tmp > 0) {
-            int v = tmp % 10;
-            sum += v;
-            prod *= v;
-            tmp /= 10;
-        }
+    void sol() {
+        std::ios::sync_with_stdio(false);
+        std::cin.tie(nullptr);
 
-        return n % (sum + prod);
+        int t; 
+        if (!(std::cin >> t)) return;
+        while (t--) {
+            int n; 
+            std::cin >> n;
+            std::vector<int> a(n);
+            for (int i = 0; i < n; ++i) std::cin >> a[i];
+
+            std::array<int, 101> freq{}; 
+            bool ok = false;
+            for (int x : a) {
+                if (++freq[x] >= 2) { ok = true; break; }
+            }
+
+            std::cout << (ok ? "YES\n" : "NO\n");
+        }
     }
-    
 };

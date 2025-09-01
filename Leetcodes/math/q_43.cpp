@@ -29,39 +29,31 @@ Constraints:
 class Solution {
 public:
     string multiply(string num1, string num2) {
-        if (num1 == "0" || num2 == "0") {
-          return "0";
-        }
+        if (num1 == "0" || num2 == "0") return "0";
 
-        std::reverse(num1.begin(), num1.end());
-        std::reverse(num2.begin(), num2.end());
+        int n1 = num1.size();
+        int n2 = num2.size();
+        std::string ans(n1 + n2, '0');
 
-        int N = num1.size() + num2.size();
-        std::string ans(N, '0');
-
-        for (int p2 = 0; p2 < num2.size(); ++p2) {
+        for (int p2 = n2 - 1; p2 >= 0; --p2) {
           int d2 = num2[p2] - '0';
 
-          for (int p1 = 0; p1 < num1.size(); ++p1) {
+          for (int p1 = n1 - 1; p1 >= 0; --p1) {
             int d1 = num1[p1] - '0';
-            int numZeros = p1 + p2; //this is the important step!
+            int pos = p1 + p2 + 1; 
 
-            //this is the largest digit in previous operation, 
-            //and it will be used for carry
-            int carryFromPrev = ans[numZeros] - '0';
-            int multi = d1 * d2 + carryFromPrev;
+            int prev_carry = ans[pos] - '0';
+            int multi = d1 * d2 + prev_carry;
 
-            ans[numZeros] = (multi % 10) + '0';
+            ans[pos] = (multi % 10) + '0';
 
-             ans[numZeros + 1] += (multi / 10);
+            ans[pos - 1] += (multi / 10);   //put carry
           }
         }
 
-        if (ans.back() == '0') {
-          ans.pop_back();
+        if (ans[0] == '0') {
+            ans = ans.erase(0, 1);
         }
-
-        std::reverse(ans.begin(), ans.end());
 
         return ans;
     }
