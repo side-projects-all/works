@@ -37,6 +37,26 @@ Constraints:
 class Solution {
 public:
     vector<vector<int>> insert(vector<vector<int>>& intervals, vector<int>& newInterval) {
+        int pos = std::lower_bound(intervals.begin(), intervals.end(), newInterval) - intervals.begin();
+        intervals.insert(intervals.begin() + pos, newInterval);
+
+        std::vector<std::vector<int>> ans;
+        for (const auto& v : intervals) {
+            if (ans.empty() || ans.back()[1] < v[0]) {
+                ans.push_back(v);
+            } else {
+                ans.back()[1] = std::max(ans.back()[1], v[1]);
+            }
+        }
+
+        return ans;
+    }
+};
+
+/*
+class Solution {
+public:
+    vector<vector<int>> insert(vector<vector<int>>& intervals, vector<int>& newInterval) {
         int N = intervals.size();
         int target = newInterval[0];
         int left = 0;
@@ -66,3 +86,4 @@ public:
         return ans;
     }
 };
+*/

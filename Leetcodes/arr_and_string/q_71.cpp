@@ -44,58 +44,35 @@ Constraints:
 */
 
 class Solution {
-private:
-    void split(std::string& path, std::vector<std::string>& splited, char ptn) {
-        std::size_t begin = 0;
-        std::size_t end = path.find(ptn);
-
-        while (end != std::string::npos) {
-            if (begin != end) {
-                splited.push_back(path.substr(begin, end - begin));
-            }
-
-            begin = end + 1;
-            end = path.find(ptn, begin);
-        }
-        
-        if (splited.size() == 0 || begin < path.size()) {
-            splited.push_back(path.substr(begin, splited.size() - begin));
-        }
-    }
 public:
     string simplifyPath(string path) {
-        std::string ans(1, '/');
-        
+        std::istringstream iss(path);
+        std::string sub;
         std::vector<std::string> splited;
-        split(path, splited, '/');
 
-        for (int i = 0; i < splited.size(); ++i) {
+        while (std::getline(iss, sub, '/')) {
+            if (!sub.empty()) {
+                if (sub == "..") {
 
-            if (splited[i] == "..") {
-                if (ans.size() > 1) {
-                    //for moving to upper layer
-                    while (ans.back() != '/') {
-                        ans.pop_back();
-                    }
+                    if (!splited.empty()) {
+                        splited.pop_back();
+                    }   
+                    continue;
 
-                    //remove '/' if there were not only '/'
-                    if (ans.size() > 1) {
-                        ans.pop_back();
-                    }
+                } else if (sub == ".") {
+                    continue;
                 }
-                
-            } else if (splited[i] == ".") {
-                continue;
 
-            } else {
-
-                if (ans.back() != '/') {
-                    ans.push_back('/');
-                }
-                ans.append(splited[i]);
+                splited.push_back(sub);
             }
         }
 
-        return ans;
+        std::string ans;
+        for (int i = 0; i < splited.size(); ++i) {
+            ans.push_back('/');
+            ans += splited[i];
+        }        
+
+        return ans.empty() ? "/" : ans;
     }
 };

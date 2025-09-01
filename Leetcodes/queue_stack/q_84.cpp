@@ -31,34 +31,30 @@ class Solution {
 private:
     int by_stack(vector<int>& heights) {
         int n = heights.size();
-        if (n == 1) {
-            return heights[0];
-        }
-
         std::stack<int> stack;
         stack.push(-1);
-        int max_area = 0;
+        int ans = 0;
+
         for (int i = 0; i < n; ++i) {
-
             while (stack.top() != -1 && heights[stack.top()] >= heights[i]) {
-                int h = heights[stack.top()];
-                stack.pop();
+                int curr = stack.top();
+                stack.pop();    //important step for get index before curr
+                int prev = stack.top();
 
-                int w = i - stack.top() - 1;
-                max_area = std::max(max_area, w * h);
+                ans = std::max(ans, heights[curr] * (i - prev - 1));
             }
 
             stack.push(i);
         }
 
-         while (stack.top() != -1) {
-            int h = heights[stack.top()];
+        while (stack.top() != -1) {
+            int curr = stack.top();
             stack.pop();
+            int prev = stack.top();
 
-            int w = n - stack.top() - 1;
-            max_area = std::max(max_area, w * h);
+            ans = std::max(ans, heights[curr] * (n - prev - 1));
         }
-        return max_area;
+        return ans;
     }
 public:
     int largestRectangleArea(vector<int>& heights) {

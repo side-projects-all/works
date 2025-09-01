@@ -26,30 +26,39 @@ class Solution {
 public:
     vector<vector<int>> generateMatrix(int n) {
         std::vector<std::vector<int>> ans(n, std::vector<int>(n));
-        int cnt = 1;
-        int layers = (n + 1) / 2;
-        for (int lr = 0; lr < layers; ++lr) {
+        int i = 0;
+        int lb = 0;
+        int rb = n - 1;
+        int top = 0;
+        int btm = n - 1;
 
-            //top left to right
-            for (int ptr = lr; ptr < n - lr; ++ptr) {
-                ans[lr][ptr] = cnt++;
+        while (i < n * n) {
+            //left to right
+            for (int c = lb; c <= rb; ++c, ++i) {
+                ans[top][c] = i + 1;
             }
 
-            //top right to bottom right
-            for (int ptr = lr + 1; ptr < n - lr; ++ptr) {
-                ans[ptr][n - lr - 1] = cnt++;
+            //top to bottom
+            for (int r = top + 1; r <= btm; ++r, ++i) {
+                ans[r][rb] = i + 1;
             }
 
-            //bottom right to bottom left
-            for (int ptr = n - lr - 2; ptr >= lr; --ptr) {
-                ans[n - lr - 1][ptr] = cnt++;
+            if (i == n * n) return ans;
+
+            for (int c = rb - 1; c >= lb; --c, ++i) {
+                ans[btm][c] = i + 1;
             }
 
-            //bottom left to top left
-            for (int ptr = n - lr - 2; ptr > lr; --ptr) {
-                ans[ptr][lr] = cnt++;
+            for (int r = btm - 1; r > top; --r, ++i) {
+                ans[r][lb] = i + 1;
             }
+
+            ++lb;
+            --rb;
+            ++top;
+            --btm;
         }
+
 
         return ans;
     }

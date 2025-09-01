@@ -97,7 +97,7 @@ private:
 
         return validFinalState.find(currState) != validFinalState.end();
     }
-    bool followRull(string& s) {
+    bool follow_rule(string& s) {
         bool hasDigit = false;
         bool oneExp = false;
         bool oneDot = false;
@@ -139,7 +139,7 @@ private:
 public:
     bool isNumber(string s) {
         
-        //return followRull(s);
-        return dfa(s);
+        return follow_rule(s);
+        //return dfa(s);
     }
 };

@@ -42,60 +42,49 @@ Constraints:
 class Solution {
 private:
     double iterative(int n, int k, int maxPts) {
-        if (k == 0 || n >= k + maxPts) {
+        if (k == 0 || n >= k - 1 + maxPts) {
             return 1.0;
         }
 
         std::vector<double> dp(n + 1);
         dp[0] = 1.0;
         
+        //P(x) = 1/W * (P(x-1) + P(x-2) + P(x-W)) = 1/W * sumP(x-W, x-1)
+        //P[i] = 1/W * sum[i-1]
+        //sum[i] = sum[i-1] + P[i] = sum[i-1] + sum[i-1] / W     (when i <= W)
         double sum = 1.0;
         double ans = 0.0;
         for (int i = 1; i <= n; ++i) {
             dp[i] = sum / maxPts;
 
             if (i < k) {
-                sum += dp[i];
+                sum += dp[i];   //keep drawing, so add to sum
             } else {
-                ans += dp[i];
+                ans += dp[i];   // i >= k, add to final ans
             }
 
-            if (i - maxPts >= 0) {
+            if (i - maxPts >= 0 && i - maxPts < k) {    //out of window size
                 sum -= dp[i - maxPts];
             }
         }
 
         return ans;
+        
         /*
-        std::vector<double> dp(n + maxPts, 0.0);
-        for (int i = k; i <= n; ++i) {
-            dp[i] = 1.0;
-        }
+        std::vector<double> dp(n + 1, 0.0);
+        dp[0] = 1.0;
 
-        //using n = 21, k = 17, maxPts = 10 to think about it
-        //when you arrive k, you could not draw, and the point must smaller than or equal to n!!!
-        //so we count every number of them as 1 
-        //ex: 17, 18, 19, 20, 21
-        //dp[k] means the probability from k you will be smaller than or equal to 21
-
-        double s = std::min((n - k + 1.0), (double)maxPts);
-        //we start from k - 1
-        for (int r = k - 1; r > -1; --r) {
-            
-            double tmp = 0.0;
-            for (int i = 0; i < maxPts; ++i) {
-                tmp += dp[r + i + 1];
+        for (int i = 0; i < k; ++i) {                       // only < K keep drawing
+            double p = dp[i] / maxPts;                      // split evenly to next W
+            for (int x = 1; x <= maxPts; ++x) {
+                int j = i + x;
+                if (j <= n) dp[j] += p;                     // stop accumulating after N
             }
-
-            dp[r] = tmp / (1.0 * maxPts);
-            
-
-            //those are improved from upper part
-            //dp[r] = s / maxPts;
-            //s = s + dp[r] - dp[r + maxPts];
         }
 
-        return dp[0];
+        double ans = 0.0;
+        for (int i = k; i <= n; ++i) ans += dp[i];
+        return ans;
         */
     }
 public:

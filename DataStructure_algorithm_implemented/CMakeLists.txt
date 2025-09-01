@@ -41,4 +41,4 @@ target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/sorting)
 target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/graph)
 target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/list)
 
-target_link_libraries(main PRIVATE sort_test t_list Shortest_path Trie MathFuncs Sortings)
+target_link_libraries(main PRIVATE single_linked_list sort_test t_list Shortest_path Trie MathFuncs Sortings)

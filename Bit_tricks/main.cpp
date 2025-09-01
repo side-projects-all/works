@@ -10,7 +10,9 @@
 int main(int argc, char *argv[]) {
 
 	//All_tricks all;
-	sign_extending_from_a_variable_bit_width_in_3_operations();
+	//sign_extending_from_a_variable_bit_width_in_3_operations();
+    Solution s;
+    s.sol();
 
 	return 0;
 }
