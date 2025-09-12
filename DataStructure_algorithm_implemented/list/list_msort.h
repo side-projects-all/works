@@ -126,7 +126,6 @@ static void list_msort_iter(struct list_head *head) {
             lists[lists_len++] = stack[top--];
         }
     }
-
     
     while (lists_len > 1) {
         for (int i = 0, j = lists_len - 1; i < j; ++i, --j) {
