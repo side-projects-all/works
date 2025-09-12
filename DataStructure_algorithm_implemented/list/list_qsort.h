@@ -55,7 +55,7 @@ static void list_qsort_iter(struct list_head *head) {
     while (i >= 0) {
         L = beg[i];
         R = end[i];
-
+    
         if (L != R && &beg[i]->link != head) {
             piv = *beg[i];
             if (i == MAX_LEVEL - 1) {
@@ -85,9 +85,9 @@ static void list_qsort_iter(struct list_head *head) {
             }
 
             L->i = piv.i;
-            beg[i + 1] = list_entry(L->link.next, struct list_node, link);
-            end[i + 1] = end [i];
-            end[i++] = L;
+            beg[i + 1] = list_entry(L->link.next, struct list_node, link);  //this is right part begin
+            end[i + 1] = end[i];                                            //this is right part end
+            end[i++] = L;   //it becomes left part end and increases the index
 
         } else {
             --i;
